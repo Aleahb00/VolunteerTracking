@@ -1,0 +1,3 @@
+All templates need their own css fields
+can perhaps do two bases one for client side one for admin side
+currently 03/26/26 11:48pm css is onlyworkingon the admin page and not the forms page or the landing page even though it is linked to base and base is being extended on these templates

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{%block css%}
+<link rel="stylesheet" href="{% static 'css/ .css' %}">
+{%endblock%}
+
+{% include 'navbar.html' %}
+
+    <section>
+
+        <h1>TEST CHEKCER TEMPLATE</h1>
+        <div>
+            <h2>Flagged Forms </h2>
+            {% for form in flagged_forms %}
+                <p>{{ form }}</p>
+            {% empty %}
+                <p>No flagged forms.</p>
+            {% endfor %}
+
+
+    </section>
+
+
+{% endblock content %}
+

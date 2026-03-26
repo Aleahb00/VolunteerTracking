@@ -13,4 +13,9 @@ urlpatterns = [
     path('admin-dashboard/', admin_dashboard_view, name='admin_dashboard'),           # list + create
     path('admin-dashboard/<int:project_id>/', admin_dashboard_view, name='edit_project'),  # edit
     path('admin-dashboard/<int:project_id>/delete/', admin_dashboard_view, name='delete_project'),  # delete
+    
+    path('403/', error_view, name='403'), #unauthorized access page
+    
+    path('test-checker/', checker_view, name='test_checker'),
+    
 ]

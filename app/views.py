@@ -12,6 +12,7 @@ from .models import *
 from .forms import *
 from .forms import ProjectForm, VolunteerForm, DonationForm
 from django.template.loader import get_template
+import re
 
 # Create your views here.
 
@@ -20,7 +21,7 @@ def landing_view(request:HttpRequest)->HttpResponse:
     return render(request, 'landing.html')
 
 def error_view(request:HttpRequest)->HttpResponse:
-    pass
+    return render(request, '403.html', status=403)
 
 def project_test_view(request:HttpRequest)->HttpResponse:
     projects = Project.objects.all()
@@ -62,7 +63,6 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 # NOTE ADMIN SIDE VIEWS
 def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
     project = get_object_or_404(Project, id=project_id) if project_id else None
-
     # DELETE
     if request.method == 'POST' and request.POST.get('_method') == 'DELETE':
         if project:
@@ -77,12 +77,41 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
             return redirect('admin_dashboard')
     else:
         form = ProjectForm(instance=project)  
+    
+    if project:
+        volunteers = Volunteer.objects.filter(project=project)
+        donations = Donations.objects.filter(project=project)
+    else:
+        volunteers = Volunteer.objects.all()
+        donations = Donations.objects.all()
+
+    total_submissions = volunteers.count() + donations.count()
 
     # READ
     return render(request, 'admin_dashboard.html', {
         'projects': Project.objects.all(),
-        'volunteers': Volunteer.objects.all(),
-        'donations': Donations.objects.all(),
+        'volunteers': volunteers,
+        'donations': donations,
+        'total_submissions': total_submissions,
         'form': form,
         'project': project,  
     })
+
+
+def checker_view(request:HttpRequest)->HttpResponse:
+    volunteers = Volunteer.objects.all()
+    projects = Project.objects.all()
+    
+    if request.method == 'POST':
+        for project in projects:
+            location = project.location
+            for volunteer in volunteers:
+                if not re.match(r'volunteer.location_volunteered', location):
+                    volunteer.flagged = True
+                    volunteer.save()
+
+    return render(request, 'test_checker.html', {'flagged_forms': Volunteer.objects.filter(flagged=True)})
+
+# def print_view(request, v_d_form_id):
+#     pet = get_object_or_404(Project, id=v_d_form_id)
+#     return render(request, 'pets.html', {'pet': pet})

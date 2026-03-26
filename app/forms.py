@@ -45,6 +45,10 @@ class ProjectForm(forms.ModelForm):
                 'class' : 'unknown',
                 'type': 'date'}),
             
+            'location': forms.TextInput(attrs={
+                'class' : 'unknown',
+                'type': 'text'}),
+            
             'process_step': forms.TextInput(attrs={
                 'class' : 'unknown',
                 'type': 'text'}),

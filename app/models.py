@@ -14,7 +14,7 @@ class Project(models.Model):
     completion_date = models.DateField()
     start_date = models.DateField()
     end_date = models.DateField()
-
+    location = models.CharField(max_length=100, blank=True, null=True)
     process_step = models.CharField(max_length=100)
     applicant = models.CharField(max_length=100)
 
@@ -73,7 +73,7 @@ class Donations(models.Model):
     phone_number = PhoneNumberField()
     
     date_of_donation = models.DateField()
-    total_hours = models.IntegerField(max_length=100)
+    total_hours = models.IntegerField()
     location_donated = models.CharField(max_length=100)
     
     work_desc = models.TextField(max_length=500)

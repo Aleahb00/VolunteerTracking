@@ -20,14 +20,14 @@
             </form>
         </div>
 
-            <div>
-                <h2>Donation Form</h2>
-                <form method="post">
-                    {% csrf_token %}
-                    {{ donationForm.as_p }}
-                    <button type="submit">Submit</button>
-                </form>
-            </div>
+        <div>
+            <h2>Donation Form</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ donationForm.as_p }}
+                <button type="submit">Submit</button>
+            </form>
+        </div>
 
 
 
