@@ -22,22 +22,7 @@
     </div>
 
     <!-- Drop down for all the projects -->
-        <select onchange="location = this.value;">
-        <option value="">-- Select a Project --</option>
-        {% for p in projects %}
-        <option value="{% url 'admin_dashboard' p.id %}" {% if p.id = project.id %}selected{% endif %}>
-        {{ p.name }}
-        </option>
-        {% endfor %}
-        </select>
-
-        <div class="stats">
-        <p>Total Submissions for this disaster: <strong>{{ total_submissions }}</strong></p>
-        <ul>
-        <li>Volunteers: {{ volunteers }}</li>
-        <li>Donations: {{ donations }}</li>
-        </ul>
-        </div>
+        
     <!--  -->
 
     <div>
