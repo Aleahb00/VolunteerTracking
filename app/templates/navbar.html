@@ -1,51 +1,11 @@
-{% extends 'base.html' %}
 {% load static %}
-{% block navbar %}
+
 <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-<div class="navbar-wrapper">
-
-    {%if user.is_authenticated%}
-    <nav class="nav-bar">
-
-        <div class="nav-left">
-            <a href="{% url 'landing' %}" >
-                <img  class="icon" src="{% static 'images/paws-icon.png' %}" alt="Logo">PawCare
-            </a>
-        </div>
-
-        <div class="nav-center">
-            <a href="{% url 'pets' %}" class="active">🐾 My Pets</a>
-            <div class="dropdown">
-                <button class="dropbtn">🩺 Health Records</button>
-                <div class="dropdown-content">
-                    <a href="{% url 'vet-visits' %}">Vet Visits</a>
-                    <a href="{% url 'vaccinations' %}">Vaccinations</a>
-                </div>
-            </div>
-            <a href="{% url 'community' %}">👥 Community</a>
-        </div>
-        
-        <div class="nav-right">
-            <a href="{% url 'logout' %}" style="color: red; padding-right: 100px;">Logout</a>
-        </div>
-
-    </nav>
-
-    {%else%}
-
-    <nav class="nav-bar">
-        <a href="{% url 'landing' %}" style="float: left;">
-            <img  class="icon" src="{% static 'images/paws-icon.png' %}" alt="Logo">PawCare
-        </a>
-        <div style="float: right; gap:10px; margin-right: 2%;">
-            <a href="{% url 'login' %}">Log in</a>
-            <a href="{% url 'register' %}">Sign up</a>  
-        </div>
-    </nav>
-    {%endif%}
-
-</div>
-
-{% endblock navbar %}
+<nav>
+    <ul>
+        <li><a href="{% url 'landing' %}">Home</a></li>
+        <li><a href="{% url 'admin_dashboard' %}">Admin Test</a></li>
+        <li><a href="{% url 'forms' %}">Forms</a></li>
+    </ul>
+</nav>

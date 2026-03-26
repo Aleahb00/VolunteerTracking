@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% endblock css %}
+
+{% include 'navbar.html' %}
+
+
+<h2>This is the test admin page </h2>
+
+    <div>
+        <h1>Project Form</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <div>
+        <h1> Created Projects </h1>
+        {% for project in projects %}
+            <p>{{ project.name }}</p>
+            <p>Number: {{ project.number }}</p>
+            <p>Type: {{ project.type }}</p>
+            <p>Category: {{ project.category }}</p>
+            <p>Size: {{ project.size }}</p>
+            <p>Declaration Date: {{ project.declaration_date }}</p>
+            <p>Completion Date: {{ project.completion_date }}</p>
+            <p>Start Date: {{ project.start_date }}</p>
+            <p>End Date: {{ project.end_date }}</p>
+            <p>Process Step: {{ project.process_step }}</p>
+            <p>Applicant: {{ project.applicant }}</p>
+            <p>Volunteer Count: {{ project.volunteer_set.count }}</p>
+
+            <form method="POST" action="{% url 'delete_project' project.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="_method" value="DELETE">
+                <button type="submit">Delete</button>
+            </form>
+
+            <a href="{% url 'edit_project' project.id %}">Edit</a>
+            <hr>
+
+        {% empty %}
+            <p>No projects created yet.</p>
+        {% endfor %}
+
+
+    {% comment %} || NOTES || CRUD is in one view for this temp for project but it's definelt gonna hve to be changed
+    because it jsut manages project rn and ediit form interfeares with create form (it doesnt break anything it just
+    looks weird and i dont like it ){% endcomment %}
+
+
+{% endblock content %}

@@ -20,6 +20,30 @@ class Project(models.Model):
 
 
 class Volunteer(models.Model):
+
+    EQUIPMENT_CHOICES = [
+        ('chainsaw', 'Chainsaw'),
+        ('pole_saw', 'Pole Saw'),
+        ('shovel', 'Shovel'),
+        ('rake', 'Rake'),
+        ('wheelbarrow', 'Wheelbarrow'),
+        ('generator', 'Generator'),
+        ('extension_cords', 'Extension Cords'),
+        ('shop_vac', 'Shop Vac / Wet-Dry Vacuum'),
+        ('pressure_washer', 'Pressure Washer'),
+        ('truck', 'Truck'),
+        ('trailer', 'Trailer'),
+        ('atv', 'ATV / UTV'),
+        ('ladder', 'Ladder'),
+        ('drill_tools', 'Power Tools'),
+        ('hand_tools', 'Hand Tools'),
+        ('tarps', 'Tarps'),
+        ('safety_gear', 'Safety Gear'),
+        ('first_aid', 'First Aid Kit'),
+        ('none', 'None'),
+        ('other', 'Other'),
+    ]
+
     name = models.CharField(max_length=100)
     email = models.EmailField()
     phone_number = PhoneNumberField(blank=True)
@@ -29,12 +53,16 @@ class Volunteer(models.Model):
     location_volunteered = models.CharField(max_length=100)
     work_desc = models.TextField(max_length=500)
 
-    equipment_used = models.BooleanField(default=False)
-    equipment_type = models.CharField(max_length=100, blank=True, null=True)
+    equipment = models.CharField(max_length=50,choices=EQUIPMENT_CHOICES,blank=True,null=True)
+
+    other_equipment = models.CharField(max_length=100,blank=True,null=True)
+
     equipment_make_model = models.CharField(max_length=100, blank=True, null=True)
     equipment_hours = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    # equipment_used = models.BooleanField(default=False)
 
-    notes = models.TextField(max_length=500)
+
+    notes = models.TextField(max_length=500, blank=True)
     flagged = models.BooleanField(default=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
@@ -49,7 +77,7 @@ class Donations(models.Model):
     location_donated = models.CharField(max_length=100)
     
     work_desc = models.TextField(max_length=500)
-    notes = models.TextField(max_length=500)
+    notes = models.TextField(max_length=500, blank=True)
     DONATION_TYPES = [
         ('material', 'Material'),
         ('equipment', 'Equipment'),

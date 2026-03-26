@@ -22,6 +22,6 @@ from django.conf.urls.static import static
 from app.views import landing_view
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('super-secret-admin-address/', admin.site.urls),
     path('', include('app.urls')),
 ]

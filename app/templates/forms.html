@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{%block css%}
+<link rel="stylesheet" href="{% static 'css/ .css' %}">
+{%endblock%}
+
+{% include 'navbar.html' %}
+
+    <section>
+
+        <div>
+            <h2>Volunteer Form</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ volunteerForm.as_p }}
+                <button type="submit">Submit</button> 
+            </form>
+        </div>
+
+            <div>
+                <h2>Donation Form</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ donationForm.as_p }}
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+
+
+
+    </section>
+    {% comment %} || NOTES || I think js needs to be added to hide the other text field
+    & restriction on the date field still needs to be implemented {% endcomment %}
+
+
+{% endblock content %}
