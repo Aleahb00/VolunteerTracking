@@ -10,12 +10,11 @@ urlpatterns = [
     path('', landing_view, name="landing"),
     # path('admin/test/', project_test_view, name="project_test"),
     path('forms/', form_template_view, name="forms"),
+    path('/admin-dashboard/export/csv/', generate_csv, name='export_csv'),
     path('admin-dashboard/', admin_dashboard_view, name='admin_dashboard'),           # list + create
     path('admin-dashboard/<int:project_id>/', admin_dashboard_view, name='edit_project'),  # edit
     path('admin-dashboard/<int:project_id>/delete/', admin_dashboard_view, name='delete_project'),  # delete
     
-    path('403/', error_view, name='403'), #unauthorized access page
-    
-    path('test-checker/', checker_view, name='test_checker'),
-    
+    path('403/', status_403_view, name='403'), #unauthorized access page
+    path('404/', status_404_view, name='404'), #page not found    
 ]

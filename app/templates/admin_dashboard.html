@@ -12,6 +12,10 @@
 
 <h2>This is the test admin page </h2>
 
+<div>
+    <a href="{% url 'export_csv' %}">Export Data CSV</a>
+</div>
+
     <div>
         <h1>Project Form</h1>
         <form method="post">
@@ -22,8 +26,22 @@
     </div>
 
     <!-- Drop down for all the projects -->
+    <div>
+
+        <h2> Select a project </h2>
+        <ul>
+        <li><a href="{% url 'admin_dashboard' %}">All Projects (Total)</a></li>
         
-    <!--  -->
+        {% for p in projects %}
+            <li>
+                <a href="{% url 'edit_project' p.id %}">{{ p.name }}</a>
+            </li>
+        {% endfor %}
+        
+    </ul>
+    </div>
+        
+    <!--  This doesnt currently work -->
 
     <div>
         <h1> Created Projects </h1>
@@ -40,6 +58,7 @@
             <p>Process Step: {{ project.process_step }}</p>
             <p>Applicant: {{ project.applicant }}</p>
             <p>Volunteer Count: {{ project.volunteer_set.count }}</p>
+            <p>Location: {{ project.location }}</p>
 
             <form method="POST" action="{% url 'delete_project' project.id %}">
                 {% csrf_token %}
@@ -53,6 +72,25 @@
         {% empty %}
             <p>No projects created yet.</p>
         {% endfor %}
+    </div>
+
+    <div>
+        <h1>List of Volunteers</h1>
+        {% for volunteer in volunteers %}
+            <p>{{ volunteer.name }}</p>
+            <p>Email: {{ volunteer.email }}</p>
+            <p>Phone Number: {{ volunteer.phone_number }}</p>
+            <p>Date of Work: {{ volunteer.date_of_work }}</p>
+            <p>Total Hours: {{ volunteer.total_hours }}</p>
+            <p>Location Volunteered: {{ volunteer.location_volunteered }}</p>
+            <p>Work Description: {{ volunteer.work_desc }}</p>
+            <p>Flagged: {{ volunteer.flagged }}</p>
+            <p>Project: {{ volunteer.project.name }}</p>
+            <hr>
+        {% empty %}
+            <p>No volunteers yet.</p>
+        {% endfor %}
+    </div>
 
 
     {% comment %} || NOTES || CRUD is in one view for this temp for project but it's definelt gonna hve to be changed

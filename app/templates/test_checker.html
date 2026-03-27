@@ -19,6 +19,23 @@
             {% empty %}
                 <p>No flagged forms.</p>
             {% endfor %}
+    <div>
+        <h1>List of Volunteers</h1>
+        {% for volunteer in volunteers %}
+            <p>{{ volunteer.name }}</p>
+            <p>Email: {{ volunteer.email }}</p>
+            <p>Phone Number: {{ volunteer.phone_number }}</p>
+            <p>Date of Work: {{ volunteer.date_of_work }}</p>
+            <p>Total Hours: {{ volunteer.total_hours }}</p>
+            <p>Location Volunteered: {{ volunteer.location_volunteered }}</p>
+            <p>Work Description: {{ volunteer.work_desc }}</p>
+            <p>Flagged: {{ volunteer.flagged }}</p>
+            <p>Project: {{ volunteer.project.name }}</p>
+            <hr>
+        {% empty %}
+            <p>No volunteers yet.</p>
+        {% endfor %}
+    </div>
 
 
     </section>

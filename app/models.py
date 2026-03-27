@@ -64,7 +64,7 @@ class Volunteer(models.Model):
 
     notes = models.TextField(max_length=500, blank=True)
     flagged = models.BooleanField(default=False)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
 
 
 class Donations(models.Model):
