@@ -1,3 +1,13 @@
 All templates need their own css fields
 can perhaps do two bases one for client side one for admin side
 currently 03/26/26 11:48pm css is onlyworkingon the admin page and not the forms page or the landing page even though it is linked to base and base is being extended on these templates
+
+
+403 view
+404 viewt
+captcha view
+wanted checkers
+change password
+trash view (to be deleted but not actually)
+limiting the date to when the owner want to 
+add feature where she can add the hourly rate 

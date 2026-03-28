@@ -51,40 +51,111 @@ def project_test_view(request:HttpRequest)->HttpResponse:
 def form_template_view(request:HttpRequest)->HttpResponse:
     volunteerForm = VolunteerForm()
     donationForm = DonationForm()
-    volunteers = Volunteer.objects.all()
-    projects = Project.objects.all()
+    projects = Project.objects.exclude(location__isnull=True).exclude(location__exact='')
 
-    if request.method == 'POST':
-        volunteerForm = VolunteerForm(request.POST)
-        donationForm = DonationForm(request.POST)
+    def find_best_project(location_text: str):
+        best_project = None
+        best_similarity = -1
 
         for project in projects:
-            location = project.location
-            for volunteer in volunteers:
-                similarity = fuzz.ratio(volunteer.location_volunteered.lower(), location.lower())
-                if similarity < 80:
-                    volunteer.flagged = True
-                    volunteer.save()
+            similarity = fuzz.ratio(location_text.lower(), project.location.lower())
+            if similarity > best_similarity:
+                best_similarity = similarity
+                best_project = project
 
-        if volunteerForm.is_valid():
-            volunteerForm.save()
-            return redirect('forms')
+        return best_project, best_similarity
 
-        if donationForm.is_valid():
-            donationForm.save()
-            return redirect('forms')
+    if request.method == 'POST':
+        if 'submit_volunteer' in request.POST:
+            volunteerForm = VolunteerForm(request.POST)
+
+            if volunteerForm.is_valid():
+                volunteer = volunteerForm.save(commit=False)
+                best_project, similarity = find_best_project(volunteer.location_volunteered)
+                volunteer.flagged = similarity < 80
+
+                if volunteer.flagged:
+                    volunteer.project = None
+                elif best_project:
+                    volunteer.project = best_project
+
+                volunteer.save()
+
+                if volunteer.flagged:
+                    messages.warning(request, 'Volunteer submission saved and flagged (location similarity below 80%). No project was assigned.')
+                else:
+                    messages.success(request, 'Volunteer submission saved and matched to project location.')
+
+                return redirect('forms')
+
+            messages.error(request, 'There was an error with the volunteer form. Please check and try again.')
+
+        elif 'submit_donation' in request.POST:
+            donationForm = DonationForm(request.POST)
+
+            if donationForm.is_valid():
+                donation = donationForm.save(commit=False)
+                best_project, similarity = find_best_project(donation.location_donated)
+                donation.flagged = similarity < 80
+
+                if donation.flagged:
+                    donation.project = None
+                elif best_project:
+                    donation.project = best_project
+
+                donation.save()
+
+                if donation.flagged:
+                    messages.warning(request, 'Donation submission saved and flagged (location similarity below 80%). No project was assigned.')
+                else:
+                    messages.success(request, 'Donation submission saved and matched to project location.')
+
+                return redirect('forms')
+
+            else:
+                messages.error(request, 'There was an error with the donation form. Please check and try again.')
 
     return render(request, 'forms.html', {
         'volunteerForm': volunteerForm,
-        'donationForm': donationForm,
+        'donationForm': donationForm
     })
-    # I think this function works but like its been acting funny or I might just be tripping (might need hondussy to review)
+    # I think this function works but like its been acting funny
+    #  or I might just be tripping (might need hondussy to review)
 
 
 
 
 # NOTE ADMIN SIDE VIEWS
 # Search query needs to be implemented into this view if this is the one that were searching on
+def register_view(request:HttpRequest)->HttpResponse:
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('admin_dashboard')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'register.html', {'form': form})
+
+
+def login_view(request:HttpRequest)->HttpResponse:
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('admin_dashboard')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})
+
+
+def logout_view(request:HttpRequest)->HttpResponse:
+    logout(request)
+    return redirect('landing')
+# may need to redirect to somewhere else considering it's admin
+
 def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
     project = get_object_or_404(Project, id=project_id) if project_id else None
     # DELETE
@@ -110,18 +181,21 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         donations = Donations.objects.all()
 
     total_submissions = volunteers.count() + donations.count()
-
+    create_form = ProjectForm()
+    
+    edit_form = ProjectForm(instance=project) if project else None
     # READ
     return render(request, 'admin_dashboard.html', {
         'projects': Project.objects.all(),
         'volunteers': volunteers,
         'donations': donations,
         'total_submissions': total_submissions,
-        'form': form,
+        'create_form': create_form,
+        'edit_form': edit_form,
         'project': project,  
     })
     
-def generate_csv(request):
+def generate_volunteer_csv(request):
     response = HttpResponse(
         content_type="text/csv",
         headers={"Content-Disposition": 'attachment; filename="submissions_export.csv"'},
@@ -129,7 +203,6 @@ def generate_csv(request):
     writer = csv.writer(response)
     writer.writerow([
     'submission_type', 'id', 'name', 'email', 'phone_number', 'date', 'total_hours', 'location', 'work_desc', 'notes',
-    # 'flagged', 'project_id', 
     'project_name', 'equipment', 'other_equipment', 'equipment_make_model', 'equipment_hours', 'donation_type', 'material_type', 'equipment_type'])
 
     volunteers = Volunteer.objects.select_related('project').all()
@@ -145,40 +218,42 @@ def generate_csv(request):
     volunteer.location_volunteered,
     volunteer.work_desc,
     volunteer.notes,
-    # volunteer.flagged,
-    # volunteer.project_id,
     volunteer.project.name if volunteer.project else '',
     volunteer.equipment,
     volunteer.other_equipment,
     volunteer.equipment_make_model,
-    volunteer.equipment_hours,])
+    volunteer.equipment_hours])
+    return response
+
+
+def generate_donation_csv(request):
+    response = HttpResponse(
+        content_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="submissions_export.csv"'},
+    )
+    writer = csv.writer(response)
+    writer.writerow([
+    'submission_type' ,'project_name', 'id', 'name', 'email', 'phone_number', 'date', 'total_hours', 'location', 'work_desc', 'notes',
+    'donation_type', 'material_type', 'equipment_type'])
 
     donations = Donations.objects.select_related('project').all()
     for donation in donations:
         writer.writerow([
-            'donation',
-            donation.id,
-            donation.name,
-            donation.email,
-            donation.phone_number,
-            donation.date_of_donation,
-            donation.total_hours,
-            donation.location_donated,
-            donation.work_desc,
-            donation.notes,
-            donation.flagged,
-            donation.project_id,
-            donation.project.name,
-            '',
-            '',
-            '',
-            '',
-            donation.donation_type,
-            donation.material_type,
-            donation.equipment_type,
-        ])
+    'donation',
+    donation.project.name if donation.project else '',
+    donation.id,
+    donation.name,
+    donation.email,
+    donation.phone_number,
+    donation.date_of_donation,
+    donation.total_hours,
+    donation.location_donated,
+    donation.work_desc,
+    donation.notes,
+    donation.donation_type,
+    donation.material_type if donation.donation_type == 'material' else '',
+    donation.equipment_type if donation.donation_type == 'equipment' else ''])
     return response
-# this view needs to be reconfigured if we need to export donations and volunteers seperately or togeder or both options
 
 
 # def print_view(request, v_d_form_id):

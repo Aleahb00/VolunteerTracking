@@ -4,98 +4,121 @@
 {% block content %}
 
 {% block css %}
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
 {% endblock css %}
 
 {% include 'navbar.html' %}
 
 
-<h2>This is the test admin page </h2>
+<h2 style="text-align: center; font-size: 5em;">This is the test admin page </h2>
 
 <div>
-    <a href="{% url 'export_csv' %}">Export Data CSV</a>
+    <a href="{% url 'export_csv' %}">Export Volunteer CSV</a>
+    <a href="{% url 'export_donations_csv' %}"> Export Donations CSV</a> 
 </div>
 
-    <div>
-        <h1>Project Form</h1>
-        <form method="post">
+<!-- Button to open the create-project modal -->
+<div>
+    <button id="openFormButton" class="btn">Create New Project</button>
+</div>
+
+<!-- Create Project Modal -->
+<div id="formModal" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="createProjectTitle">
+        <span class="close" aria-label="Close">&times;</span>
+        <h2 id="createProjectTitle">Create New Project</h2>
+        <form method="post" action="{% url 'admin_dashboard' %}" enctype="multipart/form-data">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Submit</button>
+            {{ create_form.as_p }}
+            <button type="submit">Create New</button>
         </form>
     </div>
+</div>
 
-    <!-- Drop down for all the projects -->
-    <div>
+<div>
+    <p>Select a project</p>
+    {%for project in projects%}
+    <li>
+        <a href="{% url 'edit_project' project.id %}"> {{project.name}}</a>
+    </li>
+    {% endfor %}
+</div>
 
-        <h2> Select a project </h2>
-        <ul>
-        <li><a href="{% url 'admin_dashboard' %}">All Projects (Total)</a></li>
+<!-- List of the details of the project selected -->
+<div>
+    <h1> Selected Projects </h1>
+    {% if project %}
+    <div class="project-details">
+        <p><strong>Name:</strong> {{ project.name }}</p>
+        <p><strong>Number:</strong> {{ project.number }}</p>
+        <p><strong>Type:</strong> {{ project.type }}</p>
+        <p><strong>Category:</strong> {{ project.category }}</p>
+        <p><strong>Size:</strong> {{ project.size }}</p>
+        <p><strong>Declaration date :</strong> {{ project.declaration_date }}</p>
+        <p><strong>Completion date:</strong> {{ project.completion_date }}</p>
+        <p><strong>Start date:</strong> {{ project.start_date }}</p>
+        <p><strong>End date:</strong> {{ project.end_date }}</p>
+        <p><strong>Locatino:</strong> {{ project.location }}</p>
+        <p><strong>Process Step:</strong> {{ project.process_step}}</p>
+        <p><strong>Applicant:</strong> {{ project.applicant }}</p>
         
-        {% for p in projects %}
-            <li>
-                <a href="{% url 'edit_project' p.id %}">{{ p.name }}</a>
-            </li>
-        {% endfor %}
+        <p><strong>Total Submissions (this project):</strong> {{ total_submissions }}</p>
         
-    </ul>
+        <p>Volunteer Count: {{ volunteers.count }}</p>
+        <p>Donation Count: {{ donations.count }}</p>
     </div>
-        
-    <!--  This doesnt currently work -->
 
-    <div>
-        <h1> Created Projects </h1>
-        {% for project in projects %}
-            <p>{{ project.name }}</p>
-            <p>Number: {{ project.number }}</p>
-            <p>Type: {{ project.type }}</p>
-            <p>Category: {{ project.category }}</p>
-            <p>Size: {{ project.size }}</p>
-            <p>Declaration Date: {{ project.declaration_date }}</p>
-            <p>Completion Date: {{ project.completion_date }}</p>
-            <p>Start Date: {{ project.start_date }}</p>
-            <p>End Date: {{ project.end_date }}</p>
-            <p>Process Step: {{ project.process_step }}</p>
-            <p>Applicant: {{ project.applicant }}</p>
-            <p>Volunteer Count: {{ project.volunteer_set.count }}</p>
-            <p>Location: {{ project.location }}</p>
+    <button class="btn open-modal-btn" data-target="modal-{{ project.id }}">Edit Project</button>
 
-            <form method="POST" action="{% url 'delete_project' project.id %}">
+    <div id="modal-{{ project.id }}" class="modal" style="display:none;" aria-hidden="true">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Editing: {{ project.name }}</h2>
+            <form method="post" action="{% url 'edit_project' project.id %}">
                 {% csrf_token %}
-                <input type="hidden" name="_method" value="DELETE">
-                <button type="submit">Delete</button>
+                {{ edit_form.as_p }}
+                <button type="submit" class="btn-save">Save Changes</button>
             </form>
-
-            <a href="{% url 'edit_project' project.id %}">Edit</a>
-            <hr>
-
-        {% empty %}
-            <p>No projects created yet.</p>
-        {% endfor %}
+        </div>
     </div>
 
-    <div>
-        <h1>List of Volunteers</h1>
-        {% for volunteer in volunteers %}
-            <p>{{ volunteer.name }}</p>
-            <p>Email: {{ volunteer.email }}</p>
-            <p>Phone Number: {{ volunteer.phone_number }}</p>
-            <p>Date of Work: {{ volunteer.date_of_work }}</p>
-            <p>Total Hours: {{ volunteer.total_hours }}</p>
-            <p>Location Volunteered: {{ volunteer.location_volunteered }}</p>
-            <p>Work Description: {{ volunteer.work_desc }}</p>
-            <p>Flagged: {{ volunteer.flagged }}</p>
-            <p>Project: {{ volunteer.project.name }}</p>
-            <hr>
-        {% empty %}
-            <p>No volunteers yet.</p>
-        {% endfor %}
-    </div>
+    <form method="POST" action="{% url 'delete_project' project.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="_method" value="DELETE">
+        <button type="submit">Delete Project</button>
+    </form>
+    <hr>
+    {% else %}
+        <p>Select a project from the list above to view its specific data and counts.</p>
+    {% endif %}
+</div>
 
 
-    {% comment %} || NOTES || CRUD is in one view for this temp for project but it's definelt gonna hve to be changed
-    because it jsut manages project rn and ediit form interfeares with create form (it doesnt break anything it just
-    looks weird and i dont like it ){% endcomment %}
+
+<!-- List of the volunteer details -->
+<div>
+    <h1>List of Volunteers</h1>
+    {% for volunteer in volunteers %}
+        <p>{{ volunteer.name }}</p>
+        <p>Email: {{ volunteer.email }}</p>
+        <p>Phone Number: {{ volunteer.phone_number }}</p>
+        <p>Date of Work: {{ volunteer.date_of_work }}</p>
+        <p>Total Hours: {{ volunteer.total_hours }}</p>
+        <p>Location Volunteered: {{ volunteer.location_volunteered }}</p>
+        <p>Work Description: {{ volunteer.work_desc }}</p>
+        <p>Flagged: {{ volunteer.flagged }}</p>
+        <p>Project: {{ volunteer.project.name }}</p>
+        <hr>
+    {% empty %}
+        <p>No volunteers yet.</p>
+    {% endfor %}
+</div>
+
+
+{% comment %} || NOTES || CRUD is in one view for this temp for project but it's definelt gonna hve to be changed
+because it jsut manages project rn and ediit form interfeares with create form (it doesnt break anything it just
+looks weird and i dont like it ){% endcomment %}
+
 
 
 {% endblock content %}
