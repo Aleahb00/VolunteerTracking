@@ -1,46 +1,244 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% load honeypot %}
+{% endblock css %}
+
 {% block content %}
-
-{%block css%}
-<link rel="stylesheet" href="{% static 'css/ .css' %}">
-{%endblock%}
-
 {% include 'navbar.html' %}
 
-    <section>
-        <h1 style="text-align: center; font-size: 5em;">FORMS TEMPLATE</h1>
+<main class="forms-page">
+    <div class="forms-container">
+        <header class="forms-header">
+            <h1>Get Involved</h1>
+            <p>Better heading pargraph thing needs to go here and im thinking a little information too idk what</p>
+            <p>The more information you can fill out the better (but in a professional way)</p>
+        </header>
 
         {% if messages %}
-            {% for message in messages %}
-                <p>{{ message }}</p>
-            {% endfor %}
+            <div class="forms-messages">
+                {% for message in messages %}
+                    <p class="forms-message">{{ message }}</p>
+                {% endfor %}
+            </div>
         {% endif %}
 
-        <div>
+        <div class="forms-tabs" role="tablist" aria-label="Submission Forms">
+            <button class="forms-tab is-active" type="button" data-tab-target="volunteer-panel" aria-controls="volunteer-panel" aria-selected="true">Volunteer Form</button>
+            <button class="forms-tab" type="button" data-tab-target="donation-panel" aria-controls="donation-panel" aria-selected="false">Donation Form</button>
+        </div>
+
+        <section id="volunteer-panel" class="forms-panel is-active" role="tabpanel">
             <h2>Volunteer Form</h2>
-            <form method="post">
+            <form method="post" class="forms-grid-form">
                 {% csrf_token %}
-                {{ volunteerForm.as_p }}
-                <button type="submit" name="submit_volunteer">Submit</button> 
-            </form>
-        </div>
+                {% render_honeypot_field %}
 
-        <div>
+                <div class="form-field">
+                    {{ volunteerForm.name.label_tag }}
+                    {{ volunteerForm.name }}
+                </div>
+                <div class="form-field">
+                    {{ volunteerForm.contact_method.label_tag }}
+                    {{ volunteerForm.contact_method }}
+                    <span class="contact-select-volunteer" data-trigger="contact_method"></span>
+                </div>
+                <div class="form-field conditional-field" data-show-when="contact_method=email">
+                    {{ volunteerForm.email.label_tag }}
+                    {{ volunteerForm.email }}
+                </div>
+                <div class="form-field conditional-field" data-show-when="contact_method=phone">
+                    {{ volunteerForm.phone_number.label_tag }}
+                    {{ volunteerForm.phone_number }}
+                </div>
+                <div class="form-field">
+                    {{ volunteerForm.total_hours.label_tag }}
+                    {{ volunteerForm.total_hours }}
+                </div>
+                <div class="form-field form-field-full">
+                    {{ volunteerForm.date_of_work.label_tag }}
+                    <input
+                        type="date"
+                        name="{{ volunteerForm.date_of_work.html_name }}"
+                        id="{{ volunteerForm.date_of_work.id_for_label }}"
+                        class="form-input"
+                        min="{{ earliest_date|date:'Y-m-d' }}"
+                        value="{{ volunteerForm.date_of_work.value|default_if_none:'' }}"
+                    >
+                </div>
+                <div class="form-field form-field-full">
+                    {{ volunteerForm.location_volunteered.label_tag }}
+                    {{ volunteerForm.location_volunteered }}
+                </div>
+                <div class="form-field form-field-full">
+                    {{ volunteerForm.work_desc.label_tag }}
+                    {{ volunteerForm.work_desc }}
+                </div>
+                <div class="form-field">
+                    {{ volunteerForm.equipment.label_tag }}
+                    {{ volunteerForm.equipment }}
+                    <span class="equipment-select-volunteer" data-trigger="equipment"></span>
+                </div>
+                <div class="form-field conditional-field" data-show-when="equipment=other">
+                    {{ volunteerForm.other_equipment.label_tag }}
+                    {{ volunteerForm.other_equipment }}
+                </div>
+                <div class="form-field">
+                    {{ volunteerForm.equipment_make_model.label_tag }}
+                    {{ volunteerForm.equipment_make_model }}
+                </div>
+                <div class="form-field">
+                    {{ volunteerForm.equipment_hours.label_tag }}
+                    {{ volunteerForm.equipment_hours }}
+                </div>
+                <div class="form-field form-field-full">
+                    {{ volunteerForm.notes.label_tag }}
+                    {{ volunteerForm.notes }}
+                </div>
+
+                <button type="submit" name="submit_volunteer" class="form-submit">Submit Volunteer Form</button>
+            </form>
+        </section>
+
+        <section id="donation-panel" class="forms-panel" role="tabpanel" hidden>
             <h2>Donation Form</h2>
-            <form method="post">
+            <form method="post" class="forms-grid-form">
                 {% csrf_token %}
-                {{ donationForm.as_p }}
-                <button type="submit" name="submit_donation">Submit</button>
+                {% render_honeypot_field %}
+
+                <div class="form-field">
+                    {{ donationForm.name.label_tag }}
+                    {{ donationForm.name }}
+                </div>
+                <div class="form-field">
+                    {{ donationForm.contact_method.label_tag }}
+                    {{ donationForm.contact_method }}
+                    <span class="contact-select-donation" data-trigger="contact_method"></span>
+                </div>
+                <div class="form-field conditional-field" data-show-when="contact_method=email">
+                    {{ donationForm.email.label_tag }}
+                    {{ donationForm.email }}
+                </div>
+                <div class="form-field conditional-field" data-show-when="contact_method=phone">
+                    {{ donationForm.phone_number.label_tag }}
+                    {{ donationForm.phone_number }}
+                </div>
+                <div class="form-field">
+                    {{ donationForm.total_hours.label_tag }}
+                    {{ donationForm.total_hours }}
+                </div>
+                <div class="form-field form-field-full">
+                    {{ donationForm.date_of_donation.label_tag }}
+                    <input
+                        type="date"
+                        name="{{ donationForm.date_of_donation.html_name }}"
+                        id="{{ donationForm.date_of_donation.id_for_label }}"
+                        class="form-input"
+                        min="{{ earliest_date|date:'Y-m-d' }}"
+                        value="{{ donationForm.date_of_donation.value|default_if_none:'' }}"
+                    >
+                </div>
+                <div class="form-field form-field-full">
+                    {{ donationForm.location_donated.label_tag }}
+                    {{ donationForm.location_donated }}
+                </div>
+                <div class="form-field form-field-full">
+                    {{ donationForm.work_desc.label_tag }}
+                    {{ donationForm.work_desc }}
+                </div>
+                <div class="form-field">
+                    {{ donationForm.donation_type.label_tag }}
+                    {{ donationForm.donation_type }}
+                    <span class="donation-select" data-trigger="donation_type"></span>
+                </div>
+                <div class="form-field conditional-field" data-show-when="donation_type=material">
+                    {{ donationForm.material_type.label_tag }}
+                    {{ donationForm.material_type }}
+                </div>
+                <div class="form-field conditional-field" data-show-when="donation_type=equipment">
+                    {{ donationForm.equipment_type.label_tag }}
+                    {{ donationForm.equipment_type }}
+                </div>
+                <div class="form-field form-field-full">
+                    {{ donationForm.notes.label_tag }}
+                    {{ donationForm.notes }}
+                </div>
+
+                <button type="submit" name="submit_donation" class="form-submit">Submit Donation Form</button>
             </form>
-        </div>
+        </section>
+    </div>
+</main>
 
+<script>
+    (function () {
+        // Tab switching logic
+        const tabs = document.querySelectorAll('.forms-tab');
+        const panels = document.querySelectorAll('.forms-panel');
 
+        tabs.forEach((tab) => {
+            tab.addEventListener('click', () => {
+                const target = tab.getAttribute('data-tab-target');
 
-    </section>
-    {% comment %} || NOTES || I think js needs to be added to hide the other text field
-    & restriction on the date field still needs to be implemented {% endcomment %}
+                tabs.forEach((item) => {
+                    item.classList.remove('is-active');
+                    item.setAttribute('aria-selected', 'false');
+                });
 
+                panels.forEach((panel) => {
+                    panel.classList.remove('is-active');
+                    panel.setAttribute('hidden', 'hidden');
+                });
 
+                tab.classList.add('is-active');
+                tab.setAttribute('aria-selected', 'true');
+
+                const activePanel = document.getElementById(target);
+                if (activePanel) {
+                    activePanel.classList.add('is-active');
+                    activePanel.removeAttribute('hidden');
+                }
+            });
+        });
+
+        // Conditional field visibility logic
+        function setupConditionalFields(formSelector) {
+            const form = document.querySelector(formSelector);
+            if (!form) return;
+
+            const conditionalFields = form.querySelectorAll('.conditional-field');
+            
+            function updateVisibility() {
+                conditionalFields.forEach((field) => {
+                    const showWhen = field.getAttribute('data-show-when');
+                    if (!showWhen) return;
+
+                    const [fieldName, fieldValue] = showWhen.split('=');
+                    const triggerField = form.querySelector(`select[name="${fieldName}"]`);
+                    
+                    if (triggerField && triggerField.value === fieldValue) {
+                        field.style.display = 'block';
+                    } else {
+                        field.style.display = 'none';
+                    }
+                });
+            }
+
+            // Setup event listeners on all select fields that trigger conditional visibility
+            const selectFields = form.querySelectorAll('select');
+            selectFields.forEach((select) => {
+                select.addEventListener('change', updateVisibility);
+            });
+
+            // Initial visibility check
+            updateVisibility();
+        }
+
+        // Setup both forms
+        setupConditionalFields('#volunteer-panel .forms-grid-form');
+        setupConditionalFields('#donation-panel .forms-grid-form');
+    })();
+</script>
 {% endblock content %}

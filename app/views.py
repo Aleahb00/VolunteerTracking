@@ -7,15 +7,16 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import *
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Min
 from .models import *
 from .forms import *
 from .forms import ProjectForm, VolunteerForm, DonationForm
+from honeypot.decorators import check_honeypot
+from django_ratelimit.decorators import ratelimit
 from django.template.loader import get_template
 import csv
 from rapidfuzz import fuzz
 from .functions import *
-from django.db.models import Q
 
 
 
@@ -26,12 +27,15 @@ def landing_view(request:HttpRequest)->HttpResponse:
     return render(request, 'landing.html')
 
 
-def status_403_view(request:HttpRequest)->HttpResponse:
+def status_403_view(request:HttpRequest, exception=None)->HttpResponse:
     return render(request, '403.html', status=403)
 
 
-def status_404_view(request:HttpRequest)->HttpResponse:
+def status_404_view(request:HttpRequest, exception=None)->HttpResponse:
     return render(request, '404.html', status=404)
+
+def ratelimit_error(request, exception=None):
+    return render(request, '429.html', status=429)
 
 
 def project_test_view(request:HttpRequest)->HttpResponse:
@@ -46,12 +50,18 @@ def project_test_view(request:HttpRequest)->HttpResponse:
         form = ProjectForm()
 
     return render(request, 'temp_admin.html', {'form': form, 'projects': projects})
+# is this needed? where is this being used?
 
-
+@check_honeypot
+@ratelimit(key='ip', rate='5/m', method='POST', block=False)
 def form_template_view(request:HttpRequest)->HttpResponse:
+    earliest_date = Project.objects.aggregate(Min('start_date'))['start_date__min']
     volunteerForm = VolunteerForm()
     donationForm = DonationForm()
     projects = Project.objects.exclude(location__isnull=True).exclude(location__exact='')
+
+    if request.method == 'POST' and getattr(request, 'limited', False):
+        return render(request, '429.html', status=429)
 
     def find_best_project(location_text: str):
         best_project = None
@@ -117,7 +127,8 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
     return render(request, 'forms.html', {
         'volunteerForm': volunteerForm,
-        'donationForm': donationForm
+        'donationForm': donationForm,
+        'earliest_date': earliest_date
     })
     # I think this function works but like its been acting funny
     #  or I might just be tripping (might need hondussy to review)

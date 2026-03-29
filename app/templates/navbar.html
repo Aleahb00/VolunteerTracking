@@ -1,11 +1,14 @@
 {% load static %}
 
 <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
+<header class="site-nav">
+    <div class="site-nav__inner">
+        <a href="{% url 'landing' %}" class="site-nav__brand">Volunteer Tracking</a>
 
-<nav>
-    <ul>
-        <li><a href="{% url 'landing' %}">Home</a></li>
-        <li><a href="{% url 'admin_dashboard' %}">Admin Test</a></li>
-        <li><a href="{% url 'forms' %}">Forms</a></li>
-    </ul>
-</nav>
+        <nav class="site-nav__links" aria-label="Primary">
+            <a href="{% url 'landing' %}" class="site-nav__link {% if request.path == '/' %}is-active{% endif %}">Home</a>
+            <a href="{% url 'forms' %}" class="site-nav__link {% if '/forms/' in request.path %}is-active{% endif %}">Forms</a>
+            <a href="{% url 'admin_dashboard' %}" class="site-nav__link {% if '/admin-dashboard/' in request.path %}is-active{% endif %}">Dashboard</a>
+        </nav>
+    </div>
+</header>
