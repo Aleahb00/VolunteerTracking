@@ -20,6 +20,8 @@ urlpatterns = [
     path('admin-dashboard/export/volunteer_csv/', generate_volunteer_csv, name='export_csv'),
     path('admin-dashboard/export/donations_csv/', generate_donation_csv, name='export_donations_csv'),
     
+    path('toggle_flagged_status/<int:volunteer_id>/', toggle_flagged_status, name='toggle_flagged_status'),
+    
     path('error403/', status_403_view, name='403'), #unauthorized access page
     path('error404/', status_404_view, name='404'), #page not found    
 ]
