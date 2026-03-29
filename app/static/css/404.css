@@ -62,21 +62,33 @@ h1 {
     margin: 0;
     margin-bottom: 1rem;
     letter-spacing: 1rem;
+    position: relative;
+    display: inline-block;
     transform: translate3d(0, 0, 0vmin);
-    --x: calc(50% + (var(--swing-x) * 0.5) * 1%);
-    background: radial-gradient(var(--lit-header), var(--header) 45%) var(--x) 100% / 200% 200%;
-    color: transparent;
+    color: var(--lit-header);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    h1 {
+        --x: calc(50% + (var(--swing-x) * 0.5) * 1%);
+        background: radial-gradient(var(--lit-header), var(--header) 45%) var(--x) 100% / 200% 200%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
 }
 
 h1:after {
     animation: swing var(--speed) infinite alternate ease-in-out;
-    content: "404";
+    content: '404';
     position: absolute;
     top: 0;
     left: 0;
     color: var(--shadow);
     filter: blur(1.5vmin);
-    transform: scale(1.05) translate3d(0, 12%, -10vmin) translate(calc((var(--swing-x, 0) * 0.05) * 1%), calc((var(--swing-y) * 0.05) * 1%));
+    transform: scale(1.05) translate3d(0, 12%, -10vmin)
+        translate(calc((var(--swing-x, 0) * 0.05) * 1%), calc((var(--swing-y) * 0.05) * 1%));
 }
 
 .cloak {
@@ -121,9 +133,11 @@ h1:after {
         --swing-x: -100;
         --swing-y: -100;
     }
+
     50% {
         --swing-y: 0;
     }
+
     100% {
         --swing-y: -100;
         --swing-x: 100;

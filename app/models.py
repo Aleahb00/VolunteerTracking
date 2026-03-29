@@ -45,6 +45,11 @@ class Volunteer(models.Model):
     ]
 
     name = models.CharField(max_length=100)
+    CONTACT_CHOICES = [
+        ('email', 'Email'),
+        ('phone', 'Phone')
+        ]
+    contact_method = models.CharField(choices=CONTACT_CHOICES)
     email = models.EmailField()
     phone_number = PhoneNumberField(blank=True)
 
@@ -69,6 +74,12 @@ class Volunteer(models.Model):
 
 class Donations(models.Model):
     name = models.CharField(max_length=100)
+    
+    CONTACT_CHOICES = [
+        ('email', 'Email'),
+        ('phone', 'Phone')
+        ]
+    contact_method = models.CharField(choices=CONTACT_CHOICES)
     email = models.EmailField()
     phone_number = PhoneNumberField()
     
@@ -83,6 +94,7 @@ class Donations(models.Model):
         ('equipment', 'Equipment'),
         ('other', 'Other'),
     ]
+    # do we need other as an option for donation type? not against it but if this was intentional we need an if other please specifiy field.
     donation_type = models.CharField(max_length=50, choices=DONATION_TYPES)
     material_type = models.CharField(max_length=100, blank=True, null=True)
     equipment_type = models.CharField(max_length=100, blank=True, null=True)

@@ -1,0 +1,4 @@
+django-phonenumber-field
+django-widget-tweaks
+phonenumbers
+RapidFuzz

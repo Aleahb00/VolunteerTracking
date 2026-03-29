@@ -1,6 +1,7 @@
 All templates need their own css fields
 can perhaps do two bases one for client side one for admin side
-currently 03/26/26 11:48pm css is onlyworkingon the admin page and not the forms page or the landing page even though it is linked to base and base is being extended on these templates
+currently 03/26/26 11:48pm css is onlyworkingon the admin page and not the forms page or the landing page even though it 
+is linked to base and base is being extended on these templates
 
 
 403 view
@@ -10,4 +11,42 @@ wanted checkers
 change password
 trash view (to be deleted but not actually)
 limiting the date to when the owner want to 
+idk what this comment above means but the date restirction has been implemented, the earliest a user can put in
+their date of work is the earilest start date between all projects. there isnt a future restriction because im assuming
+that the form would be closed and removed at that point (this is gonna need some serious planning)
 add feature where she can add the hourly rate 
+
+UPDATE (03/29/26 1:13am)
+not srue whats going on i have the forms amost fully fixed they work fine and are styled but um thers something wrong but i forgot nothing maijor just needa attention
+cant think of anything aside from the if other please speciifc OHHHH certain fields need to be required to fill out while others can be optional ik it does that little orange pop up lik eplease fill out need to look into that to see if that can be customized but aside from that the fields are up and running great oh and the capthca thing ill work on that rn
+also i think the forms need to be reconfigured to ask about skilled workers? idk maybe it can be added as like a message in the extra notes field
+
+
+03/28/26 3:53am i have the 404 page fixed now but the css is incorrect since it was converted 
+so that styling needs to be fixed but i can't tn im eepy so moving on
+
+
+we can implement the reset password function later on after its figured out what way to login she wants because theres 
+testing that needs to go into that
+
+
+checkers that check for keywords that imply that they are a skilled worker and flags the form
+
+a way to say why the form got flagged ?
+
+
+
+option 1 so we can create a register page thats not linked on the client side and is tied to your ip address so you can't register
+an account unless you ip matches so even if you enter the correct url address but the thing is that if she relocates 
+she wont be able to ever access that page but she can use a vpn to reconfigure her ip address to match the allowed one 
+but idk how well thats going to work
+
+option 2 we can make her an account ourselves and implement the reset password function and give her the credientials 
+and then she can just change her password which means we can do away with the login / reigster all together
+
+option 3 we can generate a token and email her the url so she can bookmark it 
+
+option 4 combine option 1 & 3 for optimal security
+
+option 5 (bad option) we can hide the login & register page behind a different address than expected and just leave it without checkers
+but that poses an obvious security risk 

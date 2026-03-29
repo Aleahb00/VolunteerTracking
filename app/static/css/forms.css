@@ -1,0 +1,160 @@
+.forms-page {
+	min-height: calc(100vh - 70px);
+	padding: 2.5rem 1rem;
+	background: linear-gradient(180deg, #f7f4e8 0%, #f0ede2 100%);
+}
+
+.forms-container {
+	max-width: 980px;
+	margin: 0 auto;
+}
+
+.forms-header {
+	text-align: center;
+	margin-bottom: 2rem;
+}
+
+.forms-header h1 {
+	margin: 0 0 0.5rem;
+	font-size: clamp(2rem, 4vw, 3rem);
+	color: #17313d;
+}
+
+.forms-header p {
+	margin: 0;
+	color: #35505b;
+	font-size: 1.05rem;
+}
+
+.forms-messages {
+	margin-bottom: 1rem;
+}
+
+.forms-message {
+	background: #fff3cd;
+	color: #694d00;
+	border: 1px solid #efd27a;
+	border-radius: 8px;
+	padding: 0.75rem 1rem;
+	margin: 0 0 0.5rem;
+}
+
+.forms-tabs {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.5rem;
+	background: #d8e0d4;
+	border-radius: 12px;
+	padding: 0.35rem;
+	margin-bottom: 1.25rem;
+}
+
+.forms-tab {
+	border: 0;
+	background: transparent;
+	border-radius: 10px;
+	padding: 0.65rem 0.75rem;
+	cursor: pointer;
+	font-weight: 600;
+	color: #29444f;
+}
+
+.forms-tab.is-active {
+	background: #ffffff;
+	color: #112f3f;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.forms-panel {
+	display: none;
+	background: #ffffff;
+	border: 1px solid #d6dfd2;
+	border-radius: 14px;
+	padding: 1.25rem;
+}
+
+.forms-panel.is-active {
+	display: block;
+}
+
+.forms-panel h2 {
+	margin-top: 0;
+	color: #17313d;
+}
+
+.forms-grid-form {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.9rem 1rem;
+}
+
+.forms-grid-form > * {
+	min-width: 0;
+}
+
+.form-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	min-width: 0;
+}
+
+.form-field-full {
+	grid-column: 1 / -1;
+}
+
+.form-field label {
+	font-size: 0.92rem;
+	font-weight: 600;
+	color: #2e4651;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea,
+.form-input {
+	width: 100%;
+	max-width: 100%;
+	border: 1px solid #c6d3c0;
+	border-radius: 8px;
+	padding: 0.6rem 0.7rem;
+	font: inherit;
+	background: #fcfdfb;
+	color: #19333f;
+	box-sizing: border-box;
+}
+
+.form-field textarea {
+	min-height: 110px;
+	resize: vertical;
+}
+
+.form-submit {
+	grid-column: 1 / -1;
+	margin-top: 0.4rem;
+	border: 0;
+	border-radius: 10px;
+	background: #1b5c67;
+	color: #ffffff;
+	padding: 0.7rem 1rem;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.form-submit:hover {
+	background: #174f59;
+}
+
+.conditional-field {
+	display: none;
+}
+
+@media (max-width: 760px) {
+	.forms-grid-form {
+		grid-template-columns: 1fr;
+	}
+
+	.forms-tab {
+		font-size: 0.92rem;
+	}
+}

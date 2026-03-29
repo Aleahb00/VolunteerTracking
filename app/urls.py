@@ -17,7 +17,7 @@ urlpatterns = [
     path('admin-dashboard/', admin_dashboard_view, name='admin_dashboard'),           # list + create
     path('admin-dashboard/<int:project_id>/', admin_dashboard_view, name='edit_project'),  # edit
     path('admin-dashboard/<int:project_id>/delete/', admin_dashboard_view, name='delete_project'),  # delete
-    path('/admin-dashboard/export/volunteer_csv/', generate_volunteer_csv, name='export_csv'),
+    path('admin-dashboard/export/volunteer_csv/', generate_volunteer_csv, name='export_csv'),
     path('admin-dashboard/export/donations_csv/', generate_donation_csv, name='export_donations_csv'),
     
     path('error403/', status_403_view, name='403'), #unauthorized access page

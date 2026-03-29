@@ -74,11 +74,30 @@ class ProjectForm(forms.ModelForm):
 class VolunteerForm(forms.ModelForm):
     class Meta:
         model = Volunteer
-        fields = fields = ['name', 'email', 'phone_number', 'date_of_work', 'total_hours', 'location_volunteered', 'work_desc', 'equipment', 'other_equipment', 'equipment_make_model', 'equipment_hours', 'notes']
+        fields = ['name', 'contact_method', 'email', 'phone_number', 'date_of_work', 'total_hours', 'location_volunteered', 'work_desc', 'equipment', 'other_equipment', 'equipment_make_model', 'equipment_hours', 'notes']
+        labels = {
+            'name': 'Full Name',
+            'contact_method': 'Contact Method',
+            'email': 'Email Address',
+            'phone_number': 'Phone Number',
+            'date_of_work': 'Date of Work',
+            'total_hours': 'Total Hours Volunteered',
+            'location_volunteered': 'Location Volunteered',
+            'work_desc': 'Description of Work',
+            'equipment': 'Equipment Used',
+            'other_equipment': 'Other Equipment (if applicable)',
+            'equipment_make_model': 'Equipment Make/Model',
+            'equipment_hours': 'Hours Equipment Used',
+            'notes': 'Additional Notes',
+            }
         widgets = {
             'name': forms.TextInput(attrs={
                 'class' : 'unknown',
                 'type': 'text'}),
+            
+            'contact_method': forms.Select(attrs={
+                'class' : 'unknown',
+                'type': 'select'}),
             
             'email': forms.EmailInput(attrs={
                 'class' : 'unknown',
@@ -91,6 +110,7 @@ class VolunteerForm(forms.ModelForm):
             'date_of_work': forms.DateInput(attrs={
                 'class' : 'unknown',
                 'type': 'date'}),
+            
             
             'total_hours': forms.NumberInput(attrs={
                 'class' : 'unknown',
@@ -132,11 +152,37 @@ class VolunteerForm(forms.ModelForm):
                 'type': 'text'}),
         }
 
+    def clean_date_of_work(self):
+        user_date = self.cleaned_data.get('date_of_work')
+
+        from django.db.models import Min
+        from django.core.exceptions import ValidationError
+
+        earliest_date = Project.objects.aggregate(Min('start_date'))['start_date__min']
+
+        if earliest_date and user_date and user_date < earliest_date:
+            raise ValidationError('Date cannot be before earliest project date')
+
+        return user_date
+
 
 class DonationForm(forms.ModelForm):
     class Meta:
         model = Donations
-        fields = ['name', 'email', 'phone_number', 'date_of_donation', 'total_hours', 'location_donated', 'work_desc', 'notes', 'donation_type', 'material_type', 'equipment_type']
+        fields = ['name', 'contact_method', 'email', 'phone_number', 'date_of_donation', 'total_hours', 'location_donated', 'work_desc', 'notes', 'donation_type', 'material_type', 'equipment_type']
+        labels = {
+            'name': 'Full Name',
+            'email': 'Email Address',
+            'phone_number': 'Phone Number',
+            'date_of_donation': 'Date of Donation',
+            'total_hours': 'Total Hours Donated',
+            'location_donated': 'Location Donated',
+            'work_desc': 'Description of Work',
+            'notes': 'Additional Notes',
+            'donation_type': 'Donation Type',
+            'material_type': 'Material Type',
+            'equipment_type': 'Equipment Type'
+        }
         widgets = {
             'name': forms.TextInput(attrs={
                 'class' : 'unknown',
@@ -182,3 +228,15 @@ class DonationForm(forms.ModelForm):
                 'class' : 'unknown',
                 'type': 'text'}),
         }
+    def clean_date_of_work(self):
+        user_date = self.cleaned_data.get('date_of_work')
+
+        from django.db.models import Min
+        from django.core.exceptions import ValidationError
+
+        earliest_date = Project.objects.aggregate(Min('start_date'))['start_date__min']
+
+        if earliest_date and user_date and user_date < earliest_date:
+            raise ValidationError('Date cannot be before earliest project date')
+
+        return user_date

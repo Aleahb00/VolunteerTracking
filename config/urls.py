@@ -21,6 +21,9 @@ from django.conf.urls.static import static
 
 from app.views import landing_view
 
+handler403 = 'app.views.status_403_view'
+handler404 = 'app.views.status_404_view'
+
 urlpatterns = [
     path('super-secret-admin-address/', admin.site.urls),
     path('', include('app.urls')),
