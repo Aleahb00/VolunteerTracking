@@ -49,7 +49,7 @@ class Volunteer(models.Model):
         ('email', 'Email'),
         ('phone', 'Phone')
         ]
-    contact_method = models.CharField(choices=CONTACT_CHOICES)
+    contact_method = models.CharField(max_length=10, choices=CONTACT_CHOICES)
     email = models.EmailField()
     phone_number = PhoneNumberField(blank=True)
 
@@ -79,7 +79,7 @@ class Donations(models.Model):
         ('email', 'Email'),
         ('phone', 'Phone')
         ]
-    contact_method = models.CharField(choices=CONTACT_CHOICES)
+    contact_method = models.CharField(max_length=10, choices=CONTACT_CHOICES)
     email = models.EmailField()
     phone_number = PhoneNumberField()
     

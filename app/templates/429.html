@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<main class="forms-page">
+	<div class="forms-container">
+		<section class="forms-panel is-active" role="status" aria-live="polite">
+			<h2>Too Many Requests</h2>
+			<p>You have submitted too many form requests in a short time.</p>
+			<p>Please wait about a minute, then try again.</p>
+			<a href="{% url 'forms' %}" class="form-submit" style="display:inline-block; text-decoration:none; margin-top:0.8rem;">Back to Forms</a>
+		</section>
+	</div>
+</main>
+{% endblock content %}

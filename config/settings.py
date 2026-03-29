@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'app',
     'phonenumber_field',
+    'honeypot',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
@@ -76,6 +78,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+HONEYPOT_FIELD_NAME = 'address'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

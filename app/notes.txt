@@ -22,6 +22,10 @@ cant think of anything aside from the if other please speciifc OHHHH certain fie
 also i think the forms need to be reconfigured to ask about skilled workers? idk maybe it can be added as like a message in the extra notes field
 
 
+UPDATE (03/29/26 1:58am)
+honeypot and ratelimit was installed to prevent bot spam with the forms. honeypot shows a form not viewable that users wont see to fill otu but bots will - if they fill it out it auotmatticaly gets denied 
+ratelimit limits POSTS from a single ip address and only allows 5 per minute and returns a 529 error when the limit is hit
+
 03/28/26 3:53am i have the 404 page fixed now but the css is incorrect since it was converted 
 so that styling needs to be fixed but i can't tn im eepy so moving on
 

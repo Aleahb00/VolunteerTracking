@@ -3,6 +3,7 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% load honeypot %}
 {% endblock css %}
 
 {% block content %}
@@ -13,6 +14,7 @@
         <header class="forms-header">
             <h1>Get Involved</h1>
             <p>Better heading pargraph thing needs to go here and im thinking a little information too idk what</p>
+            <p>The more information you can fill out the better (but in a professional way)</p>
         </header>
 
         {% if messages %}
@@ -32,6 +34,7 @@
             <h2>Volunteer Form</h2>
             <form method="post" class="forms-grid-form">
                 {% csrf_token %}
+                {% render_honeypot_field %}
 
                 <div class="form-field">
                     {{ volunteerForm.name.label_tag }}
@@ -103,6 +106,7 @@
             <h2>Donation Form</h2>
             <form method="post" class="forms-grid-form">
                 {% csrf_token %}
+                {% render_honeypot_field %}
 
                 <div class="form-field">
                     {{ donationForm.name.label_tag }}
