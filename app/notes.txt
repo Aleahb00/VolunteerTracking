@@ -26,6 +26,20 @@ UPDATE (03/29/26 1:58am)
 honeypot and ratelimit was installed to prevent bot spam with the forms. honeypot shows a form not viewable that users wont see to fill otu but bots will - if they fill it out it auotmatticaly gets denied 
 ratelimit limits POSTS from a single ip address and only allows 5 per minute and returns a 529 error when the limit is hit
 
+
+UPDATE (03/29/26 4:35pm) flagging button has been implemented where admin can toggle the is_flagged boolean
+
+UPDATE (03/29/26 5:07pm)
+volunteer and donations are now ordered by creation date (filled out and submitted) for each project
+
+UPDATE(03/29/26 5:35pm)
+search function has been implemented although i think its going to have to be recofigured so it doejst show donations and volunteers 
+at the same time but idk because i think that depends on how were gonna have the ui set up. was gonna implement a filter function but
+couldnt decide how it would be beneficial? like what options would it have because we alrd have it sorted by date, a sort for flagged,
+perhaps we can add a filter sort by newest oldest or... skilled workers ?? idk how at all that would play a part in it though
+but im also concerned about how large the admin dashboard view has gotten so maybe we should look into a way to shorten it perhaps
+throwing some of the logic into a functions file? idk maybe its fine but needs to at least be discussed.
+
 03/28/26 3:53am i have the 404 page fixed now but the css is incorrect since it was converted 
 so that styling needs to be fixed but i can't tn im eepy so moving on
 

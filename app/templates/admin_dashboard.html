@@ -96,6 +96,10 @@
 
 
 <!-- List of the volunteer details -->
+        <form method="GET" class='input-container'>
+            <input type="text" name="q" placeholder="Search..." >
+            <button type="submit" class='button'>Search</button>
+        </form>
 <div>
     <h1>List of Volunteers</h1>
     {% for volunteer in volunteers %}
@@ -107,6 +111,7 @@
         <p>Location Volunteered: {{ volunteer.location_volunteered }}</p>
         <p>Work Description: {{ volunteer.work_desc }}</p>
         <p>Flagged: {{ volunteer.flagged }}</p>
+        <button onclick="toggleFlaggedStatus({{ volunteer.id }})" class="btn-flag">{% if volunteer.flagged %}Unflag{% else %}Flag{% endif %}</button>
         <p>Project: {{ volunteer.project.name }}</p>
         <hr>
     {% empty %}
@@ -119,6 +124,28 @@
 because it jsut manages project rn and ediit form interfeares with create form (it doesnt break anything it just
 looks weird and i dont like it ){% endcomment %}
 
-
-
+{% csrf_token %}
+<script> 
+function toggleFlaggedStatus(volunteerId) {
+    fetch(`/toggle_flagged_status/${volunteerId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            location.reload();
+        } else {
+            alert('Error toggling flagged status.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while toggling flagged status.');
+    });
+}
+</script>
 {% endblock content %}

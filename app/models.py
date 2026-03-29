@@ -69,6 +69,7 @@ class Volunteer(models.Model):
 
     notes = models.TextField(max_length=500, blank=True)
     flagged = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
 
 
@@ -99,5 +100,6 @@ class Donations(models.Model):
     material_type = models.CharField(max_length=100, blank=True, null=True)
     equipment_type = models.CharField(max_length=100, blank=True, null=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
     flagged = models.BooleanField(default=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
