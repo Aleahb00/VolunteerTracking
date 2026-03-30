@@ -122,18 +122,9 @@
         <li>
             {{ volunteer.name }} — {{ volunteer.date_of_work }} — {{ volunteer.total_hours }} hrs
             <a href="{% url 'volunteer_pdf' volunteer.id %}" target="_blank">Details</a>
+            <button onclick="toggleFlaggedStatus({{ volunteer.id }})" class="btn-flag">{% if volunteer.flagged %}Unflag{% else %}Flag{% endif %}</button>
+            <span class="project-name">{{ volunteer.project.name }}</span>
         </li>
-        <p>{{ volunteer.name }}</p>
-        <p>Email: {{ volunteer.email }}</p>
-        <p>Phone Number: {{ volunteer.phone_number }}</p>
-        <p>Date of Work: {{ volunteer.date_of_work }}</p>
-        <p>Total Hours: {{ volunteer.total_hours }}</p>
-        <p>Location Volunteered: {{ volunteer.location_volunteered }}</p>
-        <p>Work Description: {{ volunteer.work_desc }}</p>
-        <p>Flagged: {{ volunteer.flagged }}</p>
-        <button onclick="toggleFlaggedStatus({{ volunteer.id }})" class="btn-flag">{% if volunteer.flagged %}Unflag{% else %}Flag{% endif %}</button>
-        <p>Project: {{ volunteer.project.name }}</p>
-        <hr>
     {% empty %}
         <li>No volunteers yet.</li>
     {% endfor %}
@@ -161,11 +152,28 @@ looks weird and i dont like it ){% endcomment %}
 
 {% csrf_token %}
 <script> 
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 function toggleFlaggedStatus(volunteerId) {
     fetch(`/toggle_flagged_status/${volunteerId}/`, {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
+            'X-CSRFToken': getCookie('csrftoken'),
             'Content-Type': 'application/json'
         },
     })

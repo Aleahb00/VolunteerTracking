@@ -249,6 +249,7 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         'total_hours': total_hours,
         'volunteer_value': volunteer_value,
         'donation_value': donation_value,
+        'query': query,
         'hourly_rate': hourly_rate,
         'flagged_count': flagged_count,
     })
@@ -289,9 +290,6 @@ def donation_pdf_view(request: HttpRequest, donation_id: int) -> HttpResponse:
     donation = get_object_or_404(Donations, id=donation_id)
     return render(request, 'donations_pdf.html', {'donations': [donation]})
     
-        'project': project,  
-        'query': query
-    })
 
 
 def toggle_flagged_status(request, volunteer_id):
