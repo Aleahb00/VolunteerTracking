@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http.response import HttpResponse
 from django.http.request import HttpRequest
@@ -17,6 +18,7 @@ from django.template.loader import get_template
 import csv
 from rapidfuzz import fuzz
 from .functions import *
+from django.db.models import Sum
 
 
 
@@ -169,21 +171,22 @@ def logout_view(request:HttpRequest)->HttpResponse:
 
 def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
     project = get_object_or_404(Project, id=project_id) if project_id else None
+
     # DELETE
     if request.method == 'POST' and request.POST.get('_method') == 'DELETE':
         if project:
             project.delete()
         return redirect('admin_dashboard')
 
-    #  CREATE/UPDATE
+    # CREATE/UPDATE
     if request.method == 'POST':
-        form = ProjectForm(request.POST, instance=project)  
+        form = ProjectForm(request.POST, instance=project)
         if form.is_valid():
             form.save()
             return redirect('admin_dashboard')
     else:
-        form = ProjectForm(instance=project)  
-    
+        form = ProjectForm(instance=project)
+
     if project:
         volunteers = Volunteer.objects.filter(project=project)
         donations = Donations.objects.filter(project=project)
@@ -192,9 +195,19 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         donations = Donations.objects.all()
 
     total_submissions = volunteers.count() + donations.count()
+
+    hourly_rate = project.hourly_rate if project else Decimal('29.95')
+    total_hours = volunteers.aggregate(total=Sum('total_hours'))['total'] or 0
+    volunteer_value = Decimal(str(total_hours)) * hourly_rate
+    flagged_count = volunteers.filter(flagged=True).count()
+
+    # Compute donation value from donated hours using project's hourly_rate
+    donation_hours_total = donations.aggregate(total=Sum('total_hours'))['total'] or 0
+    donation_value = Decimal(str(donation_hours_total)) * hourly_rate
+
     create_form = ProjectForm()
-    
     edit_form = ProjectForm(instance=project) if project else None
+
     # READ
     return render(request, 'admin_dashboard.html', {
         'projects': Project.objects.all(),
@@ -203,8 +216,49 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         'total_submissions': total_submissions,
         'create_form': create_form,
         'edit_form': edit_form,
-        'project': project,  
+        'project': project,
+        'total_hours': total_hours,
+        'volunteer_value': volunteer_value,
+        'donation_value': donation_value,
+        'hourly_rate': hourly_rate,
+        'flagged_count': flagged_count,
     })
+
+def project_detail_view(request: HttpRequest, project_id: int) -> HttpResponse:
+    project = get_object_or_404(Project, id=project_id)
+    volunteers = Volunteer.objects.filter(project=project)
+    donations = Donations.objects.filter(project=project)
+
+    total_submissions = volunteers.count() + donations.count()
+
+    hourly_rate = project.hourly_rate
+    total_hours = volunteers.aggregate(total=Sum('total_hours'))['total'] or 0
+    volunteer_value = Decimal(str(total_hours)) * hourly_rate
+    flagged_count = volunteers.filter(flagged=True).count()
+
+    return render(request, 'project_details.html', {
+        'project': project,
+        'volunteers': volunteers,
+        'donations': donations,
+        'total_submissions': total_submissions,
+        'total_hours': total_hours,
+        'volunteer_value': volunteer_value,
+        'hourly_rate': hourly_rate,
+        'flagged_count': flagged_count,
+    })
+
+
+def volunteer_pdf_view(request: HttpRequest, volunteer_id: int) -> HttpResponse:
+    """Render a PDF-like page for a single volunteer submission (wrapped div for print)."""
+    volunteer = get_object_or_404(Volunteer, id=volunteer_id)
+    # reuse volunteers_pdf.html by passing a single-item list
+    return render(request, 'volunteers_pdf.html', {'volunteers': [volunteer]})
+
+
+def donation_pdf_view(request: HttpRequest, donation_id: int) -> HttpResponse:
+    """Render a PDF-like page for a single donation submission (wrapped div for print)."""
+    donation = get_object_or_404(Donations, id=donation_id)
+    return render(request, 'donations_pdf.html', {'donations': [donation]})
     
 def generate_volunteer_csv(request):
     response = HttpResponse(

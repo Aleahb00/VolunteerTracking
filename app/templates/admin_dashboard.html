@@ -12,10 +12,47 @@
 
 <h2 style="text-align: center; font-size: 5em;">This is the test admin page </h2>
 
+<!-- PROJECT SELECT LIST  -->
 <div>
+    <p>Select a project</p>
+    {%for project in projects%}
+    <li>
+        <a href="{% url 'edit_project' project.id %}"> {{project.name}}</a>
+    </li>
+    {% endfor %}
+</div>
+
+<!-- PROJECT LITTLE SUMMARY DIVS -->
+<div>
+    <h2>Stats summary:</h2>
+    {% if project %}
+    <div>
+        <p>Total Submissions (this project):{{ total_submissions }}</p>
+    </div>
+
+    <div>
+        <p>Volunteer value: {{ volunteer_value }}</p>
+    </div>
+
+    <div>
+        <p>Donation value: {{ donation_value }}</p>
+    </div>
+
+    <div>
+        Total hours: {{ total_hours }}
+    </div>
+        {% endif %}
+
+</div>
+
+
+<!-- Button to export data  -->
+<div>
+    <h2>Export Data:</h2>
     <a href="{% url 'export_csv' %}">Export Volunteer CSV</a>
     <a href="{% url 'export_donations_csv' %}"> Export Donations CSV</a> 
 </div>
+
 
 <!-- Button to open the create-project modal -->
 <div>
@@ -35,37 +72,14 @@
     </div>
 </div>
 
-<div>
-    <p>Select a project</p>
-    {%for project in projects%}
-    <li>
-        <a href="{% url 'edit_project' project.id %}"> {{project.name}}</a>
-    </li>
-    {% endfor %}
-</div>
-
-<!-- List of the details of the project selected -->
+<!-- name of the project selected -->
 <div>
     <h1> Selected Projects </h1>
     {% if project %}
     <div class="project-details">
         <p><strong>Name:</strong> {{ project.name }}</p>
         <p><strong>Number:</strong> {{ project.number }}</p>
-        <p><strong>Type:</strong> {{ project.type }}</p>
-        <p><strong>Category:</strong> {{ project.category }}</p>
-        <p><strong>Size:</strong> {{ project.size }}</p>
-        <p><strong>Declaration date :</strong> {{ project.declaration_date }}</p>
-        <p><strong>Completion date:</strong> {{ project.completion_date }}</p>
-        <p><strong>Start date:</strong> {{ project.start_date }}</p>
-        <p><strong>End date:</strong> {{ project.end_date }}</p>
-        <p><strong>Locatino:</strong> {{ project.location }}</p>
-        <p><strong>Process Step:</strong> {{ project.process_step}}</p>
-        <p><strong>Applicant:</strong> {{ project.applicant }}</p>
-        
-        <p><strong>Total Submissions (this project):</strong> {{ total_submissions }}</p>
-        
-        <p>Volunteer Count: {{ volunteers.count }}</p>
-        <p>Donation Count: {{ donations.count }}</p>
+        <a href="{% url 'project_detail' project.id %}">View Project Details</a>
     </div>
 
     <button class="btn open-modal-btn" data-target="modal-{{ project.id }}">Edit Project</button>
@@ -95,25 +109,35 @@
 
 
 
-<!-- List of the volunteer details -->
+<!-- Compact list of volunteers with details link -->
 <div>
-    <h1>List of Volunteers</h1>
+    <h1>Volunteers</h1>
+    <ul>
     {% for volunteer in volunteers %}
-        <p>{{ volunteer.name }}</p>
-        <p>Email: {{ volunteer.email }}</p>
-        <p>Phone Number: {{ volunteer.phone_number }}</p>
-        <p>Date of Work: {{ volunteer.date_of_work }}</p>
-        <p>Total Hours: {{ volunteer.total_hours }}</p>
-        <p>Location Volunteered: {{ volunteer.location_volunteered }}</p>
-        <p>Work Description: {{ volunteer.work_desc }}</p>
-        <p>Flagged: {{ volunteer.flagged }}</p>
-        <p>Project: {{ volunteer.project.name }}</p>
-        <hr>
+        <li>
+            {{ volunteer.name }} — {{ volunteer.date_of_work }} — {{ volunteer.total_hours }} hrs
+            <a href="{% url 'volunteer_pdf' volunteer.id %}" target="_blank">Details</a>
+        </li>
     {% empty %}
-        <p>No volunteers yet.</p>
+        <li>No volunteers yet.</li>
     {% endfor %}
+    </ul>
 </div>
 
+<!-- Compact list of donations with details link -->
+<div>
+    <h1>Donations</h1>
+    <ul>
+    {% for donation in donations %}
+        <li>
+            {{ donation.name }} — {{ donation.date_of_donation }} — {{ donation.total_hours }} hrs
+            <a href="{% url 'donation_pdf' donation.id %}" target="_blank">Details</a>
+        </li>
+    {% empty %}
+        <li>No donations yet.</li>
+    {% endfor %}
+    </ul>
+</div>
 
 {% comment %} || NOTES || CRUD is in one view for this temp for project but it's definelt gonna hve to be changed
 because it jsut manages project rn and ediit form interfeares with create form (it doesnt break anything it just

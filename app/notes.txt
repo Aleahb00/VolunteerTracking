@@ -54,3 +54,10 @@ option 4 combine option 1 & 3 for optimal security
 
 option 5 (bad option) we can hide the login & register page behind a different address than expected and just leave it without checkers
 but that poses an obvious security risk 
+
+
+how is the donation value calculated? is it the same byhourloy rate becasue of how many hours you donated something? 
+but then it would be different for like food and things like that
+-- right now donation value is set to hourly-rate * hours donated
+
+also the hourly rate is already added onthere along wiht project details being on a different html page 

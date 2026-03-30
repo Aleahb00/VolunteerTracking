@@ -9,7 +9,7 @@ class Project(models.Model):
     type = models.CharField(max_length=100)
     category = models.CharField(max_length=100)
     size = models.CharField(max_length=100)
-
+    hourly_rate = models.DecimalField(max_digits=6, decimal_places=2, default=29.95, help_text="Hourly volunteer rate for this state/county")
     declaration_date = models.DateField()
     completion_date = models.DateField()
     start_date = models.DateField()
@@ -98,6 +98,5 @@ class Donations(models.Model):
     donation_type = models.CharField(max_length=50, choices=DONATION_TYPES)
     material_type = models.CharField(max_length=100, blank=True, null=True)
     equipment_type = models.CharField(max_length=100, blank=True, null=True)
-
     flagged = models.BooleanField(default=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)

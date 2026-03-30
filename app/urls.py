@@ -19,7 +19,12 @@ urlpatterns = [
     path('admin-dashboard/<int:project_id>/delete/', admin_dashboard_view, name='delete_project'),  # delete
     path('admin-dashboard/export/volunteer_csv/', generate_volunteer_csv, name='export_csv'),
     path('admin-dashboard/export/donations_csv/', generate_donation_csv, name='export_donations_csv'),
-    
+    # Project detail page
+    path('project/<int:project_id>/', project_detail_view, name='project_detail'),
+    # PDF-like views for individual submissions
+    path('volunteer/<int:volunteer_id>/pdf/', volunteer_pdf_view, name='volunteer_pdf'),
+    path('donation/<int:donation_id>/pdf/', donation_pdf_view, name='donation_pdf'),
+
     path('error403/', status_403_view, name='403'), #unauthorized access page
     path('error404/', status_404_view, name='404'), #page not found    
 ]

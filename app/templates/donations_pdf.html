@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{%block css%}
+<link rel="stylesheet" href="{% static 'css/project_details.css' %}">
+{%endblock%}
+
+{% include 'navbar.html' %}
+
+<!-- List of the donation details -->
+<div>
+    <div class="pdf-actions">
+        <button onclick="window.print()">Print</button>
+    </div>
+    <h1>Donation</h1>
+    {% for donation in donations %}
+        <div class="pdf-item">
+            <p><strong>Name:</strong> {{ donation.name }}</p>
+            <p><strong>Email:</strong> {{ donation.email }}</p>
+            <p><strong>Phone Number:</strong> {{ donation.phone_number }}</p>
+            <p><strong>Total Hours:</strong> {{ donation.total_hours }}</p>
+            <p><strong>Date of Donation:</strong> {{ donation.date_of_donation }}</p>
+            <p><strong>Location:</strong> {{ donation.location_donated }}</p>
+            <p><strong>Description:</strong> {{ donation.work_desc }}</p>
+            <p><strong>Flagged:</strong> {{ donation.flagged }}</p>
+            <p><strong>Project:</strong> {{ donation.project.name }}</p>
+        </div>
+    {% empty %}
+        <p>No donations yet.</p>
+    {% endfor %}
+</div>  
+
+
+    
+
+{% endblock content %}

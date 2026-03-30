@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{%block css%}
+<link rel="stylesheet" href="{% static 'css/project_details.css' %}">
+{%endblock%}
+
+{% include 'navbar.html' %}
+
+<!-- List of the volunteer details -->
+<div>
+    <div class="pdf-actions">
+        <button onclick="window.print()">Print</button>
+    </div>
+    <h1>Volunteer</h1>
+    {% for volunteer in volunteers %}
+        <div class="pdf-item">
+            <p><strong>Name:</strong> {{ volunteer.name }}</p>
+            <p><strong>Email:</strong> {{ volunteer.email }}</p>
+            <p><strong>Phone Number:</strong> {{ volunteer.phone_number }}</p>
+            <p><strong>Date of Work:</strong> {{ volunteer.date_of_work }}</p>
+            <p><strong>Total Hours:</strong> {{ volunteer.total_hours }}</p>
+            <p><strong>Location Volunteered:</strong> {{ volunteer.location_volunteered }}</p>
+            <p><strong>Work Description:</strong> {{ volunteer.work_desc }}</p>
+            <p><strong>Flagged:</strong> {{ volunteer.flagged }}</p>
+            <p><strong>Project:</strong> {{ volunteer.project.name }}</p>
+        </div>
+    {% empty %}
+        <p>No volunteers yet.</p>
+    {% endfor %}
+</div>
+
+{% endblock content %}
