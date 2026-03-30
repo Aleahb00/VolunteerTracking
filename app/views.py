@@ -19,6 +19,9 @@ import csv
 from rapidfuzz import fuzz
 from .functions import *
 from django.db.models import Sum
+import json
+from django.http import JsonResponse
+
 
 
 
@@ -96,7 +99,7 @@ def form_template_view(request:HttpRequest)->HttpResponse:
                 if volunteer.flagged:
                     messages.warning(request, 'Volunteer submission saved and flagged (location similarity below 80%). No project was assigned.')
                 else:
-                    messages.success(request, 'Volunteer submission saved and matched to project location.')
+                    messages.success(request, 'Volunteer form submission saved successfully.')
 
                 return redirect('forms')
 
@@ -119,6 +122,8 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
                 if donation.flagged:
                     messages.warning(request, 'Donation submission saved and flagged (location similarity below 80%). No project was assigned.')
+                    flagged_reason = 'Location unrecognized.'
+                    # this is broken and needs to be repiared. still trying to come up with a solution. moving on.
                 else:
                     messages.success(request, 'Donation submission saved and matched to project location.')
 
@@ -130,10 +135,12 @@ def form_template_view(request:HttpRequest)->HttpResponse:
     return render(request, 'forms.html', {
         'volunteerForm': volunteerForm,
         'donationForm': donationForm,
-        'earliest_date': earliest_date
+        'earliest_date': earliest_date,
     })
     # I think this function works but like its been acting funny
     #  or I might just be tripping (might need hondussy to review)
+    
+    # these messages need to change currently theyre confirmation for testing but will need to be changed for users
 
 
 
@@ -187,12 +194,34 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
     else:
         form = ProjectForm(instance=project)
 
+        form = ProjectForm(instance=project)  
+    
+    query = request.GET.get('q')
+    
     if project:
-        volunteers = Volunteer.objects.filter(project=project)
-        donations = Donations.objects.filter(project=project)
+        volunteers = Volunteer.objects.filter(project=project).order_by('created_at')
+        donations = Donations.objects.filter(project=project).order_by('created_at')
     else:
-        volunteers = Volunteer.objects.all()
-        donations = Donations.objects.all()
+        volunteers = Volunteer.objects.all().order_by('created_at')
+        donations = Donations.objects.all().order_by('created_at')
+    
+    if query:
+        volunteers = volunteers.filter(
+            Q(name__icontains=query) |
+            Q(email__icontains=query) |
+            Q(phone_number__icontains=query) |
+            Q(location_volunteered__icontains=query) |
+            Q(work_desc__icontains=query) |
+            Q(notes__icontains=query)
+        )
+        donations = donations.filter(
+            Q(name__icontains=query) |
+            Q(email__icontains=query) |
+            Q(phone_number__icontains=query) |
+            Q(location_donated__icontains=query) |
+            Q(work_desc__icontains=query) |
+            Q(notes__icontains=query)
+        )
 
     total_submissions = volunteers.count() + donations.count()
 
@@ -260,6 +289,17 @@ def donation_pdf_view(request: HttpRequest, donation_id: int) -> HttpResponse:
     donation = get_object_or_404(Donations, id=donation_id)
     return render(request, 'donations_pdf.html', {'donations': [donation]})
     
+        'project': project,  
+        'query': query
+    })
+
+
+def toggle_flagged_status(request, volunteer_id):
+    volunteer = get_object_or_404(Volunteer, id=volunteer_id)
+    volunteer.flagged = not volunteer.flagged
+    volunteer.save()
+    return JsonResponse({'flagged': volunteer.flagged, 'status': 'success'})
+
 def generate_volunteer_csv(request):
     response = HttpResponse(
         content_type="text/csv",

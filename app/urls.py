@@ -25,6 +25,9 @@ urlpatterns = [
     path('volunteer/<int:volunteer_id>/pdf/', volunteer_pdf_view, name='volunteer_pdf'),
     path('donation/<int:donation_id>/pdf/', donation_pdf_view, name='donation_pdf'),
 
+    
+    path('toggle_flagged_status/<int:volunteer_id>/', toggle_flagged_status, name='toggle_flagged_status'),
+    
     path('error403/', status_403_view, name='403'), #unauthorized access page
     path('error404/', status_404_view, name='404'), #page not found    
 ]
