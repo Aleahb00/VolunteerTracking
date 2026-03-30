@@ -122,7 +122,7 @@
         <li>
             {{ volunteer.name }} — {{ volunteer.date_of_work }} — {{ volunteer.total_hours }} hrs
             <a href="{% url 'volunteer_pdf' volunteer.id %}" target="_blank">Details</a>
-            <button onclick="toggleFlaggedStatus({{ volunteer.id }})" class="btn-flag">{% if volunteer.flagged %}Unflag{% else %}Flag{% endif %}</button>
+            <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag">{% if volunteer.flagged %}Unflag{% else %}Flag{% endif %}</button>
             <span class="project-name">{{ volunteer.project.name }}</span>
         </li>
     {% empty %}
@@ -190,5 +190,14 @@ function toggleFlaggedStatus(volunteerId) {
         alert('An error occurred while toggling flagged status.');
     });
 }
+// Attach click handlers to buttons (avoid inline JS mixed with template tags)
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.btn-flag').forEach(function(btn) {
+        btn.addEventListener('click', function () {
+            const vid = btn.getAttribute('data-volunteer-id');
+            if (vid) toggleFlaggedStatus(vid);
+        });
+    });
+});
 </script>
 {% endblock content %}
