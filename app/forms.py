@@ -172,6 +172,7 @@ class DonationForm(forms.ModelForm):
         fields = ['name', 'contact_method', 'email', 'phone_number', 'date_of_donation', 'total_hours', 'location_donated', 'work_desc', 'notes', 'donation_type', 'material_type', 'equipment_type']
         labels = {
             'name': 'Full Name',
+            'contact_method': 'Contact Method',
             'email': 'Email Address',
             'phone_number': 'Phone Number',
             'date_of_donation': 'Date of Donation',
@@ -188,13 +189,19 @@ class DonationForm(forms.ModelForm):
                 'class' : 'unknown',
                 'type': 'text'}),
             
+            'contact_method': forms.Select(attrs={
+                'class' : 'unknown',
+                'type': 'select'}),
+            
             'email': forms.EmailInput(attrs={
                 'class' : 'unknown',
-                'type': 'email'}),
+                'type': 'email',
+                'required': False}),
             
             'phone_number': forms.TextInput(attrs={
                 'class' : 'unknown',
-                'type': 'text'}),
+                'type': 'text',
+                'required': False}),
             
             'date_of_donation': forms.DateInput(attrs={
                 'class' : 'unknown',
@@ -228,8 +235,26 @@ class DonationForm(forms.ModelForm):
                 'class' : 'unknown',
                 'type': 'text'}),
         }
-    def clean_date_of_work(self):
-        user_date = self.cleaned_data.get('date_of_work')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        contact_method = cleaned_data.get('contact_method')
+        email = cleaned_data.get('email')
+        phone_number = cleaned_data.get('phone_number')
+
+        if contact_method == 'email':
+            if not email:
+                self.add_error('email', 'Email is required when contact method is Email.')
+            cleaned_data['phone_number'] = ''
+        elif contact_method == 'phone':
+            if not phone_number:
+                self.add_error('phone_number', 'Phone number is required when contact method is Phone.')
+            cleaned_data['email'] = ''
+
+        return cleaned_data
+
+    def clean_date_of_donation(self):
+        user_date = self.cleaned_data.get('date_of_donation')
 
         from django.db.models import Min
         from django.core.exceptions import ValidationError

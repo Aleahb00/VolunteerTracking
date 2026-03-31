@@ -1,18 +1,17 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/403.css' %}">
+{% endblock css %}
+
 {% block content %}
 
-{%block css%}
-<link rel="stylesheet" href="{% static 'css/403.css' %}">
-{%endblock%}
-
-{% include 'navbar.html' %}
 
     <div class="lock"></div>
     <div class="message">
-    <h1>Access to this page is restricted</h1>
-    <p>Please check with the site admin if you believe this is a mistake.</p>
+        <h1>Access to this page is restricted</h1>
+        <p>Please check with the site admin if you believe this is a mistake.</p>
     </div>
 
 

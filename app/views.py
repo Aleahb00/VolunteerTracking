@@ -147,6 +147,9 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
 # NOTE ADMIN SIDE VIEWS
 # Search query needs to be implemented into this view if this is the one that were searching on
+
+
+
 def register_view(request:HttpRequest)->HttpResponse:
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -175,6 +178,7 @@ def logout_view(request:HttpRequest)->HttpResponse:
     logout(request)
     return redirect('landing')
 # may need to redirect to somewhere else considering it's admin
+
 
 def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
     project = get_object_or_404(Project, id=project_id) if project_id else None
@@ -223,16 +227,20 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
             Q(notes__icontains=query)
         )
 
-    total_submissions = volunteers.count() + donations.count()
+    volunteer_count = volunteers.count()
+    donation_count = donations.count()
+    total_submissions = volunteer_count + donation_count
 
     hourly_rate = project.hourly_rate if project else Decimal('29.95')
     total_hours = volunteers.aggregate(total=Sum('total_hours'))['total'] or 0
     volunteer_value = Decimal(str(total_hours)) * hourly_rate
     flagged_count = volunteers.filter(flagged=True).count()
+    donation_flagged_count = donations.filter(flagged=True).count()
 
     # Compute donation value from donated hours using project's hourly_rate
     donation_hours_total = donations.aggregate(total=Sum('total_hours'))['total'] or 0
     donation_value = Decimal(str(donation_hours_total)) * hourly_rate
+    total_value = volunteer_value + donation_value
 
     create_form = ProjectForm()
     edit_form = ProjectForm(instance=project) if project else None
@@ -242,6 +250,8 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         'projects': Project.objects.all(),
         'volunteers': volunteers,
         'donations': donations,
+        'volunteer_count': volunteer_count,
+        'donation_count': donation_count,
         'total_submissions': total_submissions,
         'create_form': create_form,
         'edit_form': edit_form,
@@ -249,9 +259,11 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         'total_hours': total_hours,
         'volunteer_value': volunteer_value,
         'donation_value': donation_value,
+        'total_value': total_value,
         'query': query,
         'hourly_rate': hourly_rate,
         'flagged_count': flagged_count,
+        'donation_flagged_count': donation_flagged_count,
     })
 
 def project_detail_view(request: HttpRequest, project_id: int) -> HttpResponse:

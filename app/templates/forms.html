@@ -66,6 +66,7 @@
                         class="form-input"
                         min="{{ earliest_date|date:'Y-m-d' }}"
                         value="{{ volunteerForm.date_of_work.value|default_if_none:'' }}"
+                        required
                     >
                 </div>
                 <div class="form-field form-field-full">
@@ -138,6 +139,7 @@
                         class="form-input"
                         min="{{ earliest_date|date:'Y-m-d' }}"
                         value="{{ donationForm.date_of_donation.value|default_if_none:'' }}"
+                        required
                     >
                 </div>
                 <div class="form-field form-field-full">

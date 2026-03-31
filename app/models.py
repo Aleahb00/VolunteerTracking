@@ -50,7 +50,7 @@ class Volunteer(models.Model):
         ('phone', 'Phone')
         ]
     contact_method = models.CharField(max_length=10, choices=CONTACT_CHOICES)
-    email = models.EmailField()
+    email = models.EmailField(blank=True)
     phone_number = PhoneNumberField(blank=True)
 
     date_of_work = models.DateField()
@@ -81,8 +81,8 @@ class Donations(models.Model):
         ('phone', 'Phone')
         ]
     contact_method = models.CharField(max_length=10, choices=CONTACT_CHOICES)
-    email = models.EmailField()
-    phone_number = PhoneNumberField()
+    email = models.EmailField(blank=True)
+    phone_number = PhoneNumberField(blank=True)
     
     date_of_donation = models.DateField()
     total_hours = models.IntegerField()
