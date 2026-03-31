@@ -18,26 +18,21 @@
             <button id="openFormButton" class="btn">Create New Project</button>
         </header>
 
-        {% if messages %}
-            <section class="dash-msgs">
-                {% for message in messages %}
-                    <p class="dash-msg">{{ message }}</p>
-                {% endfor %}
-            </section>
-        {% endif %}
+        <h2>Hello, {{ user.first_name }}!</h2>
 
         <section class="dash-block">
             <h2>Projects</h2>
-            
-            <ul class="project-list">
+            <label for="project-select" class="block mb-2 text-sm font-medium">Select a project to view:</label>
+            <select onchange="if(this.value) window.location.href=this.value;">
+                <option value="">-- Select a Project --</option>
                 {% for project_item in projects %}
-                    <li>
-                        <a href="{% url 'edit_project' project_item.id %}">{{ project_item.name }}</a>
-                    </li>
+                    <option value="{% url 'edit_project' project_item.id %}">
+                        {{ project_item.name }}
+                    </option>
                 {% empty %}
-                    <li>No projects yet.</li>
+                    <option disabled>No projects yet.</option>
                 {% endfor %}
-            </ul>
+            </select>
         </section>
 
         <section class="dash-stats">
