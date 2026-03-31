@@ -20,6 +20,7 @@
 
         <h2>Hello, {{ user.first_name }}!</h2>
 
+        <!-- SELECT A PROJECT SECTION -->
         <section class="dash-block">
             <h2>Projects</h2>
             <label for="project-select" class="block mb-2 text-sm font-medium">Select a project to view:</label>
@@ -35,6 +36,7 @@
             </select>
         </section>
 
+        <!-- LITTLE SUMMARY DIVS -->
         <section class="dash-stats">
             <article class="stat-card">
                 <h3>Volunteers</h3>
@@ -56,6 +58,7 @@
             </article>
         </section>
 
+        <!-- EXPORTING AS CSV -->
         <section class="dash-block dash-actions">
             <h2>Export Data</h2>
             <div class="actions-row">
@@ -64,6 +67,7 @@
             </div>
         </section>
 
+        <!-- PROJECT INFORMATION -->
         <section class="dash-block">
             <h2>Selected Project</h2>
             {% if project %}
@@ -98,13 +102,16 @@
             {% endif %}
         </section>
 
+        <!-- TOGGLE WINDOWS -->
         <section class="dash-toggle" role="tablist" aria-label="Submission Toggle">
             <button class="dash-tab is-active" type="button" role="tab" aria-selected="true" data-target="volunteers-panel">Volunteer Submissions</button>
             <button class="dash-tab" type="button" role="tab" aria-selected="false" data-target="donations-panel">Donation Submissions</button>
             <button class="dash-tab" type="button" role="tab" aria-selected="false" data-target="flagged-panel">Flagged Forms</button>
+            <button class="dash-tab" type="button" role="tab" aria-selected="false" data-target="setting-panel">Settings</button>
+            <button class="dash-tab" type="button" role="tab" aria-selected="false" data-target="trash-panel">Trash</button>
         </section>
 
-
+        <!-- SEARCH BLOCK -->
         <section class="dash-block">
             <form method="GET" class="search-form">
                 <input type="text" name="q" placeholder="Search submissions" value="{{ query|default_if_none:'' }}">
@@ -112,6 +119,7 @@
             </form>
         </section>
 
+        <!-- VOLUNTEERS LIST -->
         <section id="volunteers-panel" class="dash-grid tab-panel">
             <article class="dash-block">
                 <h2>Volunteers</h2>
@@ -124,13 +132,19 @@
                                 {% if volunteer.project %}
                                     <span> | {{ volunteer.project.name }}</span>
                                 {% endif %}
+
                                 {% if volunteer.flagged %}
                                     <span class="flag-badge">Flagged</span>
                                 {% endif %}
                             </div>
+                            
                             <div class="actions-row">
                                 <!-- Trigger Link -->
                                 <a href="#" class="volunteer-details" data-id="{{ volunteer.id }}" data-pdf-url="{% url 'volunteer_pdf' volunteer.id %}">Details</a>
+                                <form method="POST" action="{% url 'delete_volunteer' volunteer.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
 
                                 <button data-volunteer-id="{{ volunteer.id }}" class="btn btn-flag" type="button">{% if volunteer.flagged %}Unflag{% else %}Flag{% endif %}</button>
                             </div>
@@ -142,6 +156,7 @@
             </article>
         </section>
 
+        <!-- DONATIONS LIST -->
         <section id="donations-panel" class="dash-grid tab-panel" hidden>
             <article class="dash-block">
                 <h2>Donations</h2>
@@ -156,6 +171,10 @@
                                 {% endif %}
                             </div>
                             <a href="{% url 'donation_pdf' donation.id %}" target="_blank">Details</a>
+                            <form method="POST" action="{% url 'delete_donation' donation.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
                         </li>
                     {% empty %}
                         <li>No donations yet.</li>
@@ -164,6 +183,7 @@
             </article>
         </section>
 
+        <!-- FLAGGED SUBMISSIONS LIST  -->
         <section id="flagged-panel" class="dash-grid tab-panel" hidden>
             <article class="dash-block">
                 <h2>Flagged Volunteers</h2>
@@ -207,9 +227,62 @@
                 </ul>
             </article>
         </section>
+
+        {% comment %} TRASH PANEL {% endcomment %}
+
+        <section id="trash-panel" class="dash-grid tab-panel" hidden>
+            <article class="dash-block">
+                <h2>Deleted Volunteers</h2>
+                <ul class="record-list">
+                    {% for volunteer in deleted_volunteers %}
+                        <li class="record-item">
+                            <div>
+                                <strong>{{ volunteer.name }}</strong>
+                                <span> {{ volunteer.date_of_work }} | {{ volunteer.total_hours }} hrs</span>
+                                {% if volunteer.project %}
+                                    <span> | {{ volunteer.project.name }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="actions-row">
+                                <a href="#" class="volunteer-details" data-id="{{ volunteer.id }}" data-pdf-url="{% url 'volunteer_pdf' volunteer.id %}">Details</a>
+                                <form method="POST" action="{% url 'restore_volunteer' volunteer.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn">Restore</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li>No deleted volunteers.</li>
+                    {% endfor %}
+                </ul>
+            </article>
+            <article class="dash-block">
+                <h2>Deleted Donations</h2>
+                <ul class="record-list">
+                    {% for donation in deleted_donations %}
+                        <li class="record-item">
+                            <div>
+                                <strong>{{ donation.name }}</strong>
+                                <span> {{ donation.date_of_donation }} | {{ donation.total_hours }} hrs</span>
+                            </div>
+                            <div class="actions-row">
+                                <a href="{% url 'donation_pdf' donation.id %}" target="_blank">Details</a>
+                                <form method="POST" action="{% url 'restore_donation' donation.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn">Restore</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li>No deleted donations.</li>
+                    {% endfor %}
+                </ul>
+            </article>
+        </section>
     </div>
 </main>
 
+<!-- CREATE NEW PROJECT  -->
 <div id="formModal" class="modal" aria-hidden="true">
     <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="createProjectTitle">
         <span class="close" aria-label="Close">&times;</span>
@@ -221,13 +294,6 @@
         </form>
     </div>
 </div>
-
-
-
-
-
-
-
 
 
 

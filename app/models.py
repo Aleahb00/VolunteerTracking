@@ -1,5 +1,7 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+from safedelete.models import SafeDeleteModel, SOFT_DELETE
+
 
 # Create your models here.
 
@@ -19,7 +21,8 @@ class Project(models.Model):
     applicant = models.CharField(max_length=100)
 
 
-class Volunteer(models.Model):
+class Volunteer(SafeDeleteModel):
+    _safedelete_policy = SOFT_DELETE
 
     EQUIPMENT_CHOICES = [
         ('chainsaw', 'Chainsaw'),
@@ -73,7 +76,8 @@ class Volunteer(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
 
 
-class Donations(models.Model):
+class Donations(SafeDeleteModel):
+    _safedelete_policy = SOFT_DELETE
     name = models.CharField(max_length=100)
     
     CONTACT_CHOICES = [

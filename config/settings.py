@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'honeypot',
     'widget_tweaks',
+    'safedelete',
 ]
 
 MIDDLEWARE = [

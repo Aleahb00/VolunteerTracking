@@ -244,6 +244,8 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
 
     create_form = ProjectForm()
     edit_form = ProjectForm(instance=project) if project else None
+    deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False).order_by('-created_at')
+    deleted_donations = Donations.all_objects.filter(deleted__isnull=False).order_by('-created_at')
 
     # READ
     return render(request, 'admin_dashboard.html', {
@@ -264,7 +266,30 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         'hourly_rate': hourly_rate,
         'flagged_count': flagged_count,
         'donation_flagged_count': donation_flagged_count,
+        'deleted_volunteers': deleted_volunteers,
+        'deleted_donations': deleted_donations,
     })
+    
+def delete_volunteer_view(request, volunteer_id):
+    volunteer = get_object_or_404(Volunteer, id=volunteer_id)
+    volunteer.delete()
+    return redirect('admin_dashboard')
+
+def delete_donation_view(request, donation_id):
+    donation = get_object_or_404(Donations, id=donation_id)
+    donation.delete()
+    return redirect('admin_dashboard')
+    
+    
+def restore_volunteer(request, id):
+    volunteer = get_object_or_404(Volunteer.all_objects, id=id)
+    volunteer.undelete()
+    return redirect('admin_dashboard')
+
+def restore_donation(request, id):
+    donation = get_object_or_404(Donations.all_objects, id=id)
+    donation.undelete()
+    return redirect('admin_dashboard')
 
 def project_detail_view(request: HttpRequest, project_id: int) -> HttpResponse:
     project = get_object_or_404(Project, id=project_id)
