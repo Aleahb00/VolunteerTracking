@@ -74,7 +74,7 @@ class ProjectForm(forms.ModelForm):
 class VolunteerForm(forms.ModelForm):
     class Meta:
         model = Volunteer
-        fields = ['name', 'contact_method', 'email', 'phone_number', 'date_of_work', 'total_hours', 'location_volunteered', 'work_desc', 'equipment', 'other_equipment', 'equipment_make_model', 'equipment_hours', 'notes']
+        fields = ['name', 'contact_method', 'email', 'phone_number', 'date_of_work', 'total_hours', 'location_volunteered', 'work_desc', 'equipment', 'other_equipment', 'equipment_make_model', 'equipment_hours', 'skilled_worker', 'notes']
         labels = {
             'name': 'Full Name',
             'contact_method': 'Contact Method',
@@ -88,6 +88,7 @@ class VolunteerForm(forms.ModelForm):
             'other_equipment': 'Other Equipment (if applicable)',
             'equipment_make_model': 'Equipment Make/Model',
             'equipment_hours': 'Hours Equipment Used',
+            'skilled_worker': 'Skilled Worker',
             'notes': 'Additional Notes',
             }
         widgets = {
@@ -124,10 +125,6 @@ class VolunteerForm(forms.ModelForm):
                 'class' : 'unknown',
                 'type': 'text'}),
             
-            # 'equipment_used': forms.CheckboxInput(attrs={
-            #     'class' : 'unknown',
-            #     'type': 'checkbox'}),
-            
             'equipment': forms.Select(attrs={
                 'class': 'unknown',
                 'id': 'equipment-select'
@@ -146,6 +143,10 @@ class VolunteerForm(forms.ModelForm):
             'equipment_hours': forms.NumberInput(attrs={
                 'class' : 'unknown',
                 'type': 'number'}),
+            
+            'skilled_worker': forms.RadioSelect(attrs={
+                'class': 'radio-input'
+            }),
             
             'notes': forms.Textarea(attrs={
                 'class' : 'unknown',
@@ -182,7 +183,8 @@ class DonationForm(forms.ModelForm):
             'notes': 'Additional Notes',
             'donation_type': 'Donation Type',
             'material_type': 'Material Type',
-            'equipment_type': 'Equipment Type'
+            'equipment_type': 'Equipment Type',
+            'skilled_worker': 'Skilled Worker',
         }
         widgets = {
             'name': forms.TextInput(attrs={

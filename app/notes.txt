@@ -75,3 +75,12 @@ but then it would be different for like food and things like that
 -- right now donation value is set to hourly-rate * hours donated
 
 also the hourly rate is already added onthere along wiht project details being on a different html page 
+
+
+
+if there more than one disaster in one location the which one does the form go to? need some more 
+clarification to which form does to which disaster 
+
+
+from mobile swap from deleted donations and volunteers
+

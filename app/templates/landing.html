@@ -1,16 +1,154 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block content %}
-
-{%block css%}
+{% block css %}
 <link rel="stylesheet" href="{% static 'css/landing.css' %}">
-{%endblock%}
+<script src="https://unpkg.com/lucide@latest"></script>
+{% endblock css %}
 
+{% block content %}
 {% include 'navbar.html' %}
 
+<main>
+  <section class="hero">
+    <div class="container">
+      <p class="eyebrow">OVER THE PAST SEVEN YEARS</p>
+      <h1>$3+ Billion</h1>
+      <p class="subtitle">IN DISASTERS FUNDING TO COMMUNITIES JUST LIKE YOURS</p>
+      <p class="desc">
+        Supporting communities affected by ice storms, floods, and natural disasters
+        with coordinated volunteer relief efforts.
+      </p>
+    </div>
+  </section>
 
-<h2 style="text-align: center; font-size: 5em;">This is the landing page </h2>
+  <section class="impact">
+    <div class="container">
+      <h2>Our Impact</h2>
 
+      <div class="stats-grid">
+        <div class="stat">
+          <span class="stat-number">$3+ Billion</span>
+          <span class="stat-label">Total Funding Raised</span>
+        </div>
+
+        <div class="stat">
+          <span class="stat-number">#?</span>
+          <span class="stat-label">Active Volunteers</span>
+        </div>
+
+        <div class="stat">
+          <span class="stat-number">#%</span>
+          <span class="stat-label">Progress to Goal</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="focus">
+    <div class="container">
+      <h2>Areas of Focus</h2>
+
+      <div class="focus-grid">
+
+        <div class="focus-card">
+          <div class="focus-image volunteer-img">
+            <span>Volunteer</span>
+          </div>
+
+          <ul>
+            <li>On-site Cleanup and Debris Removal</li>
+            <li>Emergency Response Coordination</li>
+            <li>Community Outreach Programs</li>
+            <li>Volunteer Hour Tracking & Management</li>
+            <li>Safety Training and Certification</li>
+          </ul>
+        </div>
+
+        <div class="focus-card">
+          <div class="focus-image funding-img">
+            <span>Funding</span>
+          </div>
+
+          <ul>
+            <li>Hourly Rate Revenue Generation</li>
+            <li>Direct Donation Processing</li>
+            <li>Grant Application Assistance</li>
+            <li>Financial Transparency Reporting</li>
+            <li>Budget Allocation & Planning</li>
+          </ul>
+        </div>
+
+        <div class="focus-card">
+          <div class="focus-image support-img">
+            <span>Support</span>
+          </div>
+
+          <ul>
+            <li>24/7 Emergency Hotline</li>
+            <li>Mental Health & Counseling Resources</li>
+            <li>Supply Distribution Centers</li>
+            <li>Temporary Shelter Coordination</li>
+            <li>Long-term Recovery Planning</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <section class="hero">
+    <div class="container center">
+
+      <h1>SEE THE TRANSFORMATION</h1>
+
+      <div class="before-after" id="slider">
+
+        <img src="{% static 'images/after.png' %}">
+
+        <div class="before-wrapper" id="beforeWrapper">
+          <img src="{% static 'images/before.png' %}">
+        </div>
+
+        <div class="slider-line" id="sliderLine">
+          <div class="slider-handle">
+            <i data-lucide="chevrons-left-right"></i>
+          </div>
+        </div>
+
+        <span class="label before">After</span>
+        <span class="label after">Before</span>
+
+      </div>
+    </div>
+  </section>
+  <section class="testimonial">
+    <div class="container">
+      <blockquote>
+        "QUOTE FROM MAYOR"
+      </blockquote>
+      <cite>
+        Mayor of Water Valley, Community Leader, Yalobusha
+      </cite>
+    </div>
+  </section>
+  <section class="cta">
+    <div class="container">
+      <h2>Let's Get Started.</h2>
+
+      <p>
+        Every volunteer hour and donation brings us closer to full recovery.
+        Join our community of helpers and be part of the solution.
+      </p>
+
+      <a href="#" class="cta-btn">Get Started →</a>
+    </div>
+  </section>
+
+<script src="{% static 'js/before-after.js' %}"></script>
+<script>
+lucide.createIcons();
+</script>
 
 {% endblock content %}

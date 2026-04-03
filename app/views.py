@@ -43,18 +43,18 @@ def ratelimit_error(request, exception=None):
     return render(request, '429.html', status=429)
 
 
-def project_test_view(request:HttpRequest)->HttpResponse:
-    projects = Project.objects.all()
+# def project_test_view(request:HttpRequest)->HttpResponse:
+#     projects = Project.objects.all()
 
-    if request.method == 'POST':
-        form = ProjectForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('landing')
-    else:
-        form = ProjectForm()
+#     if request.method == 'POST':
+#         form = ProjectForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('landing')
+#     else:
+#         form = ProjectForm()
 
-    return render(request, 'temp_admin.html', {'form': form, 'projects': projects})
+#     return render(request, 'temp_admin.html', {'form': form, 'projects': projects})
 # is this needed? where is this being used?
 
 @check_honeypot
@@ -73,10 +73,11 @@ def form_template_view(request:HttpRequest)->HttpResponse:
         best_similarity = -1
 
         for project in projects:
-            similarity = fuzz.ratio(location_text.lower(), project.location.lower())
-            if similarity > best_similarity:
-                best_similarity = similarity
-                best_project = project
+            if project.active:
+                similarity = fuzz.ratio(location_text.lower(), project.location.lower())
+                if similarity > best_similarity:
+                    best_similarity = similarity
+                    best_project = project
 
         return best_project, best_similarity
 
@@ -88,6 +89,10 @@ def form_template_view(request:HttpRequest)->HttpResponse:
                 volunteer = volunteerForm.save(commit=False)
                 best_project, similarity = find_best_project(volunteer.location_volunteered)
                 volunteer.flagged = similarity < 80
+                
+                if volunteer.skilled_worker == 'unsure':
+                    volunteer.flagged = True
+                    # ANCHOR NEW
 
                 if volunteer.flagged:
                     volunteer.project = None
@@ -102,6 +107,7 @@ def form_template_view(request:HttpRequest)->HttpResponse:
                     messages.success(request, 'Volunteer form submission saved successfully.')
 
                 return redirect('forms')
+            
 
             messages.error(request, 'There was an error with the volunteer form. Please check and try again.')
 
@@ -123,7 +129,7 @@ def form_template_view(request:HttpRequest)->HttpResponse:
                 if donation.flagged:
                     messages.warning(request, 'Donation submission saved and flagged (location similarity below 80%). No project was assigned.')
                     flagged_reason = 'Location unrecognized.'
-                    # this is broken and needs to be repiared. still trying to come up with a solution. moving on.
+                    # this is broken and needs to be repaired. still trying to come up with a solution. moving on.
                 else:
                     messages.success(request, 'Donation submission saved and matched to project location.')
 
@@ -187,14 +193,15 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
     if request.method == 'POST' and request.POST.get('_method') == 'DELETE':
         if project:
             project.delete()
-        return redirect('admin_dashboard')
+        return redirect('admin_dashboard', )
+    # think this needs to be deleted because you cant delete projects just close them but maybe it should still be an option? //COW//
 
     # CREATE/UPDATE
     if request.method == 'POST':
         form = ProjectForm(request.POST, instance=project)
         if form.is_valid():
             form.save()
-            return redirect('admin_dashboard')
+            return redirect('admin_dashboard', )
     else:
         form = ProjectForm(instance=project)
 
@@ -269,26 +276,59 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         'deleted_volunteers': deleted_volunteers,
         'deleted_donations': deleted_donations,
     })
+
+def general_dashboard_view(request:HttpRequest)->HttpResponse:
+    projects = Project.objects.filter(active=True)
+    flagged_volunteers = Volunteer.objects.filter(flagged=True)
+    flagged_donations = Donations.objects.filter(flagged=True)
     
+    return render(request, 'general_dashboard.html', {
+        'projects': projects,
+        'total_projects': projects.count(),
+        'flagged_volunteers': flagged_volunteers,
+        'flagged_volunteers_count': flagged_volunteers.count(),
+        'flagged_donations': flagged_donations,
+        'flagged_donations_count': flagged_donations.count(),
+    })
+    
+
 def delete_volunteer_view(request, volunteer_id):
     volunteer = get_object_or_404(Volunteer, id=volunteer_id)
+    volunteer_project_id = volunteer.project_id
     volunteer.delete()
+    if volunteer_project_id:
+        return redirect('edit_project', project_id=volunteer_project_id)
     return redirect('admin_dashboard')
 
 def delete_donation_view(request, donation_id):
     donation = get_object_or_404(Donations, id=donation_id)
+    donation_project_id = donation.project_id
     donation.delete()
+    if donation_project_id:
+        return redirect('edit_project', project_id=donation_project_id)
     return redirect('admin_dashboard')
     
-    
-def restore_volunteer(request, id):
+def restore_volunteer_view(request, id):
     volunteer = get_object_or_404(Volunteer.all_objects, id=id)
+    volunteer_project_id = volunteer.project_id
     volunteer.undelete()
+    if volunteer_project_id:
+        return redirect('edit_project', project_id=volunteer_project_id)
     return redirect('admin_dashboard')
 
-def restore_donation(request, id):
+def restore_donation_view(request, id):
     donation = get_object_or_404(Donations.all_objects, id=id)
+    donation_project_id = donation.project_id
     donation.undelete()
+    if donation_project_id:
+        return redirect('edit_project', project_id=donation_project_id)
+    return redirect('admin_dashboard')
+
+
+def close_project_view(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    project.active = False
+    project.save()
     return redirect('admin_dashboard')
 
 def project_detail_view(request: HttpRequest, project_id: int) -> HttpResponse:

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block css %}
-<link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}?v=20260330">
+
 {% endblock css %}
 
 {% block content %}
@@ -16,6 +16,14 @@
                 <p>Manage projects and review submissions.</p>
             </div>
             <button id="openFormButton" class="btn">Create New Project</button>
+            {% if project and project.active %}
+                <form method="POST" action="{% url 'close_project' project.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Close Project</button>
+                </form>
+            {% elif project and not project.active %}
+                <p>Project closed.</p>
+            {% endif %}
         </header>
 
         <h2>Hello, {{ user.first_name }}!</h2>
@@ -68,7 +76,7 @@
         </section>
 
         <!-- PROJECT INFORMATION -->
-        <section class="dash-block">
+        <!-- <section class="dash-block">
             <h2>Selected Project</h2>
             {% if project %}
                 <div class="project-card">
@@ -100,14 +108,14 @@
             {% else %}
                 <p>Select a project from the list above to view and edit it.</p>
             {% endif %}
-        </section>
+        </section> -->
 
         <!-- TOGGLE WINDOWS -->
         <section class="dash-toggle" role="tablist" aria-label="Submission Toggle">
             <button class="dash-tab is-active" type="button" role="tab" aria-selected="true" data-target="volunteers-panel">Volunteer Submissions</button>
             <button class="dash-tab" type="button" role="tab" aria-selected="false" data-target="donations-panel">Donation Submissions</button>
             <button class="dash-tab" type="button" role="tab" aria-selected="false" data-target="flagged-panel">Flagged Forms</button>
-            <button class="dash-tab" type="button" role="tab" aria-selected="false" data-target="setting-panel">Settings</button>
+            <button class="dash-tab" type="button" role="tab" aria-selected="false" data-target="settings-panel">Settings</button>
             <button class="dash-tab" type="button" role="tab" aria-selected="false" data-target="trash-panel">Trash</button>
         </section>
 
@@ -227,6 +235,87 @@
                 </ul>
             </article>
         </section>
+
+        <!-- SETTINGS -->
+        <section id="settings-panel" class="tab-panel" hidden>
+            {% if project %}
+                <article class="dash-block project-settings">
+                    <div class="project-settings-head">
+                        <div>
+                            <p class="project-kicker">Project Settings</p>
+                            <h2>{{ project.name }}</h2>
+                            <p class="project-subtitle">Project #{{ project.number }} · {{ project.location|default:"Not provided" }}</p>
+                        </div>
+                        <span class="status-pill {% if project.active %}is-active{% else %}is-closed{% endif %}">
+                            {% if project.active %}Active{% else %}Closed{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="project-settings-rate">
+                        <span>Current Hourly Rate</span>
+                        <strong>${{ project.hourly_rate|floatformat:2 }}</strong>
+                        <small>per hour</small>
+                    </div>
+
+                    <div class="actions-row">
+                        <button class="btn open-modal-btn" data-target="modal-{{ project.id }}">Edit Project</button>
+                        <form method="POST" action="{% url 'delete_project' project.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn btn-danger">Delete Project</button>
+                        </form>
+                        <a href="{% url 'project_detail' project.id %}" class="btn">View Project Details</a>
+                    </div>
+
+                    <dl class="project-settings-grid">
+                        <div class="project-settings-item">
+                            <dt>Type</dt>
+                            <dd>{{ project.type }}</dd>
+                        </div>
+                        <div class="project-settings-item">
+                            <dt>Category</dt>
+                            <dd>{{ project.category }}</dd>
+                        </div>
+                        <div class="project-settings-item">
+                            <dt>Size</dt>
+                            <dd>{{ project.size }}</dd>
+                        </div>
+                        <div class="project-settings-item">
+                            <dt>Process Step</dt>
+                            <dd>{{ project.process_step }}</dd>
+                        </div>
+                        <div class="project-settings-item">
+                            <dt>Applicant</dt>
+                            <dd>{{ project.applicant }}</dd>
+                        </div>
+                        <div class="project-settings-item">
+                            <dt>Declaration Date</dt>
+                            <dd>{{ project.declaration_date|date:"m/d/Y" }}</dd>
+                        </div>
+                        <div class="project-settings-item">
+                            <dt>Completion Date</dt>
+                            <dd>{{ project.completion_date|date:"m/d/Y" }}</dd>
+                        </div>
+                        <div class="project-settings-item">
+                            <dt>Start Date</dt>
+                            <dd>{{ project.start_date|date:"m/d/Y" }}</dd>
+                        </div>
+                        <div class="project-settings-item">
+                            <dt>End Date</dt>
+                            <dd>{{ project.end_date|date:"m/d/Y" }}</dd>
+                        </div>
+                    </dl>
+
+                </article>
+            {% else %}
+                <article class="dash-block project-settings">
+                    <p>Select a project to edit.</p>
+                </article>
+            {% endif %}
+        </section>
+
+
+
 
         {% comment %} TRASH PANEL {% endcomment %}
 
@@ -455,4 +544,5 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
     </div>
 </div>
+
 {% endblock content %}

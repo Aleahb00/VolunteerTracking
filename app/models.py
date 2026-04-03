@@ -19,6 +19,7 @@ class Project(models.Model):
     location = models.CharField(max_length=100, blank=True, null=True)
     process_step = models.CharField(max_length=100)
     applicant = models.CharField(max_length=100)
+    active = models.BooleanField(default=True)
 
 
 class Volunteer(SafeDeleteModel):
@@ -46,6 +47,12 @@ class Volunteer(SafeDeleteModel):
         ('none', 'None'),
         ('other', 'Other'),
     ]
+    
+    SKILL_OPTIONS = [
+        ('yes', 'Yes'),
+        ('no', 'No'),
+        ('unsure', 'Unsure'),
+    ]
 
     name = models.CharField(max_length=100)
     CONTACT_CHOICES = [
@@ -67,8 +74,7 @@ class Volunteer(SafeDeleteModel):
 
     equipment_make_model = models.CharField(max_length=100, blank=True, null=True)
     equipment_hours = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
-    # equipment_used = models.BooleanField(default=False)
-
+    skilled_worker = models.CharField(max_length=10, choices=SKILL_OPTIONS, blank=True, null=True)
 
     notes = models.TextField(max_length=500, blank=True)
     flagged = models.BooleanField(default=False)
@@ -84,6 +90,12 @@ class Donations(SafeDeleteModel):
         ('email', 'Email'),
         ('phone', 'Phone')
         ]
+    
+    SKILL_OPTIONS = [
+        ('yes', 'Yes'),
+        ('no', 'No'),
+        ('unsure', 'Unsure'),
+    ]
     contact_method = models.CharField(max_length=10, choices=CONTACT_CHOICES)
     email = models.EmailField(blank=True)
     phone_number = PhoneNumberField(blank=True)

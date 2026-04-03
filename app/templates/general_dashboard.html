@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/general_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{% include 'navbar.html' %}
+
+<div class="dashboard-container">
+    <div class="dashboard-wrapper">
+        <header class="dashboard-header">
+        <div class="header-content">
+            <div>
+            <h1 class="header-title">General Admin Dashboard</h1>
+            <p class="header-subtitle">Overview of all flagged submissions across projects</p>
+            </div>
+            <a href="{% url 'admin_dashboard' %}" class="btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="card-icon">
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            Settings
+            </a>
+        </div>
+        </header>
+
+        <section class="stats-grid">
+        <article class="card">
+            <div class="card-header">
+            <h4>Total Projects</h4>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="card-icon">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path>
+                <path d="M12 9v4"></path>
+                <path d="M12 17h.01"></path>
+            </svg>
+            </div>
+            <div class="card-content">
+            <div class="stat-value">{{ total_projects }}</div>
+            <p class="stat-label">Active projects</p>
+            </div>
+        </article>
+
+        <article class="card">
+            <div class="card-header">
+            <h4>Flagged Volunteers</h4>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="card-icon">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            </div>
+            <div class="card-content">
+            <div class="stat-value">{{ flagged_volunteers_count }}</div>
+            <p class="stat-label">Across all projects</p>
+            </div>
+        </article>
+
+        <article class="card">
+            <div class="card-header">
+            <h4>Flagged Donations</h4>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="card-icon">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+            </svg>
+            </div>
+            <div class="card-content">
+            <div class="stat-value">{{ flagged_donations_count }}</div>
+            <p class="stat-label">Across all projects</p>
+            </div>
+        </article>
+        </section>
+
+        <section class="card">
+        <div class="card-header">
+            <div>
+            <h4>Projects</h4>
+            <p class="header-subtitle">View and manage individual project dashboards</p>
+            </div>
+        </div>
+        <div class="card-content">
+            <div class="projects-list">
+            {% for project in projects %}
+            <div class="project-item">
+                <div class="project-info">
+                <h3 class="project-title">{{ project.name }}</h3>
+                <p class="project-description">{{ project.category }}</p>
+                <div class="project-badges">
+                    <span class="badge badge-primary">{{ project.active|yesno:"Active,Inactive" }}</span>
+                    <span class="badge badge-secondary">{{ project.location|default:"No location" }}</span>
+                </div>
+                </div>
+                <a href="{% url 'edit_project' project.id %}" class="btn">View Dashboard</a>
+            </div>
+            {% empty %}
+            <p class="empty-state">No active projects</p>
+            {% endfor %}
+            </div>
+        </div>
+        </section>
+
+        <section class="card submissions-card">
+        <div class="card-header submissions-header">
+            <div>
+            <div class="section-title-row">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="section-icon">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                <line x1="4" x2="4" y1="22" y2="15"></line>
+                </svg>
+                <h4>Flagged Submissions</h4>
+            </div>
+            <p class="header-subtitle">Review submissions flagged for potential issues</p>
+            </div>
+        </div>
+
+        <div class="card-content">
+            <div class="submissions-tabs">
+            <div class="tabs-list" role="tablist" aria-label="Flagged submissions">
+                <button type="button" role="tab" data-target="volunteer-panel" data-state="active" aria-selected="true" class="tab-trigger">Volunteers ({{ flagged_volunteers_count }})</button>
+                <button type="button" role="tab" data-target="donation-panel" data-state="inactive" aria-selected="false" class="tab-trigger">Donations ({{ flagged_donations_count }})</button>
+            </div>
+
+            <section id="volunteer-panel" class="tab-panel" role="tabpanel">
+                <div class="panel-search">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                </svg>
+                <input type="search" class="search-input" placeholder="Search volunteers..." aria-label="Search flagged volunteers">
+                </div>
+
+                <div class="table-shell">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Project</th>
+                        <th>Hours</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Notes</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for volunteer in flagged_volunteers %}
+                    <tr>
+                        <td class="cell-strong">{{ volunteer.name }}</td>
+                        <td>
+                        {% if volunteer.project %}
+                            {{ volunteer.project.name }}
+                        {% else %}
+                            <span class="muted-text">Unassigned</span>
+                        {% endif %}
+                        </td>
+                        <td>{{ volunteer.total_hours }}</td>
+                        <td>{{ volunteer.date_of_work|date:"M j, Y" }}</td>
+                        <td>{{ volunteer.location_volunteered }}</td>
+                        <td>{{ volunteer.notes|default:"-" }}</td>
+                        <td>
+                        {% if volunteer.project %}
+                        <a href="{% url 'edit_project' volunteer.project.id %}" class="link-button">Open Project</a>
+                        {% else %}
+                        <span class="muted-text">No project</span>
+                        {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td class="table-empty" colspan="7">No flagged volunteer submissions</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </section>
+
+            <section id="donation-panel" class="tab-panel" role="tabpanel" hidden>
+                <div class="panel-search">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                </svg>
+                <input type="search" class="search-input" placeholder="Search donations..." aria-label="Search flagged donations">
+                </div>
+
+                <div class="table-shell">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Project</th>
+                        <th>Hours</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Donation Type</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for donation in flagged_donations %}
+                    <tr>
+                        <td class="cell-strong">{{ donation.name }}</td>
+                        <td>
+                        {% if donation.project %}
+                            {{ donation.project.name }}
+                        {% else %}
+                            <span class="muted-text">Unassigned</span>
+                        {% endif %}
+                        </td>
+                        <td>{{ donation.total_hours }}</td>
+                        <td>{{ donation.date_of_donation|date:"M j, Y" }}</td>
+                        <td>{{ donation.location_donated }}</td>
+                        <td>{{ donation.get_donation_type_display }}</td>
+                        <td>
+                        {% if donation.project %}
+                        <a href="{% url 'edit_project' donation.project.id %}" class="link-button">Open Project</a>
+                        {% else %}
+                        <span class="muted-text">No project</span>
+                        {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td class="table-empty" colspan="7">No flagged donation submissions</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </section>
+            </div>
+        </div>
+        </section>
+    </div>
+    </div>
+
+    <script>
+    document.querySelectorAll('.submissions-tabs').forEach(container => {
+        const tabs = container.querySelectorAll('[role="tab"]');
+        const panels = container.querySelectorAll('[role="tabpanel"]');
+
+        tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetId = tab.dataset.target;
+
+            tabs.forEach(currentTab => {
+            const isActive = currentTab === tab;
+            currentTab.dataset.state = isActive ? 'active' : 'inactive';
+            currentTab.setAttribute('aria-selected', String(isActive));
+            });
+
+            panels.forEach(panel => {
+            const isActive = panel.id === targetId;
+            panel.hidden = !isActive;
+            panel.classList.toggle('is-active', isActive);
+            });
+        });
+        });
+    });
+</script>
+
+{% endblock content %}

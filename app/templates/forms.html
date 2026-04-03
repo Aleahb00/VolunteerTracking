@@ -95,6 +95,24 @@
                     {{ volunteerForm.equipment_hours }}
                 </div>
                 <div class="form-field form-field-full">
+                    {{ volunteerForm.skilled_worker.label_tag }}
+                    <div class="radio-group">
+                        {% for value, label in volunteerForm.skilled_worker.field.choices %}
+                            {% if value %}
+                            <label class="radio-option">
+                                <input
+                                    type="radio"
+                                    name="{{ volunteerForm.skilled_worker.html_name }}"
+                                    value="{{ value }}"
+                                    {% if volunteerForm.skilled_worker.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
+                                >
+                                <span>{{ label }}</span>
+                            </label>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="form-field form-field-full">
                     {{ volunteerForm.notes.label_tag }}
                     {{ volunteerForm.notes }}
                 </div>
@@ -238,9 +256,35 @@
             updateVisibility();
         }
 
+        function setupRadioGroups(formSelector) {
+            const form = document.querySelector(formSelector);
+            if (!form) return;
+
+            const groups = form.querySelectorAll('.radio-group');
+
+            groups.forEach((group) => {
+                const radios = group.querySelectorAll('input[type="radio"]');
+
+                function syncSelection() {
+                    group.querySelectorAll('.radio-option').forEach((option) => {
+                        const input = option.querySelector('input[type="radio"]');
+                        option.classList.toggle('is-selected', Boolean(input && input.checked));
+                    });
+                }
+
+                radios.forEach((radio) => {
+                    radio.addEventListener('change', syncSelection);
+                });
+
+                syncSelection();
+            });
+        }
+
         // Setup both forms
         setupConditionalFields('#volunteer-panel .forms-grid-form');
         setupConditionalFields('#donation-panel .forms-grid-form');
+        setupRadioGroups('#volunteer-panel .forms-grid-form');
+        setupRadioGroups('#donation-panel .forms-grid-form');
     })();
 </script>
 {% endblock content %}
