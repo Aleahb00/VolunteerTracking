@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from rapidfuzz import fuzz
 from .models import *
 
 
@@ -165,12 +166,34 @@ class VolunteerForm(forms.ModelForm):
             raise ValidationError('Date cannot be before earliest project date')
 
         return user_date
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        flags = []
 
+        location = (cleaned_data.get('location_volunteered') or '').strip()
+        skilled_worker = (cleaned_data.get('skilled_worker') or '').strip().lower()
+
+        min_similarity = 80
+        project_locations = Project.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
+
+        best_similarity = max(
+            (fuzz.ratio(location.lower(), project_location.lower()) for project_location in project_locations),default=0)
+
+        if location and best_similarity < min_similarity:
+            flags.append(Volunteer.FLAG_INVALID_LOCATION)
+        if skilled_worker == 'unsure':
+            flags.append(Volunteer.FLAG_CHECKBOX)
+
+        cleaned_data['flagged_reason'] = flags
+        cleaned_data['is_flagged'] = bool(flags)
+        cleaned_data['location_similarity'] = best_similarity
+        return cleaned_data
 
 class DonationForm(forms.ModelForm):
     class Meta:
         model = Donations
-        fields = ['name', 'contact_method', 'email', 'phone_number', 'date_of_donation', 'total_hours', 'location_donated', 'work_desc', 'notes', 'donation_type', 'material_type', 'equipment_type']
+        fields = ['name', 'contact_method', 'email', 'phone_number', 'date_of_donation', 'total_hours', 'location_donated', 'work_desc', 'notes', 'donation_type', 'material_type', 'equipment_type', 'other_donation_type']
         labels = {
             'name': 'Full Name',
             'contact_method': 'Contact Method',
@@ -236,6 +259,10 @@ class DonationForm(forms.ModelForm):
             'equipment_type': forms.TextInput(attrs={
                 'class' : 'unknown',
                 'type': 'text'}),
+            
+            'other_donation_type': forms.TextInput(attrs={
+                'class' : 'unknown',
+                'type': 'text'}),
         }
 
     def clean(self):
@@ -252,6 +279,24 @@ class DonationForm(forms.ModelForm):
             if not phone_number:
                 self.add_error('phone_number', 'Phone number is required when contact method is Phone.')
             cleaned_data['email'] = ''
+
+        # Compute flagged_reason for donations
+        flags = []
+        location = (cleaned_data.get('location_donated') or '').strip()
+        
+        min_similarity = 80
+        project_locations = Project.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
+        
+        best_similarity = max(
+            (fuzz.ratio(location.lower(), project_location.lower()) for project_location in project_locations),
+            default=0)
+        
+        if location and best_similarity < min_similarity:
+            flags.append(Donations.FLAG_INVALID_LOCATION)
+        
+        cleaned_data['flagged_reason'] = flags
+        cleaned_data['is_flagged'] = bool(flags)
+        cleaned_data['location_similarity'] = best_similarity
 
         return cleaned_data
 

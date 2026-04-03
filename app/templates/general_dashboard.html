@@ -140,6 +140,7 @@
                         <th>Hours</th>
                         <th>Date</th>
                         <th>Location</th>
+                        <th>Flagged Reasons</th>
                         <th>Notes</th>
                         <th>Action</th>
                     </tr>
@@ -158,6 +159,17 @@
                         <td>{{ volunteer.total_hours }}</td>
                         <td>{{ volunteer.date_of_work|date:"M j, Y" }}</td>
                         <td>{{ volunteer.location_volunteered }}</td>
+                        <td>
+                        {% if volunteer.flagged_reason|length > 0 %}
+                            <div class="reason-badges">
+                            {% for reason in volunteer.flagged_reason %}
+                                <span class="badge-reason">{{ reason }}</span>
+                            {% endfor %}
+                            </div>
+                        {% else %}
+                            <span class="muted-text">-</span>
+                        {% endif %}
+                        </td>
                         <td>{{ volunteer.notes|default:"-" }}</td>
                         <td>
                         {% if volunteer.project %}
@@ -169,7 +181,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td class="table-empty" colspan="7">No flagged volunteer submissions</td>
+                        <td class="table-empty" colspan="8">No flagged volunteer submissions</td>
                     </tr>
                     {% endfor %}
                     </tbody>
@@ -195,6 +207,7 @@
                         <th>Hours</th>
                         <th>Date</th>
                         <th>Location</th>
+                        <th>Flagged Reasons</th>
                         <th>Donation Type</th>
                         <th>Action</th>
                     </tr>
@@ -213,6 +226,17 @@
                         <td>{{ donation.total_hours }}</td>
                         <td>{{ donation.date_of_donation|date:"M j, Y" }}</td>
                         <td>{{ donation.location_donated }}</td>
+                        <td>
+                        {% if donation.flagged_reason|length > 0 %}
+                            <div class="reason-badges">
+                            {% for reason in donation.flagged_reason %}
+                                <span class="badge-reason">{{ reason }}</span>
+                            {% endfor %}
+                            </div>
+                        {% else %}
+                            <span class="muted-text">-</span>
+                        {% endif %}
+                        </td>
                         <td>{{ donation.get_donation_type_display }}</td>
                         <td>
                         {% if donation.project %}
@@ -224,7 +248,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td class="table-empty" colspan="7">No flagged donation submissions</td>
+                        <td class="table-empty" colspan="8">No flagged donation submissions</td>
                     </tr>
                     {% endfor %}
                     </tbody>

@@ -88,11 +88,9 @@ def form_template_view(request:HttpRequest)->HttpResponse:
             if volunteerForm.is_valid():
                 volunteer = volunteerForm.save(commit=False)
                 best_project, similarity = find_best_project(volunteer.location_volunteered)
-                volunteer.flagged = similarity < 80
-                
-                if volunteer.skilled_worker == 'unsure':
-                    volunteer.flagged = True
-                    # ANCHOR NEW
+                flag_reasons = volunteerForm.cleaned_data.get('flagged_reason', [])
+                volunteer.flagged_reason = flag_reasons
+                volunteer.flagged = bool(flag_reasons)
 
                 if volunteer.flagged:
                     volunteer.project = None
@@ -117,7 +115,9 @@ def form_template_view(request:HttpRequest)->HttpResponse:
             if donationForm.is_valid():
                 donation = donationForm.save(commit=False)
                 best_project, similarity = find_best_project(donation.location_donated)
-                donation.flagged = similarity < 80
+                flag_reasons = donationForm.cleaned_data.get('flagged_reason', [])
+                donation.flagged_reason = flag_reasons
+                donation.flagged = bool(flag_reasons)
 
                 if donation.flagged:
                     donation.project = None
@@ -128,10 +128,8 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
                 if donation.flagged:
                     messages.warning(request, 'Donation submission saved and flagged (location similarity below 80%). No project was assigned.')
-                    flagged_reason = 'Location unrecognized.'
-                    # this is broken and needs to be repaired. still trying to come up with a solution. moving on.
                 else:
-                    messages.success(request, 'Donation submission saved and matched to project location.')
+                    messages.success(request, 'Donation form submission saved successfully.')
 
                 return redirect('forms')
 
@@ -143,8 +141,7 @@ def form_template_view(request:HttpRequest)->HttpResponse:
         'donationForm': donationForm,
         'earliest_date': earliest_date,
     })
-    # I think this function works but like its been acting funny
-    #  or I might just be tripping (might need hondussy to review)
+
     
     # these messages need to change currently theyre confirmation for testing but will need to be changed for users
 
@@ -278,9 +275,18 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
     })
 
 def general_dashboard_view(request:HttpRequest)->HttpResponse:
-    projects = Project.objects.filter(active=True)
-    flagged_volunteers = Volunteer.objects.filter(flagged=True)
-    flagged_donations = Donations.objects.filter(flagged=True)
+    projects = Project.objects.filter(active=True).select_related()
+    flagged_volunteers = Volunteer.objects.filter(flagged=True).select_related('project').order_by('-created_at')
+    flagged_donations = Donations.objects.filter(flagged=True).select_related('project').order_by('-created_at')
+    
+    # Ensure flagged_reason is always a list, never None
+    for volunteer in flagged_volunteers:
+        if volunteer.flagged_reason is None:
+            volunteer.flagged_reason = []
+    
+    for donation in flagged_donations:
+        if donation.flagged_reason is None:
+            donation.flagged_reason = []
     
     return render(request, 'general_dashboard.html', {
         'projects': projects,

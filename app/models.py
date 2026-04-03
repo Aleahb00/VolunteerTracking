@@ -25,6 +25,9 @@ class Project(models.Model):
 class Volunteer(SafeDeleteModel):
     _safedelete_policy = SOFT_DELETE
 
+    FLAG_INVALID_LOCATION = 'Invalid Location'
+    FLAG_CHECKBOX = 'Checked unsure for skilled worker'
+
     EQUIPMENT_CHOICES = [
         ('chainsaw', 'Chainsaw'),
         ('pole_saw', 'Pole Saw'),
@@ -53,12 +56,15 @@ class Volunteer(SafeDeleteModel):
         ('no', 'No'),
         ('unsure', 'Unsure'),
     ]
-
-    name = models.CharField(max_length=100)
+    FLAGGED_OPTIONS = [
+        FLAG_INVALID_LOCATION,
+        FLAG_CHECKBOX,
+    ]
     CONTACT_CHOICES = [
         ('email', 'Email'),
         ('phone', 'Phone')
-        ]
+    ]
+    name = models.CharField(max_length=100)
     contact_method = models.CharField(max_length=10, choices=CONTACT_CHOICES)
     email = models.EmailField(blank=True)
     phone_number = PhoneNumberField(blank=True)
@@ -78,14 +84,17 @@ class Volunteer(SafeDeleteModel):
 
     notes = models.TextField(max_length=500, blank=True)
     flagged = models.BooleanField(default=False)
+    flagged_reason = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
 
 
 class Donations(SafeDeleteModel):
-    _safedelete_policy = SOFT_DELETE
-    name = models.CharField(max_length=100)
-    
+    _safedelete_policy = SOFT_DELETE    
+
+    FLAG_INVALID_LOCATION = 'Invalid Location'
+    FLAG_CHECKBOX = 'Checked unsure for skilled worker'
+
     CONTACT_CHOICES = [
         ('email', 'Email'),
         ('phone', 'Phone')
@@ -96,26 +105,29 @@ class Donations(SafeDeleteModel):
         ('no', 'No'),
         ('unsure', 'Unsure'),
     ]
-    contact_method = models.CharField(max_length=10, choices=CONTACT_CHOICES)
-    email = models.EmailField(blank=True)
-    phone_number = PhoneNumberField(blank=True)
-    
-    date_of_donation = models.DateField()
-    total_hours = models.IntegerField()
-    location_donated = models.CharField(max_length=100)
-    
-    work_desc = models.TextField(max_length=500)
-    notes = models.TextField(max_length=500, blank=True)
+    FLAGGED_OPTIONS = [
+        FLAG_INVALID_LOCATION,
+        FLAG_CHECKBOX,
+    ]
     DONATION_TYPES = [
         ('material', 'Material'),
         ('equipment', 'Equipment'),
         ('other', 'Other'),
     ]
-    # do we need other as an option for donation type? not against it but if this was intentional we need an if other please specifiy field.
+    name = models.CharField(max_length=100)
+    contact_method = models.CharField(max_length=10, choices=CONTACT_CHOICES)
+    email = models.EmailField(blank=True)
+    phone_number = PhoneNumberField(blank=True)
+    date_of_donation = models.DateField()
+    total_hours = models.IntegerField()
+    location_donated = models.CharField(max_length=100)
+    work_desc = models.TextField(max_length=500)
+    notes = models.TextField(max_length=500, blank=True)
+    other_donation_type = models.CharField(max_length=100, blank=True, null=True)
     donation_type = models.CharField(max_length=50, choices=DONATION_TYPES)
     material_type = models.CharField(max_length=100, blank=True, null=True)
     equipment_type = models.CharField(max_length=100, blank=True, null=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     flagged = models.BooleanField(default=False)
+    flagged_reason = models.JSONField(blank=True, null=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
