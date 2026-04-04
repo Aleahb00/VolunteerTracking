@@ -5,3 +5,4 @@ RapidFuzz
 django-honeypot
 django-ratelimit
 django-safedelete
+django-filter

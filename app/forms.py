@@ -193,7 +193,7 @@ class VolunteerForm(forms.ModelForm):
 class DonationForm(forms.ModelForm):
     class Meta:
         model = Donations
-        fields = ['name', 'contact_method', 'email', 'phone_number', 'date_of_donation', 'total_hours', 'location_donated', 'work_desc', 'notes', 'donation_type', 'material_type', 'equipment_type', 'other_donation_type']
+        fields = ['name', 'contact_method', 'email', 'phone_number', 'date_of_donation', 'total_hours', 'location_donated', 'work_desc', 'notes', 'donation_type', 'other_donation_type', 'material_type', 'equipment_type', 'other_donation_type']
         labels = {
             'name': 'Full Name',
             'contact_method': 'Contact Method',
@@ -205,6 +205,7 @@ class DonationForm(forms.ModelForm):
             'work_desc': 'Description of Work',
             'notes': 'Additional Notes',
             'donation_type': 'Donation Type',
+            'other_donation_type': 'Other Donation Type (if applicable)',
             'material_type': 'Material Type',
             'equipment_type': 'Equipment Type',
             'skilled_worker': 'Skilled Worker',
@@ -251,6 +252,10 @@ class DonationForm(forms.ModelForm):
             'donation_type': forms.Select(attrs={
                 'class' : 'unknown',
                 'type': 'select'}),
+            
+            'other_donation_type': forms.TextInput(attrs={
+                'class' : 'unknown',
+                'type': 'text'}),
             
             'material_type': forms.TextInput(attrs={
                 'class' : 'unknown',

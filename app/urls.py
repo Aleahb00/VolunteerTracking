@@ -35,10 +35,14 @@ urlpatterns = [
 
     path('admin-dashboard/restore-volunteer/<int:id>/', restore_volunteer_view, name='restore_volunteer'),
     path('admin-dashboard/restore-donation/<int:id>/', restore_donation_view, name='restore_donation'),
+    
+    path('admin-dashboard/permanent-delete-volunteer/<int:id>/', permanent_delete_volunteer_view, name='permanent_delete_volunteer'),
+    path('admin-dashboard/permanent-delete-donation/<int:id>/', permanent_delete_donation_view, name='permanent_delete_donation'),
 
 
 
     path('toggle_flagged_status/<int:volunteer_id>/', toggle_flagged_status, name='toggle_flagged_status'),
+    path('toggle_skilled_worker_status/<int:volunteer_id>/', toggle_skilled_worker_status, name='toggle_skilled_worker_status'),
 
     path('error403/', status_403_view, name='403'), #unauthorized access page
     path('error404/', status_404_view, name='404'), #page not found    

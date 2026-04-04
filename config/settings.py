@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'honeypot',
     'widget_tweaks',
     'safedelete',
+    'django_filters'
 ]
 
 MIDDLEWARE = [

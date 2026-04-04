@@ -173,6 +173,10 @@
                     {{ donationForm.donation_type }}
                     <span class="donation-select" data-trigger="donation_type"></span>
                 </div>
+                <div class="form-field conditional-field" data-show-when="donation_type=other">
+                    {{ donationForm.other_donation_type.label_tag }}
+                    {{ donationForm.other_donation_type }}
+                </div>
                 <div class="form-field conditional-field" data-show-when="donation_type=material">
                     {{ donationForm.material_type.label_tag }}
                     {{ donationForm.material_type }}

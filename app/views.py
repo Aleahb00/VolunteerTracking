@@ -21,6 +21,7 @@ from .functions import *
 from django.db.models import Sum
 import json
 from django.http import JsonResponse
+from .filters import VolunteerFilter
 
 
 
@@ -185,6 +186,7 @@ def logout_view(request:HttpRequest)->HttpResponse:
 
 def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
     project = get_object_or_404(Project, id=project_id) if project_id else None
+    
 
     # DELETE
     if request.method == 'POST' and request.POST.get('_method') == 'DELETE':
@@ -205,14 +207,14 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         form = ProjectForm(instance=project)  
     
     query = request.GET.get('q')
-    
+
     if project:
-        volunteers = Volunteer.objects.filter(project=project).order_by('created_at')
-        donations = Donations.objects.filter(project=project).order_by('created_at')
+        volunteers = Volunteer.objects.filter(project=project).order_by('-created_at')
+        donations = Donations.objects.filter(project=project).order_by('-created_at')
     else:
-        volunteers = Volunteer.objects.all().order_by('created_at')
-        donations = Donations.objects.all().order_by('created_at')
-    
+        volunteers = Volunteer.objects.all().order_by('-created_at')
+        donations = Donations.objects.all().order_by('-created_at')
+
     if query:
         volunteers = volunteers.filter(
             Q(name__icontains=query) |
@@ -230,6 +232,9 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
             Q(work_desc__icontains=query) |
             Q(notes__icontains=query)
         )
+
+    volunteer_filter = VolunteerFilter(request.GET, queryset=volunteers)
+    volunteers = volunteer_filter.qs
 
     volunteer_count = volunteers.count()
     donation_count = donations.count()
@@ -272,6 +277,7 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         'donation_flagged_count': donation_flagged_count,
         'deleted_volunteers': deleted_volunteers,
         'deleted_donations': deleted_donations,
+        'filter': volunteer_filter,
     })
 
 def general_dashboard_view(request:HttpRequest)->HttpResponse:
@@ -306,12 +312,23 @@ def delete_volunteer_view(request, volunteer_id):
         return redirect('edit_project', project_id=volunteer_project_id)
     return redirect('admin_dashboard')
 
+def permanent_delete_volunteer_view(request, id):
+    volunteer = get_object_or_404(Volunteer.all_objects, id=id)
+    volunteer.delete()
+    return redirect('admin_dashboard')
+
+
 def delete_donation_view(request, donation_id):
     donation = get_object_or_404(Donations, id=donation_id)
     donation_project_id = donation.project_id
     donation.delete()
     if donation_project_id:
         return redirect('edit_project', project_id=donation_project_id)
+    return redirect('admin_dashboard')
+
+def permanent_delete_donation_view(request, id):
+    donation = get_object_or_404(Donations.all_objects, id=id)
+    donation.delete()
     return redirect('admin_dashboard')
     
 def restore_volunteer_view(request, id):
@@ -380,6 +397,13 @@ def toggle_flagged_status(request, volunteer_id):
     volunteer.flagged = not volunteer.flagged
     volunteer.save()
     return JsonResponse({'flagged': volunteer.flagged, 'status': 'success'})
+
+
+def toggle_skilled_worker_status(request, volunteer_id):
+    volunteer = get_object_or_404(Volunteer, id=volunteer_id)
+    volunteer.confirmed_skilled_worker = not volunteer.confirmed_skilled_worker
+    volunteer.save(update_fields=['confirmed_skilled_worker'])
+    return JsonResponse({'confirmed_skilled_worker': volunteer.confirmed_skilled_worker, 'status': 'success'})
 
 def generate_volunteer_csv(request):
     response = HttpResponse(

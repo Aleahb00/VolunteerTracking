@@ -81,6 +81,7 @@ class Volunteer(SafeDeleteModel):
     equipment_make_model = models.CharField(max_length=100, blank=True, null=True)
     equipment_hours = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     skilled_worker = models.CharField(max_length=10, choices=SKILL_OPTIONS, blank=True, null=True)
+    confirmed_skilled_worker = models.BooleanField(default=False)
 
     notes = models.TextField(max_length=500, blank=True)
     flagged = models.BooleanField(default=False)
