@@ -8,6 +8,7 @@ from .views import *
 
 urlpatterns = [
     path('', landing_view, name="landing"),
+    path('faq/', faq_view, name="faq"),
     # path('admin/test/', project_test_view, name="project_test"),
     path('forms/', form_template_view, name="forms"),
 
@@ -27,11 +28,14 @@ urlpatterns = [
     path('admin-dashboard/export/donations_csv/', generate_donation_csv, name='export_donations_csv'),
 
     path('general-dashboard/', general_dashboard_view, name='general_dashboard'),
-    # Project detail page
+    path('submissions-full/', submissions_full_view, name='submissions_full'),
+    path('submissions-full/<int:project_id>/', submissions_full_view, name='submissions_full_project'),
+
     path('project/<int:project_id>/', project_detail_view, name='project_detail'),
-    # PDF-like views for individual submissions
+    # Project detail page
     path('admin-dashboard/volunteer/<int:volunteer_id>/pdf/', volunteer_pdf_view, name='volunteer_pdf'),
     path('admin-dashboard/donation/<int:donation_id>/pdf/', donation_pdf_view, name='donation_pdf'),
+    # PDF-like views for individual submissions
 
     path('admin-dashboard/restore-volunteer/<int:id>/', restore_volunteer_view, name='restore_volunteer'),
     path('admin-dashboard/restore-donation/<int:id>/', restore_donation_view, name='restore_donation'),
@@ -42,9 +46,12 @@ urlpatterns = [
 
 
     path('toggle_flagged_status/<int:volunteer_id>/', toggle_flagged_status, name='toggle_flagged_status'),
+    path('toggle_donation_flagged_status/<int:donation_id>/', toggle_donation_flagged_status, name='toggle_donation_flagged_status'),
     path('toggle_skilled_worker_status/<int:volunteer_id>/', toggle_skilled_worker_status, name='toggle_skilled_worker_status'),
 
     path('error403/', status_403_view, name='403'), #unauthorized access page
-    path('error404/', status_404_view, name='404'), #page not found    
+    path('error404/', status_404_view, name='404'), #page not found   
+    path('error429/', status_429_view, name='429'), #too many requests page
+    path('error500/', status_500_view, name='500'), #server error page
 ]
 

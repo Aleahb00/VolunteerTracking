@@ -21,7 +21,7 @@ from .functions import *
 from django.db.models import Sum
 import json
 from django.http import JsonResponse
-from .filters import VolunteerFilter
+from .filters import VolunteerFilter, DonationFilter
 
 
 
@@ -32,13 +32,20 @@ from .filters import VolunteerFilter
 def landing_view(request:HttpRequest)->HttpResponse:
     return render(request, 'landing.html')
 
+def faq_view(request:HttpRequest)->HttpResponse:
+    return render(request, 'faq.html')
 
 def status_403_view(request:HttpRequest, exception=None)->HttpResponse:
     return render(request, '403.html', status=403)
 
-
 def status_404_view(request:HttpRequest, exception=None)->HttpResponse:
     return render(request, '404.html', status=404)
+
+def status_429_view(request:HttpRequest, exception=None)->HttpResponse:
+    return render(request, '429.html', status=429)
+
+def status_500_view(request:HttpRequest)->HttpResponse:
+    return render(request, '500.html', status=500)
 
 def ratelimit_error(request, exception=None):
     return render(request, '429.html', status=429)
@@ -92,6 +99,8 @@ def form_template_view(request:HttpRequest)->HttpResponse:
                 flag_reasons = volunteerForm.cleaned_data.get('flagged_reason', [])
                 volunteer.flagged_reason = flag_reasons
                 volunteer.flagged = bool(flag_reasons)
+                if volunteer.skilled_worker == 'yes':
+                    volunteer.confirmed_skilled_worker = True
 
                 if volunteer.flagged:
                     volunteer.project = None
@@ -186,6 +195,7 @@ def logout_view(request:HttpRequest)->HttpResponse:
 
 def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
     project = get_object_or_404(Project, id=project_id) if project_id else None
+    active_tab = request.GET.get('active_tab', 'volunteers-panel')
     
 
     # DELETE
@@ -215,7 +225,11 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         volunteers = Volunteer.objects.all().order_by('-created_at')
         donations = Donations.objects.all().order_by('-created_at')
 
-    if query:
+    # Keep dedicated flagged querysets so filters/sorts from other tabs do not leak into flagged tab.
+    flagged_volunteers = volunteers.filter(flagged=True)
+    flagged_donations = donations.filter(flagged=True)
+
+    if query and active_tab == 'volunteers-panel':
         volunteers = volunteers.filter(
             Q(name__icontains=query) |
             Q(email__icontains=query) |
@@ -224,6 +238,7 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
             Q(work_desc__icontains=query) |
             Q(notes__icontains=query)
         )
+    elif query and active_tab == 'donations-panel':
         donations = donations.filter(
             Q(name__icontains=query) |
             Q(email__icontains=query) |
@@ -233,16 +248,30 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
             Q(notes__icontains=query)
         )
 
-    volunteer_filter = VolunteerFilter(request.GET, queryset=volunteers)
-    volunteers = volunteer_filter.qs
+    volunteer_filter = VolunteerFilter(request.GET, queryset=volunteers, prefix='volunteer')
+    donation_filter = DonationFilter(request.GET, queryset=donations, prefix='donation')
+
+    if active_tab == 'volunteers-panel':
+        volunteers = volunteer_filter.qs
+    if active_tab == 'donations-panel':
+        donations = donation_filter.qs
 
     volunteer_count = volunteers.count()
     donation_count = donations.count()
     total_submissions = volunteer_count + donation_count
 
     hourly_rate = project.hourly_rate if project else Decimal('29.95')
+    skilled_hourly_rate = project.skilled_hourly_rate if project else Decimal('45.00')
+
+    # Price volunteer labor using confirmed skilled status only.
+    confirmed_skilled_hours = volunteers.filter(confirmed_skilled_worker=True).aggregate(total=Sum('total_hours'))['total'] or 0
+    non_skilled_hours = volunteers.filter(confirmed_skilled_worker=False).aggregate(total=Sum('total_hours'))['total'] or 0
+
     total_hours = volunteers.aggregate(total=Sum('total_hours'))['total'] or 0
-    volunteer_value = Decimal(str(total_hours)) * hourly_rate
+    volunteer_value = (
+        Decimal(str(non_skilled_hours)) * hourly_rate
+        + Decimal(str(confirmed_skilled_hours)) * skilled_hourly_rate
+    )
     flagged_count = volunteers.filter(flagged=True).count()
     donation_flagged_count = donations.filter(flagged=True).count()
 
@@ -275,15 +304,110 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         'hourly_rate': hourly_rate,
         'flagged_count': flagged_count,
         'donation_flagged_count': donation_flagged_count,
+        'flagged_volunteers': flagged_volunteers,
+        'flagged_donations': flagged_donations,
         'deleted_volunteers': deleted_volunteers,
         'deleted_donations': deleted_donations,
-        'filter': volunteer_filter,
+        'volunteer_filter': volunteer_filter,
+        'donation_filter': donation_filter,
+        'active_tab': active_tab,
+    })
+    
+def submissions_full_view(request: HttpRequest, project_id=None) -> HttpResponse:
+    project = get_object_or_404(Project, id=project_id) if project_id else None
+    active_tab = request.GET.get('active_tab', 'volunteer-panel')
+    query = request.GET.get('q')
+
+    if project:
+        volunteers = Volunteer.objects.filter(project=project).select_related('project').order_by('-created_at')
+        donations = Donations.objects.filter(project=project).select_related('project').order_by('-created_at')
+    else:
+        volunteers = Volunteer.objects.select_related('project').order_by('-created_at')
+        donations = Donations.objects.select_related('project').order_by('-created_at')
+
+    if query and active_tab == 'volunteer-panel':
+        volunteers = volunteers.filter(
+            Q(name__icontains=query) |
+            Q(email__icontains=query) |
+            Q(phone_number__icontains=query) |
+            Q(location_volunteered__icontains=query) |
+            Q(work_desc__icontains=query) |
+            Q(notes__icontains=query)
+        )
+    elif query and active_tab == 'donation-panel':
+        donations = donations.filter(
+            Q(name__icontains=query) |
+            Q(email__icontains=query) |
+            Q(phone_number__icontains=query) |
+            Q(location_donated__icontains=query) |
+            Q(work_desc__icontains=query) |
+            Q(notes__icontains=query)
+        )
+
+    volunteer_filter = VolunteerFilter(request.GET, queryset=volunteers, prefix='volunteer')
+    donation_filter = DonationFilter(request.GET, queryset=donations, prefix='donation')
+
+    if active_tab == 'volunteer-panel':
+        volunteers = volunteer_filter.qs
+    elif active_tab == 'donation-panel':
+        donations = donation_filter.qs
+
+
+    return render(request, 'submissions_full.html', {
+        'project': project,
+        'active_tab': active_tab,
+        'query': query,
+        'volunteers': volunteers,
+        'donations': donations,
+        'volunteer_filter': volunteer_filter,
+        'donation_filter': donation_filter,
     })
 
 def general_dashboard_view(request:HttpRequest)->HttpResponse:
+    active_tab = request.GET.get('active_tab', 'volunteer-panel')
+    search_query = (request.GET.get('q') or '').strip()
     projects = Project.objects.filter(active=True).select_related()
-    flagged_volunteers = Volunteer.objects.filter(flagged=True).select_related('project').order_by('-created_at')
-    flagged_donations = Donations.objects.filter(flagged=True).select_related('project').order_by('-created_at')
+    base_flagged_volunteers = Volunteer.objects.filter(flagged=True).select_related('project').order_by('-created_at')
+    base_flagged_donations = Donations.objects.filter(flagged=True).select_related('project').order_by('-created_at')
+    flagged_volunteers = base_flagged_volunteers
+    flagged_donations = base_flagged_donations
+    deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False, project__isnull=True).order_by('-created_at')
+    deleted_donations = Donations.all_objects.filter(deleted__isnull=False, project__isnull=True).order_by('-created_at')
+
+    # Keep tab badge counts stable and independent from current filter/search state.
+    flagged_volunteers_count = base_flagged_volunteers.count()
+    flagged_donations_count = base_flagged_donations.count()
+
+    volunteer_filter = VolunteerFilter(request.GET, queryset=flagged_volunteers, prefix='volunteer')
+    donation_filter = DonationFilter(request.GET, queryset=flagged_donations, prefix='donation')
+
+    if active_tab == 'volunteer-panel':
+        flagged_volunteers = volunteer_filter.qs.filter(flagged=True)
+        if search_query:
+            flagged_volunteers = flagged_volunteers.filter(
+                Q(name__icontains=search_query)
+                | Q(email__icontains=search_query)
+                | Q(phone_number__icontains=search_query)
+                | Q(location_volunteered__icontains=search_query)
+                | Q(work_desc__icontains=search_query)
+                | Q(notes__icontains=search_query)
+                | Q(project__name__icontains=search_query)
+            )
+    elif active_tab == 'donation-panel':
+        flagged_donations = donation_filter.qs.filter(flagged=True)
+        if search_query:
+            flagged_donations = flagged_donations.filter(
+                Q(name__icontains=search_query)
+                | Q(email__icontains=search_query)
+                | Q(phone_number__icontains=search_query)
+                | Q(location_donated__icontains=search_query)
+                | Q(work_desc__icontains=search_query)
+                | Q(notes__icontains=search_query)
+                | Q(material_type__icontains=search_query)
+                | Q(equipment_type__icontains=search_query)
+                | Q(other_donation_type__icontains=search_query)
+                | Q(project__name__icontains=search_query)
+            )
     
     # Ensure flagged_reason is always a list, never None
     for volunteer in flagged_volunteers:
@@ -298,9 +422,15 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
         'projects': projects,
         'total_projects': projects.count(),
         'flagged_volunteers': flagged_volunteers,
-        'flagged_volunteers_count': flagged_volunteers.count(),
+        'flagged_volunteers_count': flagged_volunteers_count,
         'flagged_donations': flagged_donations,
-        'flagged_donations_count': flagged_donations.count(),
+        'flagged_donations_count': flagged_donations_count,
+        'volunteer_filter': volunteer_filter,
+        'donation_filter': donation_filter,
+        'active_tab': active_tab,
+        'search_query': search_query,
+        'deleted_volunteers': deleted_volunteers,
+        'deleted_donations': deleted_donations,
     })
     
 
@@ -397,6 +527,13 @@ def toggle_flagged_status(request, volunteer_id):
     volunteer.flagged = not volunteer.flagged
     volunteer.save()
     return JsonResponse({'flagged': volunteer.flagged, 'status': 'success'})
+
+
+def toggle_donation_flagged_status(request, donation_id):
+    donation = get_object_or_404(Donations, id=donation_id)
+    donation.flagged = not donation.flagged
+    donation.save()
+    return JsonResponse({'flagged': donation.flagged, 'status': 'success'})
 
 
 def toggle_skilled_worker_status(request, volunteer_id):

@@ -23,6 +23,8 @@ from app.views import landing_view
 
 handler403 = 'app.views.status_403_view'
 handler404 = 'app.views.status_404_view'
+handler429 = 'app.views.status_429_view'
+handler500 = 'app.views.status_500_view'
 
 urlpatterns = [
     path('super-secret-admin-address/', admin.site.urls),

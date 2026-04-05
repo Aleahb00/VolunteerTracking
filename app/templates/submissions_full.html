@@ -1,0 +1,416 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/submissions_full.css' %}">
+{% endblock css %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<main class="print-view">
+    <header class="pv-header no-print">
+        <div>
+            <h1 class="pv-title">Print View{% if project %} - {{ project.name }}{% endif %}</h1>
+            <p class="pv-subtitle">{{ volunteers|length|add:donations|length }} total submissions ({{ volunteers|length }} volunteers, {{ donations|length }} donations)</p>
+        </div>
+        <div class="pv-actions">
+            <button class="btn" type="button" onclick="printAllReports()">Print All Reports</button>
+            <a class="btn btn-secondary" href="{% if project %}{% url 'edit_project' project.id %}{% else %}{% url 'admin_dashboard' %}{% endif %}">Back to Dashboard</a>
+        </div>
+    </header>
+
+    <section class="pv-controls no-print">
+        <div class="pv-toolbar pv-toolbar--volunteer{% if active_tab != 'volunteer-panel' %} is-hidden{% endif %}" data-toolbar-for="volunteer-panel">
+            <form method="get" class="pv-search" action="{% if project %}{% url 'submissions_full_project' project.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
+                <input type="hidden" name="active_tab" value="volunteer-panel">
+                <input type="text" name="q" value="{{ query|default_if_none:'' }}" placeholder="Search volunteers...">
+            </form>
+            <form method="get" class="pv-filter pv-filter--stack" action="{% if project %}{% url 'submissions_full_project' project.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
+                <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
+                <input type="hidden" name="active_tab" value="volunteer-panel">
+                <div class="pv-field">
+                    {{ volunteer_filter.form.skilled_worker.label_tag }}
+                    {{ volunteer_filter.form.skilled_worker }}
+                </div>
+                <div class="pv-field">
+                    {{ volunteer_filter.form.order_by.label_tag }}
+                    {{ volunteer_filter.form.order_by }}
+                </div>
+                <div class="pv-filter-actions">
+                    <button class="btn" type="submit">Apply</button>
+                    <a class="btn btn-secondary" href="{% if project %}{% url 'submissions_full_project' project.id %}?active_tab=volunteer-panel{% else %}{% url 'submissions_full' %}?active_tab=volunteer-panel{% endif %}">Reset</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="pv-toolbar pv-toolbar--donation{% if active_tab != 'donation-panel' %} is-hidden{% endif %}" data-toolbar-for="donation-panel">
+            <form method="get" class="pv-search" action="{% if project %}{% url 'submissions_full_project' project.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
+                <input type="hidden" name="active_tab" value="donation-panel">
+                <input type="text" name="q" value="{{ query|default_if_none:'' }}" placeholder="Search donations...">
+            </form>
+            <form method="get" class="pv-filter" action="{% if project %}{% url 'submissions_full_project' project.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
+                <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
+                <input type="hidden" name="active_tab" value="donation-panel">
+                <div class="pv-field">
+                    {{ donation_filter.form.order_by.label_tag }}
+                    {{ donation_filter.form.order_by }}
+                </div>
+                <div class="pv-filter-actions">
+                    <button class="btn" type="submit">Apply</button>
+                    <a class="btn btn-secondary" href="{% if project %}{% url 'submissions_full_project' project.id %}?active_tab=donation-panel{% else %}{% url 'submissions_full' %}?active_tab=donation-panel{% endif %}">Reset</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="pv-tabs" role="tablist" aria-label="Submission Tabs">
+            <button class="pv-tab {% if active_tab == 'volunteer-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'volunteer-panel' %}true{% else %}false{% endif %}" data-target="volunteer-panel">Volunteers</button>
+            <button class="pv-tab {% if active_tab == 'donation-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'donation-panel' %}true{% else %}false{% endif %}" data-target="donation-panel">Donations</button>
+        </div>
+    </section>
+
+    <section id="volunteer-panel" class="tab-panel" role="tabpanel" {% if active_tab != 'volunteer-panel' %}hidden{% endif %}>
+            <div class="submission-list">
+                {% for volunteer in volunteers %}
+                    <article class="pdf-page">
+                        <div class="report-actions no-print">
+                            <button class="btn btn-secondary" type="button" onclick="printSingleReport(this)">Print This Form</button>
+                        </div>
+
+                        <div class="page-header">
+                            <h2>Volunteer Time Report</h2>
+                            <p class="project-name">
+                                {% if volunteer.project %}
+                                    {{ volunteer.project.name }}
+                                {% else %}
+                                    Unassigned Project
+                                {% endif %}
+                            </p>
+                            <p class="submission-date">Submitted: {{ volunteer.date_of_work|date:"m/d/Y" }}</p>
+                        </div>
+
+                        {% comment %} {% if volunteer.flagged %}
+                            <div class="flagged-badge">
+                                <span class="badge-text">Flagged: Review required</span>
+                            </div>
+                        {% endif %} {% endcomment %}
+
+                        {% comment %} <div class="submission-id">
+                            <label>Submission ID</label>
+                            <p class="id-value">{{ volunteer.id }}</p>
+                        </div> {% endcomment %}
+
+                        <section class="info-section">
+                            <h3 class="section-title">Personal Information</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Full Name</label>
+                                    <p>{{ volunteer.name }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Email Address</label>
+                                    <p>{{ volunteer.email }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Phone Number</label>
+                                    <p>{{ volunteer.phone_number }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Preferred Contact</label>
+                                    <p>{{ volunteer.get_contact_method_display }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Location</label>
+                                    <p>{{ volunteer.location_volunteered }}</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="info-section">
+                            <h3 class="section-title">Contribution Details</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Hours Volunteered</label>
+                                    <p class="highlight">{{ volunteer.total_hours }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Service Date</label>
+                                    <p>{{ volunteer.date_of_work|date:"m/d/Y" }}</p>
+                                </div>
+                                {% if volunteer.work_desc %}
+                                    <div class="info-item full-width">
+                                        <label>Work Description</label>
+                                        <p>{{ volunteer.work_desc }}</p>
+                                    </div>
+                                {% endif %}
+                                {% if volunteer.notes %}
+                                    <div class="info-item full-width">
+                                        <label>Notes</label>
+                                        <p>{{ volunteer.notes }}</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </section>
+
+                        <section class="info-section">
+                            <h3 class="section-title">Equipment Information</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Equipment Type</label>
+                                    <p>{{ volunteer.get_equipment_display|default:"N/A" }}</p>
+                                </div>
+                                {% if volunteer.other_equipment %}
+                                    <div class="info-item">
+                                        <label>Other Equipment</label>
+                                        <p>{{ volunteer.other_equipment }}</p>
+                                    </div>
+                                {% endif %}
+                                {% if volunteer.equipment_make_model %}
+                                    <div class="info-item">
+                                        <label>Make/Model</label>
+                                        <p>{{ volunteer.equipment_make_model }}</p>
+                                    </div>
+                                {% endif %}
+                                {% if volunteer.equipment_hours %}
+                                    <div class="info-item">
+                                        <label>Equipment Hours</label>
+                                        <p>{{ volunteer.equipment_hours }}</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </section>
+
+                        {% comment %} {% if volunteer.flagged_reason %}
+                            <section class="info-section">
+                                <h3 class="section-title">Flagged Reasons</h3>
+                                <div class="reason-list">
+                                    {% for reason in volunteer.flagged_reason %}
+                                        <span class="reason-tag">{{ reason }}</span>
+                                    {% endfor %}
+                                </div>
+                            </section>
+                        {% endif %} {% endcomment %}
+                    </article>
+                {% empty %}
+                    <p class="empty-state">No volunteer forms found.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section id="donation-panel" class="tab-panel" role="tabpanel" {% if active_tab != 'donation-panel' %}hidden{% endif %}>
+            <div class="submission-list">
+                {% for donation in donations %}
+                    <article class="pdf-page">
+                        <div class="report-actions no-print">
+                            <button class="btn btn-secondary" type="button" onclick="printSingleReport(this)">Print This Form</button>
+                        </div>
+
+                        <div class="page-header">
+                            <h2>Donation Report</h2>
+                            <p class="project-name">
+                                {% if donation.project %}
+                                    {{ donation.project.name }}
+                                {% else %}
+                                    Unassigned Project
+                                {% endif %}
+                            </p>
+                            <p class="submission-date">Submitted: {{ donation.date_of_donation|date:"m/d/Y" }}</p>
+                        </div>
+
+                        {% comment %} {% if donation.flagged %}
+                            <div class="flagged-badge">
+                                <span class="badge-text">Flagged: Review required</span>
+                            </div>
+                        {% endif %} {% endcomment %}
+
+                        {% comment %} <div class="submission-id">
+                            <label>Submission ID</label>
+                            <p class="id-value">{{ donation.id }}</p>
+                        </div> {% endcomment %}
+
+                        <section class="info-section">
+                            <h3 class="section-title">Personal Information</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Full Name</label>
+                                    <p>{{ donation.name }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Email Address</label>
+                                    <p>{{ donation.email }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Phone Number</label>
+                                    <p>{{ donation.phone_number }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Preferred Contact</label>
+                                    <p>{{ donation.get_contact_method_display }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Location</label>
+                                    <p>{{ donation.location_donated }}</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="info-section">
+                            <h3 class="section-title">Donation Details</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Hours</label>
+                                    <p class="highlight">{{ donation.total_hours }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Donation Type</label>
+                                    <p>{{ donation.get_donation_type_display }}</p>
+                                </div>
+                                {% if donation.material_type %}
+                                    <div class="info-item">
+                                        <label>Material Type</label>
+                                        <p>{{ donation.material_type }}</p>
+                                    </div>
+                                {% endif %}
+                                {% if donation.equipment_type %}
+                                    <div class="info-item">
+                                        <label>Equipment Type</label>
+                                        <p>{{ donation.equipment_type }}</p>
+                                    </div>
+                                {% endif %}
+                                {% if donation.other_donation_type %}
+                                    <div class="info-item">
+                                        <label>Other Donation Type</label>
+                                        <p>{{ donation.other_donation_type }}</p>
+                                    </div>
+                                {% endif %}
+                                {% if donation.work_desc %}
+                                    <div class="info-item full-width">
+                                        <label>Description</label>
+                                        <p>{{ donation.work_desc }}</p>
+                                    </div>
+                                {% endif %}
+                                {% if donation.notes %}
+                                    <div class="info-item full-width">
+                                        <label>Notes</label>
+                                        <p>{{ donation.notes }}</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </section>
+
+                        {% comment %} {% if donation.flagged_reason %}
+                            <section class="info-section">
+                                <h3 class="section-title">Flagged Reasons</h3>
+                                <div class="reason-list">
+                                    {% for reason in donation.flagged_reason %}
+                                        <span class="reason-tag">{{ reason }}</span>
+                                    {% endfor %}
+                                </div>
+                            </section>
+                        {% endif %} {% endcomment %}
+                    </article>
+                {% empty %}
+                    <p class="empty-state">No donation forms found.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </section>
+</main>
+
+<script>
+let originalPrintTitle = document.title;
+let hiddenPanelState = [];
+
+function beginPrintMode() {
+    originalPrintTitle = document.title;
+    document.title = ' ';
+}
+
+function endPrintMode() {
+    document.title = originalPrintTitle;
+    document.body.classList.remove('print-single-report');
+    document.querySelectorAll('.is-print-target').forEach(function (el) {
+        el.classList.remove('is-print-target');
+    });
+
+    if (hiddenPanelState.length) {
+        hiddenPanelState.forEach(function (entry) {
+            entry.panel.hidden = entry.wasHidden;
+        });
+        hiddenPanelState = [];
+    }
+}
+
+function printAllReports() {
+    beginPrintMode();
+
+    hiddenPanelState = [];
+    document.querySelectorAll('.tab-panel').forEach(function (panel) {
+        hiddenPanelState.push({ panel: panel, wasHidden: panel.hidden });
+        panel.hidden = false;
+    });
+
+    window.print();
+}
+
+function printSingleReport(triggerButton) {
+    const target = triggerButton.closest('.pdf-page, .report-page');
+    if (!target) {
+        printAllReports();
+        return;
+    }
+
+    beginPrintMode();
+    document.body.classList.add('print-single-report');
+    target.classList.add('is-print-target');
+    window.print();
+}
+
+window.addEventListener('afterprint', function () {
+    endPrintMode();
+});
+
+document.querySelectorAll('.pv-tabs').forEach(function (container) {
+    const tabs = container.querySelectorAll('[role="tab"]');
+    const scope = container.closest('.print-view');
+    const panels = scope.querySelectorAll('[role="tabpanel"]');
+    const toolbars = scope.querySelectorAll('.pv-toolbar');
+
+    function setActiveTab(targetId, updateUrl) {
+        tabs.forEach(function (tab) {
+            const isActive = tab.dataset.target === targetId;
+            tab.classList.toggle('is-active', isActive);
+            tab.setAttribute('aria-selected', String(isActive));
+        });
+
+        panels.forEach(function (panel) {
+            panel.hidden = panel.id !== targetId;
+        });
+
+        toolbars.forEach(function (toolbar) {
+            toolbar.classList.toggle('is-hidden', toolbar.dataset.toolbarFor !== targetId);
+            toolbar.querySelectorAll('input[name="active_tab"]').forEach(function (input) {
+                input.value = targetId;
+            });
+        });
+
+        if (updateUrl) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('active_tab', targetId);
+            window.history.replaceState({}, '', url);
+        }
+    }
+
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            setActiveTab(tab.dataset.target, true);
+        });
+    });
+
+    const initialActive = container.querySelector('[role="tab"][aria-selected="true"]') || tabs[0];
+    if (initialActive) {
+        setActiveTab(initialActive.dataset.target, false);
+    }
+});
+</script>
+{% endblock content %}

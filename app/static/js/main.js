@@ -47,23 +47,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-document.querySelectorAll('.volunteer-details').forEach(link => {
-  link.addEventListener('click', function(e) {
-    e.preventDefault();
-    const volunteerId = this.getAttribute('data-id');
-    const modal = document.getElementById('popupModal');
+// Apparently this code isn't being used and is suggested to remove
 
-    // Dynamically change content based on ID
-    document.getElementById('modalBody').innerHTML =
-        `<p>Viewing details for ID: ${volunteerId}</p>
-         <a href="/volunteer/pdf/${volunteerId}" target="_blank">Download PDF</a>`;
+// document.querySelectorAll('.volunteer-details').forEach(link => {
+//     link.addEventListener('click', function(e) {
+//         e.preventDefault();
+//         const volunteerId = this.getAttribute('data-id');
+//         const modal = document.getElementById('popupModal');
 
-    modal.style.display = 'block'; // Show modal
-  });
-});
+//         // Dynamically change content based on ID
+//         document.getElementById('modalBody').innerHTML =
+//             `<p>Viewing details for ID: ${volunteerId}</p>
+//             <a href="/volunteer/pdf/${volunteerId}" target="_blank">Download PDF</a>`;
 
-// Close functionality
-document.querySelector('.close-btn').addEventListener('click', function() {
-  document.getElementById('popupModal').style.display = 'none';
-});
+//         modal.style.display = 'block'; // Show modal
+//     });
+//     });
+
+//     // Close functionality
+//     document.querySelector('.close-btn').addEventListener('click', function() {
+//     document.getElementById('popupModal').style.display = 'none';
+//     });
 
