@@ -46,3 +46,26 @@ document.addEventListener('DOMContentLoaded', function() {
         openModal(autoShowModal);
     }
 });
+
+// Apparently this code isn't being used and is suggested to remove
+
+// document.querySelectorAll('.volunteer-details').forEach(link => {
+//     link.addEventListener('click', function(e) {
+//         e.preventDefault();
+//         const volunteerId = this.getAttribute('data-id');
+//         const modal = document.getElementById('popupModal');
+
+//         // Dynamically change content based on ID
+//         document.getElementById('modalBody').innerHTML =
+//             `<p>Viewing details for ID: ${volunteerId}</p>
+//             <a href="/volunteer/pdf/${volunteerId}" target="_blank">Download PDF</a>`;
+
+//         modal.style.display = 'block'; // Show modal
+//     });
+//     });
+
+//     // Close functionality
+//     document.querySelector('.close-btn').addEventListener('click', function() {
+//     document.getElementById('popupModal').style.display = 'none';
+//     });
+
