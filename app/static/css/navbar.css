@@ -4,6 +4,8 @@
 	z-index: 40;
 	background: #ffffff;
 	border-bottom: 1px solid #d7dfd1;
+	overflow-x: hidden;
+    max-width: 100%;
 }
 
 .site-nav__inner {

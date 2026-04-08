@@ -1008,9 +1008,81 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+// Custom confirmation for closing projects
+(function() {
+    // Save the original form submit
+    const forms = document.querySelectorAll('form.inline-form');
+
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // stop default submission
+
+            // Create custom dangerous modal
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = 0;
+            modal.style.left = 0;
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.background = 'rgba(0,0,0,0.8)';
+            modal.style.display = 'flex';
+            modal.style.justifyContent = 'center';
+            modal.style.alignItems = 'center';
+            modal.style.zIndex = 10000;
+
+            // Modal content
+            const content = document.createElement('div');
+            content.style.background = '#fff';
+            content.style.border = '3px solid #b71c1c';
+            content.style.padding = '2rem';
+            content.style.borderRadius = '0.5rem';
+            content.style.textAlign = 'center';
+            content.style.maxWidth = '400px';
+            content.style.animation = 'shake 0.3s';
+
+            content.innerHTML = `
+                <h2 style="color:#b71c1c;">⚠️ WARNING!</h2>
+                <p>This action cannot be undone! Are you sure you want to close this project?</p>
+                <div style="margin-top:1.5rem; display:flex; justify-content:space-around;">
+                    <button id="cancel-btn" style="padding:0.5rem 1rem; border-radius:0.35rem; cursor:pointer;">Cancel</button>
+                    <button id="confirm-btn" style="padding:0.5rem 1rem; background:#e53935; color:white; font-weight:bold; border:1px solid #b71c1c; border-radius:0.35rem; cursor:pointer;">Yes, Close</button>
+                </div>
+            `;
+
+            // Add modal to page
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+
+            // Shake animation
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes shake {
+                    0% { transform: translateX(0); }
+                    25% { transform: translateX(-5px); }
+                    50% { transform: translateX(5px); }
+                    75% { transform: translateX(-5px); }
+                    100% { transform: translateX(0); }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Cancel button
+            modal.querySelector('#cancel-btn').addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+
+            // Confirm button
+            modal.querySelector('#confirm-btn').addEventListener('click', () => {
+                form.submit();
+            });
+        });
+    });
+})();
 </script>
 <script>
 lucide.createIcons();
 </script>
+
 {% endblock content %}
 
