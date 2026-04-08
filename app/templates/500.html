@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/500.css' %}">
+    <link href="https://fonts.googleapis.com/css?family=Encode+Sans+Semi+Condensed:100,200,300,400" rel="stylesheet">
+{% endblock css %}
+
+{% block content %}
+    <main class="loading">
+        <h1>500</h1>
+        <h2>Unexpected Error <b>:(</b></h2>
+    </main>
+
+    <script>
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                document.body.classList.remove('loading');
+                const main = document.querySelector('main.loading');
+                if (main) {
+                    main.classList.remove('loading');
+                }
+            }, 1000);
+        });
+    </script>
+
+{% endblock content %}

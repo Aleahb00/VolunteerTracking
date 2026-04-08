@@ -17,9 +17,13 @@
 }
 
 .site-nav__brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.2rem;
 	color: #133340;
 	text-decoration: none;
 	font-weight: 800;
+	line-height: 1;
 	letter-spacing: 0.02em;
 	white-space: nowrap;
 	justify-self: start;
@@ -50,6 +54,13 @@
 .site-nav__link.is-active {
 	background: #dce8de;
 	color: #133340;
+}
+
+.site-nav__logo {
+	height: 36px;
+	width: auto;
+	display: block;
+	flex-shrink: 0;
 }
 
 @media (max-width: 720px) {

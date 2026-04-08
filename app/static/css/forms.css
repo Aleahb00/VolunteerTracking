@@ -124,6 +124,52 @@
 	box-sizing: border-box;
 }
 
+.radio-group {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+	gap: 0.45rem;
+	padding: 0.25rem 0 0.1rem;
+}
+
+.radio-option {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4rem;
+	padding: 0.45rem 0.6rem;
+	border: 1px solid #c6d3c0;
+	border-radius: 999px;
+	background: #fcfdfb;
+	color: #19333f;
+	cursor: pointer;
+	transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+	min-height: 2.25rem;
+}
+
+.radio-option:hover {
+	background: #f5f8f3;
+	border-color: #b7c8af;
+}
+
+.radio-option input[type="radio"] {
+	width: 0.9rem;
+	height: 0.9rem;
+	margin: 0;
+	accent-color: #1b5c67;
+	flex-shrink: 0;
+}
+
+.radio-option span {
+	font-weight: 500;
+	font-size: 0.92rem;
+}
+
+.radio-option.is-selected {
+	border-color: #1b5c67;
+	background: #eef5f6;
+	box-shadow: 0 0 0 1px rgba(27, 92, 103, 0.15);
+}
+
 .form-field textarea {
 	min-height: 110px;
 	resize: vertical;

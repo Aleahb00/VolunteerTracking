@@ -45,18 +45,24 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'honeypot',
     'widget_tweaks',
+    'safedelete',
+    'django_filters'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
+
+# In local/prototype deployments with DEBUG=False, serve updated files directly
+# from static finders so old collectstatic artifacts are not used.
+WHITENOISE_USE_FINDERS = True
 
 ROOT_URLCONF = 'config.urls'
 
