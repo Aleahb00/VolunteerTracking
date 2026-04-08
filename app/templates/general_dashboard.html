@@ -9,6 +9,7 @@
 
 {% include 'navbar.html' %}
 
+
 <div class="dashboard-container">
     <div class="dashboard-wrapper">
         <header class="dashboard-header">
@@ -17,13 +18,53 @@
             <h1 class="header-title">General Admin Dashboard</h1>
             <p class="header-subtitle">Overview of all flagged submissions across projects</p>
             </div>
-            <a href="{% url 'admin_dashboard' %}" class="btn">
+
+            <button type="button" class="btn" id="open-settings" aria-haspopup="dialog" aria-controls="radix-:rle:">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="card-icon">
                 <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
                 <circle cx="12" cy="12" r="3"></circle>
             </svg>
-            Settings
-            </a>
+            Settings</button>
+            <div id="settings-modal" class="modal hidden">
+                <div class="modal-content">
+                    
+                    <button class="close-btn" id="close-settings">&times;</button>
+
+                    <h2>Admin Settings</h2>
+                    <p>Manage your admin account settings</p>
+
+                    <form method="POST">
+                    {% csrf_token %}
+
+                    <label>First Name</label>
+                    <input type="text" name="first_name" value="{{ user.first_name }}">
+
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" value="{{ user.last_name }}">
+
+                    <label>Username</label>
+                    <input type="text" value="{{ user.username }}" disabled>
+
+                    <hr>
+
+                    <h3>Change Password</h3>
+
+                    <label>Current Password</label>
+                    <input type="password" name="current_password">
+
+                    <label>New Password</label>
+                    <input type="password" name="new_password">
+
+                    <label>Confirm New Password</label>
+                    <input type="password" name="confirm_password">
+
+                    <button type="submit" class="btn-primary">Update Settings</button>
+                    </form>
+
+                </div>
+            </div>
+            
+
         </div>
         </header>
 
@@ -533,6 +574,36 @@
             }
         });
     });
+
+    const openBtn = document.getElementById('open-settings');
+    const closeBtn = document.getElementById('close-settings');
+    const modal = document.getElementById('settings-modal');
+
+    // Use the same inline-style show/hide approach as other modals so
+    // CSS ordering (duplicate .modal rules) doesn't keep this modal hidden.
+    if (openBtn && modal) {
+        openBtn.addEventListener('click', () => {
+            modal.style.display = 'block';
+            modal.setAttribute('aria-hidden', 'false');
+        });
+    }
+
+    if (closeBtn && modal) {
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+        });
+    }
+
+    // optional: close when clicking outside
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        });
+    }
 </script>
 
 {% endblock content %}

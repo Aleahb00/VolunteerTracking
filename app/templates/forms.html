@@ -185,11 +185,14 @@
                     {{ donationForm.equipment_type.label_tag }}
                     {{ donationForm.equipment_type }}
                 </div>
+                <div class="form-field conditional-field" data-show-when="donation_type=money">
+                    {{ donationForm.money_donated.label_tag }}
+                    {{ donationForm.money_donated }}
+                </div>
                 <div class="form-field form-field-full">
                     {{ donationForm.notes.label_tag }}
                     {{ donationForm.notes }}
                 </div>
-
                 <button type="submit" name="submit_donation" class="form-submit">Submit Donation Form</button>
             </form>
         </section>

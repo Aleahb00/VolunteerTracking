@@ -432,8 +432,42 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
         'deleted_volunteers': deleted_volunteers,
         'deleted_donations': deleted_donations,
     })
-    
 
+def general_delete_volunteer_view(request, volunteer_id):
+    volunteer = get_object_or_404(Volunteer, id=volunteer_id)
+    volunteer.delete()
+    return redirect('general_dashboard')
+
+def general_permanent_delete_volunteer_view(request, id):
+    volunteer = get_object_or_404(Volunteer.all_objects, id=id)
+    volunteer.delete()
+    return redirect('general_dashboard')
+
+
+def general_delete_donation_view(request, donation_id):
+    donation = get_object_or_404(Donations, id=donation_id)
+    donation.delete()
+    return redirect('general_dashboard')
+
+def general_permanent_delete_donation_view(request, id):
+    donation = get_object_or_404(Donations.all_objects, id=id)
+    donation.delete()
+    return redirect('general_dashboard')
+    
+def general_restore_volunteer_view(request, id):
+    volunteer = get_object_or_404(Volunteer.all_objects, id=id)
+    volunteer.undelete()
+    return redirect('general_dashboard')
+
+def general_restore_donation_view(request, id):
+    donation = get_object_or_404(Donations.all_objects, id=id)
+    donation.undelete()
+    return redirect('general_dashboard')
+
+
+
+
+# DISASTER DASHBOARD
 def delete_volunteer_view(request, volunteer_id):
     volunteer = get_object_or_404(Volunteer, id=volunteer_id)
     volunteer_project_id = volunteer.project_id
@@ -484,17 +518,17 @@ def close_project_view(request, project_id):
     project.save()
     return redirect('admin_dashboard')
 
-def project_detail_view(request: HttpRequest, project_id: int) -> HttpResponse:
-    project = get_object_or_404(Project, id=project_id)
-    volunteers = Volunteer.objects.filter(project=project)
-    donations = Donations.objects.filter(project=project)
+# def project_detail_view(request: HttpRequest, project_id: int) -> HttpResponse:
+#     project = get_object_or_404(Project, id=project_id)
+#     volunteers = Volunteer.objects.filter(project=project)
+#     donations = Donations.objects.filter(project=project)
 
-    total_submissions = volunteers.count() + donations.count()
+#     total_submissions = volunteers.count() + donations.count()
 
-    hourly_rate = project.hourly_rate
-    total_hours = volunteers.aggregate(total=Sum('total_hours'))['total'] or 0
-    volunteer_value = Decimal(str(total_hours)) * hourly_rate
-    flagged_count = volunteers.filter(flagged=True).count()
+#     hourly_rate = project.hourly_rate
+#     total_hours = volunteers.aggregate(total=Sum('total_hours'))['total'] or 0
+#     volunteer_value = Decimal(str(total_hours)) * hourly_rate
+#     flagged_count = volunteers.filter(flagged=True).count()
 
     return render(request, 'project_details.html', {
         'project': project,

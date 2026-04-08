@@ -51,11 +51,19 @@
 
 .select-field {
     min-width: 260px;
-    padding: 0.52rem 0.65rem;
+    padding: 0.60rem 0.90rem;
     border: 1px solid #c6d3c0;
     border-radius: 8px;
     background: #ffffff;
     color: #19333f;
+    appearance: none; 
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.select-field:hover {
+  border-color: #08a50068;
 }
 
 .inline-form {
@@ -381,12 +389,13 @@
 }
 
 .btn-danger {
-    background: #c7383f;
-    border-color: #c7383f;
+    color: #9f2a31;
+    background: transparent;
+    border-color: transparent;
 }
 
 .btn-danger:hover {
-    background: #9f2a31;
+    color: #f70010;
 }
 
 .btn-secondary {
@@ -399,7 +408,14 @@
 }
 
 .btn-flag {
-    min-width: 110px;
+    border: transparent;
+    background: transparent;
+    color: #1b5c67;
+    border-radius: 8px;
+    padding: 0.48rem 0.75rem;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 0.92rem;
 }
 
 .js-toggle-skilled {
@@ -451,7 +467,6 @@
     border: 1px solid #d7e1dd;
     border-radius: 12px;
     width: min(760px, calc(100vw - 1.5rem));
-    max-width: 760px;
     margin: 3.5% auto;
     padding: 1rem 1rem 1.2rem;
     position: relative;
@@ -496,7 +511,6 @@
 .modal-content:not(.submission-modal) form input,
 .modal-content:not(.submission-modal) form select,
 .modal-content:not(.submission-modal) form textarea {
-    width: 100%;
     border: 1px solid #d9e2de;
     border-radius: 10px;
     background: #e8eeec;
@@ -685,6 +699,7 @@
     margin: 0.3rem 0;
     font-size: 1.04rem;
 }
+
 
 @media (max-width: 760px) {
     .submission-modal {
@@ -912,6 +927,8 @@
     cursor: pointer;
     font-weight: bold;
 }
+
+
 
 @media (max-width: 860px) {
     .dash-grid {

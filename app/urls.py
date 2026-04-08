@@ -7,15 +7,21 @@ from .views import *
 
 
 urlpatterns = [
+    # PUBLIC USER URLS
     path('', landing_view, name="landing"),
     path('faq/', faq_view, name="faq"),
-    # path('admin/test/', project_test_view, name="project_test"),
     path('forms/', form_template_view, name="forms"),
 
+    # ADMIN ACCOUNT URLS
     path('admin-register/', register_view, name='register'),
     path('admin-login/', login_view, name='login'),
     path('admin-logout/', logout_view, name='logout'),
 
+    # GENERAL DASHBOARD URLS
+    path('general-dashboard/', general_dashboard_view, name='general_dashboard'),
+    
+    
+    # DISASTER DASHBOARD URLS
     path('admin-dashboard/', admin_dashboard_view, name='admin_dashboard'),           # list + create
     path('admin-dashboard/<int:project_id>/', admin_dashboard_view, name='edit_project'),  # edit
     path('admin-dashboard/<int:project_id>/delete/', admin_dashboard_view, name='delete_project'),  # delete
@@ -27,11 +33,22 @@ urlpatterns = [
     path('admin-dashboard/export/volunteer_csv/', generate_volunteer_csv, name='export_csv'),
     path('admin-dashboard/export/donations_csv/', generate_donation_csv, name='export_donations_csv'),
 
-    path('general-dashboard/', general_dashboard_view, name='general_dashboard'),
+    
     path('submissions-full/', submissions_full_view, name='submissions_full'),
     path('submissions-full/<int:project_id>/', submissions_full_view, name='submissions_full_project'),
 
-    path('project/<int:project_id>/', project_detail_view, name='project_detail'),
+    # UNBASED FUNCTIONS URLS
+    
+    # TBD
+    
+    # path('project/<int:project_id>/', project_detail_view, name='project_detail'),
+
+
+
+
+
+
+
     # Project detail page
     path('admin-dashboard/volunteer/<int:volunteer_id>/pdf/', volunteer_pdf_view, name='volunteer_pdf'),
     path('admin-dashboard/donation/<int:donation_id>/pdf/', donation_pdf_view, name='donation_pdf'),

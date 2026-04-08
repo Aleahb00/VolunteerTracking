@@ -3,6 +3,7 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+<script src="https://unpkg.com/lucide@latest"></script>
 {% endblock css %}
 
 {% block content %}
@@ -42,6 +43,7 @@
                     <option disabled>No projects yet.</option>
                 {% endfor %}
             </select>
+            
             {% if project %}
                 <a href="{% url 'submissions_full_project' project.id %}" class="btn btn-secondary">View Project Submissions</a>
             {% else %}
@@ -160,11 +162,11 @@
                                     <td data-label="Actions">
                                         <div class="actions-row table-actions">
                                             <button class="btn btn-secondary open-modal-btn" data-target="modal-volunteer-{{ volunteer.id }}" type="button">Details</button>
-                                            <button data-volunteer-id="{{ volunteer.id }}" class="btn btn-flag js-toggle-flag" type="button">{% if volunteer.flagged %}Unflag{% else %}Flag{% endif %}</button>
+                                            <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button">{% if volunteer.flagged %}<i data-lucide="flag-off"></i>{% else %}<i data-lucide="flag"></i>{% endif %}</button>
                                             <button data-volunteer-id="{{ volunteer.id }}" class="btn btn-secondary js-toggle-skilled" type="button">{% if volunteer.confirmed_skilled_worker %}Unmark Skilled Worker{% else %}Mark Skilled Worker{% endif %}</button>
                                             <form method="POST" action="{% url 'delete_volunteer' volunteer.id %}">
                                                 {% csrf_token %}
-                                                <button class="btn btn-danger" type="submit">Delete</button>
+                                                <button class="btn-danger" type="submit"><i data-lucide="trash-2"></i></button>
                                             </form>
                                         </div>
 
@@ -297,7 +299,7 @@
                                     <td data-label="Actions">
                                         <div class="actions-row table-actions">
                                             <button class="btn btn-secondary open-modal-btn" data-target="modal-donation-{{ donation.id }}" type="button">Details</button>
-                                            <button data-donation-id="{{ donation.id }}" class="btn btn-flag js-toggle-donation-flag" type="button">{% if donation.flagged %}Unflag{% else %}Flag{% endif %}</button>
+                                            <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button"  class = "flag-btn">{% if donation.flagged %}<i data-lucide="flag-off"></i>{% else %}<i data-lucide="flag"></i>{% endif %}</button>
                                             <form method="POST" action="{% url 'delete_donation' donation.id %}">
                                                 {% csrf_token %}
                                                 <button class="btn btn-danger" type="submit">Delete</button>
@@ -515,7 +517,7 @@
                                 </div>
                                 <div class="actions-row">
                                     <button class="btn btn-secondary open-modal-btn" data-target="modal-flagged-donation-{{ donation.id }}" type="button">Details</button>
-                                    <button data-donation-id="{{ donation.id }}" class="btn btn-flag btn-flag-compact js-toggle-donation-flag" type="button">Unflag</button>
+                                    <button data-donation-id="{{ donation.id }}" class="btn btn-flag btn-flag-compact js-toggle-donation-flag" type="button">{% if donation.flagged %}Unflag{% else %}Flag{% endif %}</button>
                                 </div>
 
                                 <div id="modal-flagged-donation-{{ donation.id }}" class="modal" aria-hidden="true">
@@ -723,7 +725,42 @@
                 <h2 id="createProjectTitle">Create New Project</h2>
                 <form method="post" action="{% url 'admin_dashboard' %}">
                     {% csrf_token %}
-                    {{ create_form.as_p }}
+                    {{ create_form.name.label_tag }}
+                    {{ create_form.name }}
+
+                    {{ create_form.number.label_tag }}
+                    {{ create_form.number }}
+
+                    {{ create_form.type.label_tag }}
+                    {{ create_form.type }}
+                    
+                    {{ create_form.category.label_tag }}
+                    {{ create_form.category }}
+
+                    {{ create_form.size.label_tag }}
+                    {{ create_form.size }}
+
+                    {{ create_form.declaration_date.label_tag }}
+                    {{ create_form.declaration_date }}
+
+                    {{ create_form.completion_date.label_tag }}
+                    {{ create_form.completion_date }}
+
+                    {{ create_form.start_date.label_tag }}
+                    {{ create_form.start_date }}
+
+                    {{ create_form.end_date.label_tag }}
+                    {{ create_form.end_date }}
+
+                    {{ create_form.location.label_tag }}
+                    {{ create_form.location }}
+
+                    {{ create_form.process_step.label_tag }}
+                    {{ create_form.process_step }}
+
+                    {{ create_form.applicant.label_tag }}
+                    {{ create_form.applicant }}
+                    
                     <button type="submit" class="btn">Create Project</button>
                 </form>
             </div>
@@ -736,7 +773,41 @@
                     <h2 id="editProjectTitle-{{ project.id }}">Editing: {{ project.name }}</h2>
                     <form method="post" action="{% url 'edit_project' project.id %}">
                         {% csrf_token %}
-                        {{ edit_form.as_p }}
+                        {{ edit_form.name.label_tag }}
+                        {{ edit_form.name }}
+
+                        {{ edit_form.number.label_tag }}
+                        {{ edit_form.number }}
+
+                        {{ edit_form.type.label_tag }}
+                        {{ edit_form.type }}
+
+                        {{ edit_form.category.label_tag }}
+                        {{ edit_form.category }}
+
+                        {{ edit_form.size.label_tag }}
+                        {{ edit_form.size }}
+
+                        {{ edit_form.declaration_date.label_tag }}
+                        {{ edit_form.declaration_date }}
+
+                        {{ edit_form.completion_date.label_tag }}
+                        {{ edit_form.completion_date }}
+
+                        {{ edit_form.start_date.label_tag }}
+                        {{ edit_form.start_date }}
+
+                        {{ edit_form.end_date.label_tag }}
+                        {{ edit_form.end_date }}
+
+                        {{ edit_form.location.label_tag }}
+                        {{ edit_form.location }}
+
+                        {{ edit_form.process_step.label_tag }}
+                        {{ edit_form.process_step }}
+
+                        {{ edit_form.applicant.label_tag }}
+                        {{ edit_form.applicant }}
                         <button type="submit" class="btn">Save Changes</button>
                     </form>
                 </div>
@@ -937,6 +1008,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+</script>
+<script>
+lucide.createIcons();
 </script>
 {% endblock content %}
 

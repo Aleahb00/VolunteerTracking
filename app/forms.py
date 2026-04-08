@@ -76,6 +76,7 @@ class VolunteerForm(forms.ModelForm):
     class Meta:
         model = Volunteer
         fields = ['name', 'contact_method', 'email', 'phone_number', 'date_of_work', 'total_hours', 'location_volunteered', 'work_desc', 'equipment', 'other_equipment', 'equipment_make_model', 'equipment_hours', 'skilled_worker', 'notes']
+        exclude = ['active']
         labels = {
             'name': 'Full Name',
             'contact_method': 'Contact Method',
@@ -260,6 +261,10 @@ class DonationForm(forms.ModelForm):
             'equipment_type': forms.TextInput(attrs={
                 'class' : 'unknown',
                 'type': 'text'}),
+            
+            'money_donated': forms.NumberInput(attrs={
+                'class' : 'unknown',
+                'type': 'number'}),
             
             'other_donation_type': forms.TextInput(attrs={
                 'class' : 'unknown',

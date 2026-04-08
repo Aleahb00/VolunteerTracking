@@ -15,6 +15,8 @@
             <p class="pv-subtitle">{{ volunteers|length|add:donations|length }} total submissions ({{ volunteers|length }} volunteers, {{ donations|length }} donations)</p>
         </div>
         <div class="pv-actions">
+            <button class="btn" type="button" onclick="selectAllReports()">Select All</button>
+            <button class="btn" type="button" onclick="printSelectedReports()">Print Selected</button>
             <button class="btn" type="button" onclick="printAllReports()">Print All Reports</button>
             <a class="btn btn-secondary" href="{% if project %}{% url 'edit_project' project.id %}{% else %}{% url 'admin_dashboard' %}{% endif %}">Back to Dashboard</a>
         </div>
@@ -72,8 +74,13 @@
     <section id="volunteer-panel" class="tab-panel" role="tabpanel" {% if active_tab != 'volunteer-panel' %}hidden{% endif %}>
             <div class="submission-list">
                 {% for volunteer in volunteers %}
-                    <article class="pdf-page">
+                    <article class="pdf-page selectable">
+
                         <div class="report-actions no-print">
+                            <label>
+                                <input type="checkbox" class="select-report">
+                                Select
+                            </label>
                             <button class="btn btn-secondary" type="button" onclick="printSingleReport(this)">Print This Form</button>
                         </div>
 
@@ -200,8 +207,12 @@
         <section id="donation-panel" class="tab-panel" role="tabpanel" {% if active_tab != 'donation-panel' %}hidden{% endif %}>
             <div class="submission-list">
                 {% for donation in donations %}
-                    <article class="pdf-page">
+                    <article class="pdf-page selectable">
                         <div class="report-actions no-print">
+                            <label>
+                                <input type="checkbox" class="select-report">
+                                Select
+                            </label>
                             <button class="btn btn-secondary" type="button" onclick="printSingleReport(this)">Print This Form</button>
                         </div>
 
@@ -411,6 +422,62 @@ document.querySelectorAll('.pv-tabs').forEach(function (container) {
     if (initialActive) {
         setActiveTab(initialActive.dataset.target, false);
     }
+});
+
+    function selectAllReports() {
+        const checkboxes = document.querySelectorAll('.select-report');
+        const allChecked = [...checkboxes].every(cb => cb.checked);
+
+        checkboxes.forEach(cb => {
+            cb.checked = !allChecked; // toggle all
+        });
+    }
+
+    function printSelectedReports() {
+    const selected = document.querySelectorAll('.select-report:checked');
+
+    if (!selected.length) {
+        alert('Please select at least one report.');
+        return;
+    }
+
+    beginPrintMode();
+    document.body.classList.add('print-single-report');
+
+    // hide everything first
+    document.querySelectorAll('.pdf-page').forEach(page => {
+        page.classList.remove('is-print-target');
+    });
+
+    // show only selected
+    selected.forEach(cb => {
+        const page = cb.closest('.pdf-page');
+        if (page) {
+            page.classList.add('is-print-target');
+        }
+    });
+
+    window.print();
+}
+
+    document.querySelectorAll('.pdf-page.selectable').forEach(card => {
+    const checkbox = card.querySelector('.select-report');
+
+    card.addEventListener('click', function (e) {
+        if (
+            e.target.tagName === 'BUTTON' ||
+            e.target.closest('button') ||
+            e.target.tagName === 'INPUT' ||
+            e.target.closest('label')
+        ) return;
+
+        checkbox.checked = !checkbox.checked;
+        card.classList.toggle('selected', checkbox.checked);
+    });
+
+    checkbox.addEventListener('change', function () {
+        card.classList.toggle('selected', checkbox.checked);
+    });
 });
 </script>
 {% endblock content %}

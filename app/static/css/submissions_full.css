@@ -359,6 +359,17 @@ body {
     display: none !important;
 }
 
+.pdf-page.selectable {
+    cursor: pointer;
+}
+
+.pdf-page.selected {
+    border: 2px solid var(--primary);
+    background: #eef2ff;
+}
+
+
+
 @page {
     size: auto;
     margin: 0.45in;
