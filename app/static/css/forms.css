@@ -4,6 +4,7 @@
 	background: linear-gradient(180deg, #f7f4e8 0%, #f0ede2 100%);
 }
 
+
 .forms-container {
 	max-width: 980px;
 	margin: 0 auto;
@@ -27,16 +28,77 @@
 }
 
 .forms-messages {
-	margin-bottom: 1rem;
+	/* Toast container positioned in the top-right corner */
+	position: fixed;
+	top: 1.25rem;
+	right: 1.25rem;
+	z-index: 1100;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	max-width: calc(100% - 2.5rem);
+	pointer-events: none; /* let clicks pass through gaps */
 }
 
 .forms-message {
+	pointer-events: auto; /* enable interaction on the toast itself */
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	min-width: 260px;
+	max-width: 360px;
 	background: #fff3cd;
 	color: #694d00;
 	border: 1px solid #efd27a;
-	border-radius: 8px;
-	padding: 0.75rem 1rem;
-	margin: 0 0 0.5rem;
+	border-radius: 12px;
+	padding: 0.8rem 1rem;
+	margin: 0;
+	box-shadow: 0 6px 20px rgba(16, 24, 40, 0.12);
+	transform-origin: top right;
+	animation: toast-in 260ms ease;
+}
+
+/* Variants based on message tags (Django message.tags) */
+.forms-message.success {
+	background: #e6fffa;
+	color: #03544e;
+	border-color: #7fe3d9;
+}
+.forms-message.warning {
+	background: #fff7e6;
+	color: #6b4b00;
+	border-color: #f0d88a;
+}
+.forms-message.error,
+.forms-message.danger {
+	background: #fff1f2;
+	color: #7f1d1d;
+	border-color: #f3a0a8;
+}
+
+.forms-message .toast-close {
+	margin-left: auto;
+	background: transparent;
+	border: 0;
+	color: inherit;
+	cursor: pointer;
+	font-weight: 700;
+	font-size: 1.05rem;
+	line-height: 1;
+	opacity: 0.85;
+}
+.forms-message .toast-close:hover {
+	opacity: 1;
+}
+
+@keyframes toast-in {
+	from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+	to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toast-out {
+	from { opacity: 1; transform: translateY(0) scale(1); }
+	to { opacity: 0; transform: translateY(-6px) scale(0.98); }
 }
 
 .forms-tabs {

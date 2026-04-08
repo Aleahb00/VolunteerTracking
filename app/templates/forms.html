@@ -20,7 +20,10 @@
         {% if messages %}
             <div class="forms-messages">
                 {% for message in messages %}
-                    <p class="forms-message">{{ message }}</p>
+                    {# Include the message.tags so CSS can target success/warning/error #}
+                    <p class="forms-message {{ message.tags }}">{{ message }}
+                        <button type="button" class="toast-close" aria-label="Dismiss">×</button>
+                    </p>
                 {% endfor %}
             </div>
         {% endif %}
@@ -292,6 +295,29 @@
         setupConditionalFields('#donation-panel .forms-grid-form');
         setupRadioGroups('#volunteer-panel .forms-grid-form');
         setupRadioGroups('#donation-panel .forms-grid-form');
+
+        // Toast auto-dismiss and close handling
+        const toastContainer = document.querySelector('.forms-messages');
+        if (toastContainer) {
+            const toasts = Array.from(toastContainer.querySelectorAll('.forms-message'));
+            toasts.forEach((toast) => {
+                // Auto-dismiss after 6s
+                const timeout = setTimeout(() => {
+                    toast.style.animation = 'toast-out 220ms ease forwards';
+                    setTimeout(() => toast.remove(), 250);
+                }, 6000);
+
+                // Close button
+                const closeBtn = toast.querySelector('.toast-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        clearTimeout(timeout);
+                        toast.style.animation = 'toast-out 180ms ease forwards';
+                        setTimeout(() => toast.remove(), 220);
+                    });
+                }
+            });
+        }
     })();
 </script>
 {% endblock content %}
