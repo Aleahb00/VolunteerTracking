@@ -19,12 +19,62 @@
             <p class="header-subtitle">Overview of all flagged submissions across disasters</p>
             </div>
 
-            <button type="button" class="btn" id="open-settings" aria-haspopup="dialog" aria-controls="radix-:rle:">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="card-icon">
-                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-            Settings</button>
+            <div class="header-actions">
+                <button type="button" class="btn open-modal-btn" data-target="create-form-modal">Create New Disaster</button>
+                <button type="button" class="btn" id="open-settings" aria-haspopup="dialog" aria-controls="radix-:rle:">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="card-icon">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                Settings</button>
+            </div>
+
+            <div id="create-form-modal" class="modal" aria-hidden="true">
+                <div class="modal-content create-disaster-modal" role="dialog" aria-modal="true" aria-labelledby="createDisasterTitle">
+                    <span class="close" aria-label="Close">&times;</span>
+                    <h2 id="createDisasterTitle">Create New Disaster</h2>
+                    <form method="post" action="{% url 'admin_dashboard' %}" class="create-disaster-form">
+                        {% csrf_token %}
+                        {{ create_form.name.label_tag }}
+                        {{ create_form.name }}
+
+                        {{ create_form.number.label_tag }}
+                        {{ create_form.number }}
+
+                        {{ create_form.type.label_tag }}
+                        {{ create_form.type }}
+
+                        {{ create_form.category.label_tag }}
+                        {{ create_form.category }}
+
+                        {{ create_form.size.label_tag }}
+                        {{ create_form.size }}
+
+                        {{ create_form.declaration_date.label_tag }}
+                        {{ create_form.declaration_date }}
+
+                        {{ create_form.completion_date.label_tag }}
+                        {{ create_form.completion_date }}
+
+                        {{ create_form.start_date.label_tag }}
+                        {{ create_form.start_date }}
+
+                        {{ create_form.end_date.label_tag }}
+                        {{ create_form.end_date }}
+
+                        {{ create_form.location.label_tag }}
+                        {{ create_form.location }}
+
+                        {{ create_form.process_step.label_tag }}
+                        {{ create_form.process_step }}
+
+                        {{ create_form.applicant.label_tag }}
+                        {{ create_form.applicant }}
+
+                        <button type="submit" class="btn">Create Disaster</button>
+                    </form>
+                </div>
+            </div>
             <div id="settings-modal" class="modal hidden">
                 <div class="modal-content">
                     
@@ -490,29 +540,29 @@
                                     <section class="actions-section">
                                         <h4>Actions</h4>
                                         <div class="actions-row">
-                                            {% if volunteer.flagged %}
-                                                <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                            {% if donation.flagged %}
+                                                <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn">Unflag Submission</button>
                                                 </form>
                                             {% else %}
-                                                <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn btn-warning">Flag Submission</button>
                                                 </form>
                                             {% endif %}
 
-                                            {% if volunteer.deleted %}
-                                                <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                            {% if donation.deleted %}
+                                                <form method="POST" action="{% url 'restore_donation_general' donation.id %}">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn">Restore Submission</button>
                                                 </form>
-                                                <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}">
+                                                <form method="POST" action="{% url 'permanent_delete_donation_general' donation.id %}">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn btn-danger">Permanently Delete</button>
                                                 </form>
                                             {% else %}
-                                                <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
+                                                <form method="POST" action="{% url 'delete_donation_general' donation.id %}">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn btn-danger">Move to Trash</button>
                                                 </form>

@@ -19,7 +19,6 @@
             </div>
             <div class="actions-row dash-header-actions">
                 <a href="{% url 'general_dashboard' %}" class="btn btn-secondary">Back to General Dashboard</a>
-                <button id="openFormButton" class="btn" type="button">Create New Disaster</button>
                 {% if disaster and disaster.active %}
                     <form method="POST" action="{% url 'close_disaster' disaster.id %}" class="inline-form" onsubmit="return confirm('Are you sure you want to close this disaster? This action cannot be undone!');">
                         {% csrf_token %}
@@ -895,53 +894,6 @@
             </article>
         </section>
 
-        <div id="formModal" class="modal" aria-hidden="true">
-            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="createDisasterTitle">
-                <span class="close" aria-label="Close">&times;</span>
-                <h2 id="createDisasterTitle">Create New Disaster</h2>
-                <form method="post" action="{% url 'admin_dashboard' %}">
-                    {% csrf_token %}
-                    {{ create_form.name.label_tag }}
-                    {{ create_form.name }}
-
-                    {{ create_form.number.label_tag }}
-                    {{ create_form.number }}
-
-                    {{ create_form.type.label_tag }}
-                    {{ create_form.type }}
-                    
-                    {{ create_form.category.label_tag }}
-                    {{ create_form.category }}
-
-                    {{ create_form.size.label_tag }}
-                    {{ create_form.size }}
-
-                    {{ create_form.declaration_date.label_tag }}
-                    {{ create_form.declaration_date }}
-
-                    {{ create_form.completion_date.label_tag }}
-                    {{ create_form.completion_date }}
-
-                    {{ create_form.start_date.label_tag }}
-                    {{ create_form.start_date }}
-
-                    {{ create_form.end_date.label_tag }}
-                    {{ create_form.end_date }}
-
-                    {{ create_form.location.label_tag }}
-                    {{ create_form.location }}
-
-                    {{ create_form.process_step.label_tag }}
-                    {{ create_form.process_step }}
-
-                    {{ create_form.applicant.label_tag }}
-                    {{ create_form.applicant }}
-                    
-                    <button type="submit" class="btn">Create Disaster</button>
-                </form>
-            </div>
-        </div>
-
         {% if disaster %}
             <div id="modal-{{ disaster.id }}" class="modal" aria-hidden="true">
                 <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="editDisasterTitle-{{ disaster.id }}">
@@ -1196,16 +1148,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
-
-    const formModal = document.getElementById('formModal');
-    const openCreateBtn = document.getElementById('openFormButton');
-
-    if (openCreateBtn && formModal) {
-        openCreateBtn.addEventListener('click', function () {
-            formModal.style.display = 'block';
-            formModal.setAttribute('aria-hidden', 'false');
-        });
-    }
 
     document.querySelectorAll('.open-modal-btn').forEach(btn => {
         btn.addEventListener('click', function () {

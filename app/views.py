@@ -280,7 +280,6 @@ def admin_dashboard_view(request: HttpRequest, disaster_id=None) -> HttpResponse
     donation_value = Decimal(str(donation_hours_total)) * hourly_rate
     total_value = volunteer_value + donation_value
 
-    create_form = DisasterForm()
     edit_form = DisasterForm(instance=disaster) if disaster else None
     deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False).order_by('-created_at')
     deleted_donations = Donations.all_objects.filter(deleted__isnull=False).order_by('-created_at')
@@ -293,7 +292,6 @@ def admin_dashboard_view(request: HttpRequest, disaster_id=None) -> HttpResponse
         'volunteer_count': volunteer_count,
         'donation_count': donation_count,
         'total_submissions': total_submissions,
-        'create_form': create_form,
         'edit_form': edit_form,
         'disaster': disaster,
         'total_hours': total_hours,
@@ -366,6 +364,7 @@ def submissions_full_view(request: HttpRequest, disaster_id=None) -> HttpRespons
 def general_dashboard_view(request:HttpRequest)->HttpResponse:
     active_tab = request.GET.get('active_tab', 'volunteer-panel')
     search_query = (request.GET.get('q') or '').strip()
+    create_form = DisasterForm()
     disasters = Disaster.objects.filter(active=True).select_related()
     base_flagged_volunteers = Volunteer.objects.filter(flagged=True).select_related('disaster').order_by('-created_at')
     base_flagged_donations = Donations.objects.filter(flagged=True).select_related('disaster').order_by('-created_at')
@@ -431,6 +430,7 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
         'search_query': search_query,
         'deleted_volunteers': deleted_volunteers,
         'deleted_donations': deleted_donations,
+        'create_form': create_form,
     })
 
 def general_delete_volunteer_view(request, volunteer_id):
