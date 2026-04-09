@@ -485,6 +485,8 @@
     display: none;
 }
 
+
+
 .btn {
     border: 1px solid #1b5c67;
     background: #1b5c67;
@@ -528,6 +530,10 @@
     cursor: pointer;
     text-decoration: none;
     font-size: 0.92rem;
+}
+
+.btn-flag:hover{
+    color: #059b6e;
 }
 
 .js-toggle-skilled {

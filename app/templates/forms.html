@@ -35,7 +35,7 @@
 
         <section id="volunteer-panel" class="forms-panel is-active" role="tabpanel">
             <h2>Volunteer Form</h2>
-            <form method="post" class="forms-grid-form">
+            <form method="post" class="forms-grid-form" autocomplete="off">
                 {% csrf_token %}
                 {% render_honeypot_field %}
 
@@ -126,7 +126,7 @@
 
         <section id="donation-panel" class="forms-panel" role="tabpanel" hidden>
             <h2>Donation Form</h2>
-            <form method="post" class="forms-grid-form">
+            <form method="post" class="forms-grid-form" autocomplete="off">
                 {% csrf_token %}
                 {% render_honeypot_field %}
 
