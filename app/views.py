@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.db.models import Q, Min
 from .models import *
 from .forms import *
-from .forms import ProjectForm, VolunteerForm, DonationForm
+from .forms import DisasterForm, VolunteerForm, DonationForm
 from honeypot.decorators import check_honeypot
 from django_ratelimit.decorators import ratelimit
 from django.template.loader import get_template
@@ -51,43 +51,43 @@ def ratelimit_error(request, exception=None):
     return render(request, '429.html', status=429)
 
 
-# def project_test_view(request:HttpRequest)->HttpResponse:
-#     projects = Project.objects.all()
+# def disaster_test_view(request:HttpRequest)->HttpResponse:
+#     disasters = Disaster.objects.all()
 
 #     if request.method == 'POST':
-#         form = ProjectForm(request.POST)
+#         form = DisasterForm(request.POST)
 #         if form.is_valid():
 #             form.save()
 #             return redirect('landing')
 #     else:
-#         form = ProjectForm()
+#         form = DisasterForm()
 
-#     return render(request, 'temp_admin.html', {'form': form, 'projects': projects})
+#     return render(request, 'temp_admin.html', {'form': form, 'disasters': disasters})
 # is this needed? where is this being used?
 
 @check_honeypot
 @ratelimit(key='ip', rate='5/m', method='POST', block=False)
 def form_template_view(request:HttpRequest)->HttpResponse:
-    earliest_date = Project.objects.aggregate(Min('start_date'))['start_date__min']
+    earliest_date = Disaster.objects.aggregate(Min('start_date'))['start_date__min']
     volunteerForm = VolunteerForm()
     donationForm = DonationForm()
-    projects = Project.objects.exclude(location__isnull=True).exclude(location__exact='')
+    disasters = Disaster.objects.exclude(location__isnull=True).exclude(location__exact='')
 
     if request.method == 'POST' and getattr(request, 'limited', False):
         return render(request, '429.html', status=429)
 
-    def find_best_project(location_text: str):
-        best_project = None
+    def find_best_disaster(location_text: str):
+        best_disaster = None
         best_similarity = -1
 
-        for project in projects:
-            if project.active:
-                similarity = fuzz.ratio(location_text.lower(), project.location.lower())
+        for disaster in disasters:
+            if disaster.active:
+                similarity = fuzz.ratio(location_text.lower(), disaster.location.lower())
                 if similarity > best_similarity:
                     best_similarity = similarity
-                    best_project = project
+                    best_disaster = disaster
 
-        return best_project, best_similarity
+        return best_disaster, best_similarity
 
     if request.method == 'POST':
         if 'submit_volunteer' in request.POST:
@@ -95,7 +95,7 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
             if volunteerForm.is_valid():
                 volunteer = volunteerForm.save(commit=False)
-                best_project, similarity = find_best_project(volunteer.location_volunteered)
+                best_disaster, similarity = find_best_disaster(volunteer.location_volunteered)
                 flag_reasons = volunteerForm.cleaned_data.get('flagged_reason', [])
                 volunteer.flagged_reason = flag_reasons
                 volunteer.flagged = bool(flag_reasons)
@@ -103,14 +103,14 @@ def form_template_view(request:HttpRequest)->HttpResponse:
                     volunteer.confirmed_skilled_worker = True
 
                 if volunteer.flagged:
-                    volunteer.project = None
-                elif best_project:
-                    volunteer.project = best_project
+                    volunteer.disaster = None
+                elif best_disaster:
+                    volunteer.disaster = best_disaster
 
                 volunteer.save()
 
                 if volunteer.flagged:
-                    messages.warning(request, 'Volunteer submission saved and flagged (location similarity below 80%). No project was assigned.')
+                    messages.warning(request, 'Volunteer submission saved and flagged (location similarity below 80%). No disaster was assigned.')
                 else:
                     messages.success(request, 'Volunteer form submission saved successfully.')
 
@@ -124,20 +124,20 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
             if donationForm.is_valid():
                 donation = donationForm.save(commit=False)
-                best_project, similarity = find_best_project(donation.location_donated)
+                best_disaster, similarity = find_best_disaster(donation.location_donated)
                 flag_reasons = donationForm.cleaned_data.get('flagged_reason', [])
                 donation.flagged_reason = flag_reasons
                 donation.flagged = bool(flag_reasons)
 
                 if donation.flagged:
-                    donation.project = None
-                elif best_project:
-                    donation.project = best_project
+                    donation.disaster = None
+                elif best_disaster:
+                    donation.disaster = best_disaster
 
                 donation.save()
 
                 if donation.flagged:
-                    messages.warning(request, 'Donation submission saved and flagged (location similarity below 80%). No project was assigned.')
+                    messages.warning(request, 'Donation submission saved and flagged (location similarity below 80%). No disaster was assigned.')
                 else:
                     messages.success(request, 'Donation form submission saved successfully.')
 
@@ -193,34 +193,34 @@ def logout_view(request:HttpRequest)->HttpResponse:
 # may need to redirect to somewhere else considering it's admin
 
 
-def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
-    project = get_object_or_404(Project, id=project_id) if project_id else None
+def admin_dashboard_view(request: HttpRequest, disaster_id=None) -> HttpResponse:
+    disaster = get_object_or_404(Disaster, id=disaster_id) if disaster_id else None
     active_tab = request.GET.get('active_tab', 'volunteers-panel')
     
 
     # DELETE
     if request.method == 'POST' and request.POST.get('_method') == 'DELETE':
-        if project:
-            project.delete()
+        if disaster:
+            disaster.delete()
         return redirect('admin_dashboard', )
-    # think this needs to be deleted because you cant delete projects just close them but maybe it should still be an option? //COW//
+    # think this needs to be deleted because you cant delete disasters just close them but maybe it should still be an option? //COW//
 
     # CREATE/UPDATE
     if request.method == 'POST':
-        form = ProjectForm(request.POST, instance=project)
+        form = DisasterForm(request.POST, instance=disaster)
         if form.is_valid():
             form.save()
             return redirect('admin_dashboard', )
     else:
-        form = ProjectForm(instance=project)
+        form = DisasterForm(instance=disaster)
 
-        form = ProjectForm(instance=project)  
+        form = DisasterForm(instance=disaster)  
     
     query = request.GET.get('q')
 
-    if project:
-        volunteers = Volunteer.objects.filter(project=project).order_by('-created_at')
-        donations = Donations.objects.filter(project=project).order_by('-created_at')
+    if disaster:
+        volunteers = Volunteer.objects.filter(disaster=disaster).order_by('-created_at')
+        donations = Donations.objects.filter(disaster=disaster).order_by('-created_at')
     else:
         volunteers = Volunteer.objects.all().order_by('-created_at')
         donations = Donations.objects.all().order_by('-created_at')
@@ -260,8 +260,8 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
     donation_count = donations.count()
     total_submissions = volunteer_count + donation_count
 
-    hourly_rate = project.hourly_rate if project else Decimal('29.95')
-    skilled_hourly_rate = project.skilled_hourly_rate if project else Decimal('45.00')
+    hourly_rate = disaster.hourly_rate if disaster else Decimal('29.95')
+    skilled_hourly_rate = disaster.skilled_hourly_rate if disaster else Decimal('45.00')
 
     # Price volunteer labor using confirmed skilled status only.
     confirmed_skilled_hours = volunteers.filter(confirmed_skilled_worker=True).aggregate(total=Sum('total_hours'))['total'] or 0
@@ -275,19 +275,19 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
     flagged_count = volunteers.filter(flagged=True).count()
     donation_flagged_count = donations.filter(flagged=True).count()
 
-    # Compute donation value from donated hours using project's hourly_rate
+    # Compute donation value from donated hours using disaster's hourly_rate
     donation_hours_total = donations.aggregate(total=Sum('total_hours'))['total'] or 0
     donation_value = Decimal(str(donation_hours_total)) * hourly_rate
     total_value = volunteer_value + donation_value
 
-    create_form = ProjectForm()
-    edit_form = ProjectForm(instance=project) if project else None
+    create_form = DisasterForm()
+    edit_form = DisasterForm(instance=disaster) if disaster else None
     deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False).order_by('-created_at')
     deleted_donations = Donations.all_objects.filter(deleted__isnull=False).order_by('-created_at')
 
     # READ
     return render(request, 'admin_dashboard.html', {
-        'projects': Project.objects.all(),
+        'disasters': Disaster.objects.all(),
         'volunteers': volunteers,
         'donations': donations,
         'volunteer_count': volunteer_count,
@@ -295,7 +295,7 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         'total_submissions': total_submissions,
         'create_form': create_form,
         'edit_form': edit_form,
-        'project': project,
+        'disaster': disaster,
         'total_hours': total_hours,
         'volunteer_value': volunteer_value,
         'donation_value': donation_value,
@@ -313,17 +313,17 @@ def admin_dashboard_view(request: HttpRequest, project_id=None) -> HttpResponse:
         'active_tab': active_tab,
     })
     
-def submissions_full_view(request: HttpRequest, project_id=None) -> HttpResponse:
-    project = get_object_or_404(Project, id=project_id) if project_id else None
+def submissions_full_view(request: HttpRequest, disaster_id=None) -> HttpResponse:
+    disaster = get_object_or_404(Disaster, id=disaster_id) if disaster_id else None
     active_tab = request.GET.get('active_tab', 'volunteer-panel')
     query = request.GET.get('q')
 
-    if project:
-        volunteers = Volunteer.objects.filter(project=project).select_related('project').order_by('-created_at')
-        donations = Donations.objects.filter(project=project).select_related('project').order_by('-created_at')
+    if disaster:
+        volunteers = Volunteer.objects.filter(disaster=disaster).select_related('disaster').order_by('-created_at')
+        donations = Donations.objects.filter(disaster=disaster).select_related('disaster').order_by('-created_at')
     else:
-        volunteers = Volunteer.objects.select_related('project').order_by('-created_at')
-        donations = Donations.objects.select_related('project').order_by('-created_at')
+        volunteers = Volunteer.objects.select_related('disaster').order_by('-created_at')
+        donations = Donations.objects.select_related('disaster').order_by('-created_at')
 
     if query and active_tab == 'volunteer-panel':
         volunteers = volunteers.filter(
@@ -354,7 +354,7 @@ def submissions_full_view(request: HttpRequest, project_id=None) -> HttpResponse
 
 
     return render(request, 'submissions_full.html', {
-        'project': project,
+        'disaster': disaster,
         'active_tab': active_tab,
         'query': query,
         'volunteers': volunteers,
@@ -366,13 +366,13 @@ def submissions_full_view(request: HttpRequest, project_id=None) -> HttpResponse
 def general_dashboard_view(request:HttpRequest)->HttpResponse:
     active_tab = request.GET.get('active_tab', 'volunteer-panel')
     search_query = (request.GET.get('q') or '').strip()
-    projects = Project.objects.filter(active=True).select_related()
-    base_flagged_volunteers = Volunteer.objects.filter(flagged=True).select_related('project').order_by('-created_at')
-    base_flagged_donations = Donations.objects.filter(flagged=True).select_related('project').order_by('-created_at')
+    disasters = Disaster.objects.filter(active=True).select_related()
+    base_flagged_volunteers = Volunteer.objects.filter(flagged=True).select_related('disaster').order_by('-created_at')
+    base_flagged_donations = Donations.objects.filter(flagged=True).select_related('disaster').order_by('-created_at')
     flagged_volunteers = base_flagged_volunteers
     flagged_donations = base_flagged_donations
-    deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False, project__isnull=True).order_by('-created_at')
-    deleted_donations = Donations.all_objects.filter(deleted__isnull=False, project__isnull=True).order_by('-created_at')
+    deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
+    deleted_donations = Donations.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
 
     # Keep tab badge counts stable and independent from current filter/search state.
     flagged_volunteers_count = base_flagged_volunteers.count()
@@ -391,7 +391,7 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
                 | Q(location_volunteered__icontains=search_query)
                 | Q(work_desc__icontains=search_query)
                 | Q(notes__icontains=search_query)
-                | Q(project__name__icontains=search_query)
+                | Q(disaster__name__icontains=search_query)
             )
     elif active_tab == 'donation-panel':
         flagged_donations = donation_filter.qs.filter(flagged=True)
@@ -406,7 +406,7 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
                 | Q(material_type__icontains=search_query)
                 | Q(equipment_type__icontains=search_query)
                 | Q(other_donation_type__icontains=search_query)
-                | Q(project__name__icontains=search_query)
+                | Q(disaster__name__icontains=search_query)
             )
     
     # Ensure flagged_reason is always a list, never None
@@ -419,8 +419,8 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
             donation.flagged_reason = []
     
     return render(request, 'general_dashboard.html', {
-        'projects': projects,
-        'total_projects': projects.count(),
+        'disasters': disasters,
+        'total_disasters': disasters.count(),
         'flagged_volunteers': flagged_volunteers,
         'flagged_volunteers_count': flagged_volunteers_count,
         'flagged_donations': flagged_donations,
@@ -453,7 +453,7 @@ def general_permanent_delete_donation_view(request, id):
     donation = get_object_or_404(Donations.all_objects, id=id)
     donation.delete()
     return redirect('general_dashboard')
-    
+
 def general_restore_volunteer_view(request, id):
     volunteer = get_object_or_404(Volunteer.all_objects, id=id)
     volunteer.undelete()
@@ -470,10 +470,10 @@ def general_restore_donation_view(request, id):
 # DISASTER DASHBOARD
 def delete_volunteer_view(request, volunteer_id):
     volunteer = get_object_or_404(Volunteer, id=volunteer_id)
-    volunteer_project_id = volunteer.project_id
+    volunteer_disaster_id = volunteer.disaster_id
     volunteer.delete()
-    if volunteer_project_id:
-        return redirect('edit_project', project_id=volunteer_project_id)
+    if volunteer_disaster_id:
+        return redirect('edit_disaster', disaster_id=volunteer_disaster_id)
     return redirect('admin_dashboard')
 
 def permanent_delete_volunteer_view(request, id):
@@ -481,65 +481,65 @@ def permanent_delete_volunteer_view(request, id):
     volunteer.delete()
     return redirect('admin_dashboard')
 
+def restore_volunteer_view(request, id):
+    volunteer = get_object_or_404(Volunteer.all_objects, id=id)
+    volunteer_disaster_id = volunteer.disaster_id
+    volunteer.undelete()
+    if volunteer_disaster_id:
+        return redirect('edit_disaster', disaster_id=volunteer_disaster_id)
+    return redirect('admin_dashboard')
+
 
 def delete_donation_view(request, donation_id):
     donation = get_object_or_404(Donations, id=donation_id)
-    donation_project_id = donation.project_id
+    donation_disaster_id = donation.disaster_id
     donation.delete()
-    if donation_project_id:
-        return redirect('edit_project', project_id=donation_project_id)
+    if donation_disaster_id:
+        return redirect('edit_disaster', disaster_id=donation_disaster_id)
     return redirect('admin_dashboard')
 
 def permanent_delete_donation_view(request, id):
     donation = get_object_or_404(Donations.all_objects, id=id)
     donation.delete()
     return redirect('admin_dashboard')
-    
-def restore_volunteer_view(request, id):
-    volunteer = get_object_or_404(Volunteer.all_objects, id=id)
-    volunteer_project_id = volunteer.project_id
-    volunteer.undelete()
-    if volunteer_project_id:
-        return redirect('edit_project', project_id=volunteer_project_id)
-    return redirect('admin_dashboard')
 
 def restore_donation_view(request, id):
     donation = get_object_or_404(Donations.all_objects, id=id)
-    donation_project_id = donation.project_id
+    donation_disaster_id = donation.disaster_id
     donation.undelete()
-    if donation_project_id:
-        return redirect('edit_project', project_id=donation_project_id)
+    if donation_disaster_id:
+        return redirect('edit_disaster', disaster_id=donation_disaster_id)
     return redirect('admin_dashboard')
 
 
-def close_project_view(request, project_id):
-    project = get_object_or_404(Project, id=project_id)
-    project.active = False
-    project.save()
+def close_disaster_view(request, disaster_id):
+    disaster = get_object_or_404(Disaster, id=disaster_id)
+    disaster.active = False
+    disaster.save()
     return redirect('admin_dashboard')
 
-# def project_detail_view(request: HttpRequest, project_id: int) -> HttpResponse:
-#     project = get_object_or_404(Project, id=project_id)
-#     volunteers = Volunteer.objects.filter(project=project)
-#     donations = Donations.objects.filter(project=project)
+# def disaster_detail_view(request: HttpRequest, disaster_id: int) -> HttpResponse:
+#     disaster = get_object_or_404(Disaster, id=disaster_id)
+#     volunteers = Volunteer.objects.filter(disaster=disaster)
+#     donations = Donations.objects.filter(disaster=disaster)
 
 #     total_submissions = volunteers.count() + donations.count()
 
-#     hourly_rate = project.hourly_rate
+#     hourly_rate = disaster.hourly_rate
 #     total_hours = volunteers.aggregate(total=Sum('total_hours'))['total'] or 0
 #     volunteer_value = Decimal(str(total_hours)) * hourly_rate
 #     flagged_count = volunteers.filter(flagged=True).count()
 
-    return render(request, 'project_details.html', {
-        'project': project,
-        'volunteers': volunteers,
-        'donations': donations,
-        'total_submissions': total_submissions,
-        'total_hours': total_hours,
-        'volunteer_value': volunteer_value,
-        'hourly_rate': hourly_rate,
-        'flagged_count': flagged_count,
-    })
+#     return render(request, 'disaster_details.html', {
+#         'disaster': disaster,
+#         'volunteers': volunteers,
+#         'donations': donations,
+#         'total_submissions': total_submissions,
+#         'total_hours': total_hours,
+#         'volunteer_value': volunteer_value,
+#         'hourly_rate': hourly_rate,
+#         'flagged_count': flagged_count,
+#     })
 
 
 def volunteer_pdf_view(request: HttpRequest, volunteer_id: int) -> HttpResponse:
@@ -584,9 +584,21 @@ def generate_volunteer_csv(request):
     writer = csv.writer(response)
     writer.writerow([
     'submission_type', 'id', 'name', 'email', 'phone_number', 'date', 'total_hours', 'location', 'work_desc', 'notes',
-    'project_name', 'equipment', 'other_equipment', 'equipment_make_model', 'equipment_hours', 'donation_type', 'material_type', 'equipment_type'])
+    'disaster_name', 'equipment', 'other_equipment', 'equipment_make_model', 'equipment_hours', 'donation_type', 'material_type', 'equipment_type'])
 
-    volunteers = Volunteer.objects.select_related('project').all()
+    raw_ids = request.GET.get('ids', '')
+    raw_disaster_id = request.GET.get('disaster_id', '')
+    selected_ids = [int(value) for value in raw_ids.split(',') if value.strip().isdigit()]
+
+    volunteers = Volunteer.objects.select_related('disaster')
+    if raw_disaster_id.strip().isdigit():
+        volunteers = volunteers.filter(disaster_id=int(raw_disaster_id))
+
+    if selected_ids:
+        volunteers = volunteers.filter(id__in=selected_ids)
+    else:
+        volunteers = volunteers.none()
+
     for volunteer in volunteers:
         writer.writerow([
     'volunteer',
@@ -599,7 +611,7 @@ def generate_volunteer_csv(request):
     volunteer.location_volunteered,
     volunteer.work_desc,
     volunteer.notes,
-    volunteer.project.name if volunteer.project else '',
+    volunteer.disaster.name if volunteer.disaster else '',
     volunteer.equipment,
     volunteer.other_equipment,
     volunteer.equipment_make_model,
@@ -614,14 +626,26 @@ def generate_donation_csv(request):
     )
     writer = csv.writer(response)
     writer.writerow([
-    'submission_type' ,'project_name', 'id', 'name', 'email', 'phone_number', 'date', 'total_hours', 'location', 'work_desc', 'notes',
+    'submission_type' ,'disaster_name', 'id', 'name', 'email', 'phone_number', 'date', 'total_hours', 'location', 'work_desc', 'notes',
     'donation_type', 'material_type', 'equipment_type'])
 
-    donations = Donations.objects.select_related('project').all()
+    raw_ids = request.GET.get('ids', '')
+    raw_disaster_id = request.GET.get('disaster_id', '')
+    selected_ids = [int(value) for value in raw_ids.split(',') if value.strip().isdigit()]
+
+    donations = Donations.objects.select_related('disaster')
+    if raw_disaster_id.strip().isdigit():
+        donations = donations.filter(disaster_id=int(raw_disaster_id))
+
+    if selected_ids:
+        donations = donations.filter(id__in=selected_ids)
+    else:
+        donations = donations.none()
+
     for donation in donations:
         writer.writerow([
     'donation',
-    donation.project.name if donation.project else '',
+    donation.disaster.name if donation.disaster else '',
     donation.id,
     donation.name,
     donation.email,
@@ -638,5 +662,5 @@ def generate_donation_csv(request):
 
 
 # def print_view(request, v_d_form_id):
-#     pet = get_object_or_404(Project, id=v_d_form_id)
+#     pet = get_object_or_404(Disaster, id=v_d_form_id)
 #     return render(request, 'pets.html', {'pet': pet})

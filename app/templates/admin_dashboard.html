@@ -13,39 +13,39 @@
     <div class="dash-wrap">
         <header class="dash-header">
             <div class="dash-heading">
-                <p class="dash-kicker">Project Dashboard</p>
+                <p class="dash-kicker">Disaster Dashboard</p>
                 <h1>Admin Dashboard</h1>
-                <p>Manage projects and review submissions.</p>
+                <p>Manage disasters and review submissions.</p>
             </div>
             <div class="actions-row dash-header-actions">
                 <a href="{% url 'general_dashboard' %}" class="btn btn-secondary">Back to General Dashboard</a>
-                <button id="openFormButton" class="btn" type="button">Create New Project</button>
-                {% if project and project.active %}
-                    <form method="POST" action="{% url 'close_project' project.id %}" class="inline-form" onsubmit="return confirm('Are you sure you want to close this project? This action cannot be undone!');">
+                <button id="openFormButton" class="btn" type="button">Create New Disaster</button>
+                {% if disaster and disaster.active %}
+                    <form method="POST" action="{% url 'close_disaster' disaster.id %}" class="inline-form" onsubmit="return confirm('Are you sure you want to close this disaster? This action cannot be undone!');">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Close Project</button>
+                        <button type="submit" class="btn btn-danger">Close Disaster</button>
                     </form>
-                {% elif project and not project.active %}
-                    <span class="status-pill is-closed">Project closed</span>
+                {% elif disaster and not disaster.active %}
+                    <span class="status-pill is-closed">Disaster closed</span>
                 {% endif %}
             </div>
         </header>
 
         <section class="dash-block dash-controls">
-            <label for="project-select" class="field-label">Select a project to view:</label>
-            <select id="project-select" class="select-field" onchange="if(this.value) window.location.href=this.value;">
-                <option value="">-- Select a Project --</option>
-                {% for project_item in projects %}
-                    <option value="{% url 'edit_project' project_item.id %}" {% if project and project.id == project_item.id %}selected{% endif %}>
-                        {{ project_item.name }}
+            <label for="disaster-select" class="field-label">Select a disaster to view:</label>
+            <select id="disaster-select" class="select-field" onchange="if(this.value) window.location.href=this.value;">
+                <option value="">-- Select a Disaster --</option>
+                {% for disaster_item in disasters %}
+                    <option value="{% url 'edit_disaster' disaster_item.id %}" {% if disaster and disaster.id == disaster_item.id %}selected{% endif %}>
+                        {{ disaster_item.name }}
                     </option>
                 {% empty %}
-                    <option disabled>No projects yet.</option>
+                    <option disabled>No disasters yet.</option>
                 {% endfor %}
             </select>
             
-            {% if project %}
-                <a href="{% url 'submissions_full_project' project.id %}" class="btn btn-secondary">View Project Submissions</a>
+            {% if disaster %}
+                <a href="{% url 'submissions_full_disaster' disaster.id %}" class="btn btn-secondary">View Disaster Submissions</a>
             {% else %}
                 <a href="{% url 'submissions_full' %}" class="btn btn-secondary">View All Submissions</a>
             {% endif %}
@@ -72,14 +72,6 @@
             </article>
         </section>
 
-        <section class="dash-block dash-actions">
-            <h2>Export Data</h2>
-            <div class="actions-row">
-                <a class="btn" href="{% url 'export_csv' %}">Export Volunteer CSV</a>
-                <a class="btn" href="{% url 'export_donations_csv' %}">Export Donations CSV</a>
-            </div>
-        </section>
-
         <section class="dash-toggle" role="tablist" aria-label="Submission Toggle">
             <button class="dash-tab {% if active_tab == 'volunteers-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'volunteers-panel' %}true{% else %}false{% endif %}" data-target="volunteers-panel">Volunteer Submissions</button>
             <button class="dash-tab {% if active_tab == 'donations-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'donations-panel' %}true{% else %}false{% endif %}" data-target="donations-panel">Donation Submissions</button>
@@ -88,49 +80,56 @@
             <button class="dash-tab {% if active_tab == 'trash-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'trash-panel' %}true{% else %}false{% endif %}" data-target="trash-panel">Trash</button>
         </section>
 
-        <section class="dash-block">
-            <form method="GET" class="search-form">
-                <input type="hidden" name="active_tab" value="{{ active_tab|default:'volunteers-panel' }}">
-                <input type="text" name="q" placeholder="Search submissions" value="{{ query|default_if_none:'' }}">
-                <button type="submit" class="btn">Search</button>
-            </form>
-            <form method="get" class="filter-form filter-select-form{% if active_tab != 'volunteers-panel' %} filter-hidden{% endif %}" data-filter-for="volunteers-panel">
-                <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
-                <input type="hidden" name="active_tab" value="{{ active_tab|default:'volunteers-panel' }}">
-                <div class="filter-select-wrap">
-                    {{ volunteer_filter.form.skilled_worker.label_tag }}
-                    {{ volunteer_filter.form.skilled_worker }}
-                </div>
-                <div class="filter-select-wrap">
-                    {{ volunteer_filter.form.order_by.label_tag }}
-                    {{ volunteer_filter.form.order_by }}
-                </div>
-                <div class="actions-row">
-                    <button type="submit" class="btn">Apply Filters</button>
-                    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Reset</a>
-                </div>
-            </form>
-            <form method="get" class="filter-form filter-select-form{% if active_tab != 'donations-panel' %} filter-hidden{% endif %}" data-filter-for="donations-panel">
-                <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
-                <input type="hidden" name="active_tab" value="{{ active_tab|default:'donations-panel' }}">
-                <div class="filter-select-wrap">
-                    {{ donation_filter.form.order_by.label_tag }}
-                    {{ donation_filter.form.order_by }}
-                </div>
-                <div class="actions-row">
-                    <button type="submit" class="btn">Apply Donation Sort</button>
-                    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Reset</a>
-                </div>
-            </form>
-        </section>
-
         <section id="volunteers-panel" class="dash-grid tab-panel" {% if active_tab != 'volunteers-panel' %}hidden{% endif %}>
             <article class="dash-block">
-                <h2>Volunteers</h2>
+                <div class="dash-toolbar-head">
+                    <div>
+                        <h2>Volunteers</h2>
+                        <p class="dash-toolbar-subtitle">Search, filter, export, and select volunteer submissions.</p>
+                    </div>
+                    <div class="actions-row dash-toolbar-actions">
+                        <button class="btn js-export-selected" type="button" data-panel-target="volunteers-panel" data-export-url="{% url 'export_csv' %}" data-disaster-id="{{ disaster.id|default:'' }}">Export Volunteer CSV</button>
+                    </div>
+                </div>
+
+                <div class="dash-toolbar-body">
+                    <form method="GET" class="search-form dash-search-form">
+                        <input type="hidden" name="active_tab" value="volunteers-panel">
+                        <label class="dash-search-input-wrap" aria-label="Search submissions">
+                            <input type="text" name="q" placeholder="Search submissions" value="{{ query|default_if_none:'' }}">
+                        </label>
+                    </form>
+
+                    <form method="get" class="filter-form filter-select-form dash-panel-filter">
+                        <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
+                        <input type="hidden" name="active_tab" value="volunteers-panel">
+                        <div class="filter-select-wrap">
+                            {{ volunteer_filter.form.skilled_worker.label_tag }}
+                            {{ volunteer_filter.form.skilled_worker }}
+                        </div>
+                        <div class="filter-select-wrap">
+                            {{ volunteer_filter.form.order_by.label_tag }}
+                            {{ volunteer_filter.form.order_by }}
+                        </div>
+                        <div class="actions-row">
+                            <button type="submit" class="btn">Apply Filters</button>
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Reset</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="dash-select-row">
+                    <label class="select-all-control">
+                        <input class="js-select-all-rows" type="checkbox" data-panel-target="volunteers-panel">
+                        <span>Select All</span>
+                    </label>
+                </div>
+
                 <div class="table-shell">
                     <table class="submission-table">
                         <thead>
                             <tr>
+                                <th class="selection-col">Select</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Phone</th>
@@ -144,6 +143,9 @@
                         <tbody>
                             {% for volunteer in volunteers %}
                                 <tr>
+                                    <td data-label="Select" class="selection-col">
+                                        <input type="checkbox" class="js-admin-select-row" data-panel-target="volunteers-panel" data-record-id="{{ volunteer.id }}" aria-label="Select volunteer {{ volunteer.name }}">
+                                    </td>
                                     <td data-label="Name">
                                         <strong>{{ volunteer.name }}</strong>
                                     </td>
@@ -176,7 +178,7 @@
 
                                                 <header class="submission-modal-head">
                                                     <h3>Volunteer Report</h3>
-                                                    <p class="submission-modal-project">{% if volunteer.project %}{{ volunteer.project.name }}{% else %}Unassigned Project{% endif %}</p>
+                                                    <p class="submission-modal-disaster">{% if volunteer.disaster %}{{ volunteer.disaster.name }}{% else %}Unassigned Disaster{% endif %}</p>
                                                     <p class="submission-modal-date">Submitted: {{ volunteer.created_at|date:"n/j/Y, g:i:s A" }}</p>
                                                 </header>
 
@@ -243,6 +245,39 @@
                                                     </section>
                                                 {% endif %}
 
+                                                <section class="actions-section">
+                                                    <h4>Actions</h4>
+                                                    <div class="actions-row">
+                                                        {% if volunteer.flagged %}
+                                                            <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn">Unflag Submission</button>
+                                                            </form>
+                                                        {% else %}
+                                                            <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-warning">Flag Submission</button>
+                                                            </form>
+                                                        {% endif %}
+
+                                                        {% if volunteer.deleted %}
+                                                            <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn">Restore Submission</button>
+                                                            </form>
+                                                            <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-danger">Permanently Delete</button>
+                                                            </form>
+                                                        {% else %}
+                                                            <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-danger">Move to Trash</button>
+                                                            </form>
+                                                        {% endif %}
+                                                    </div>
+                                                </section>
+
                                                 <footer class="submission-modal-foot">
 
                                                 </footer>
@@ -252,7 +287,7 @@
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td class="dash-empty" colspan="8">No volunteers yet.</td>
+                                    <td class="dash-empty" colspan="9">No volunteers yet.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -263,11 +298,50 @@
 
         <section id="donations-panel" class="dash-grid tab-panel" {% if active_tab != 'donations-panel' %}hidden{% endif %}>
             <article class="dash-block">
-                <h2>Donations</h2>
+                <div class="dash-toolbar-head">
+                    <div>
+                        <h2>Donations</h2>
+                        <p class="dash-toolbar-subtitle">Search, filter, export, and select donation submissions.</p>
+                    </div>
+                    <div class="actions-row dash-toolbar-actions">
+                        <button class="btn js-export-selected" type="button" data-panel-target="donations-panel" data-export-url="{% url 'export_donations_csv' %}" data-disaster-id="{{ disaster.id|default:'' }}">Export Donations CSV</button>
+                    </div>
+                </div>
+
+                <div class="dash-toolbar-body">
+                    <form method="GET" class="search-form dash-search-form">
+                        <input type="hidden" name="active_tab" value="donations-panel">
+                        <label class="dash-search-input-wrap" aria-label="Search submissions">
+                            <input type="text" name="q" placeholder="Search submissions" value="{{ query|default_if_none:'' }}">
+                        </label>
+                    </form>
+
+                    <form method="get" class="filter-form filter-select-form dash-panel-filter">
+                        <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
+                        <input type="hidden" name="active_tab" value="donations-panel">
+                        <div class="filter-select-wrap">
+                            {{ donation_filter.form.order_by.label_tag }}
+                            {{ donation_filter.form.order_by }}
+                        </div>
+                        <div class="actions-row">
+                            <button type="submit" class="btn">Apply Donation Sort</button>
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Reset</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="dash-select-row">
+                    <label class="select-all-control">
+                        <input class="js-select-all-rows" type="checkbox" data-panel-target="donations-panel">
+                        <span>Select All</span>
+                    </label>
+                </div>
+
                 <div class="table-shell">
                     <table class="submission-table">
                         <thead>
                             <tr>
+                                <th class="selection-col">Select</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Phone</th>
@@ -281,6 +355,9 @@
                         <tbody>
                             {% for donation in donations %}
                                 <tr>
+                                    <td data-label="Select" class="selection-col">
+                                        <input type="checkbox" class="js-admin-select-row" data-panel-target="donations-panel" data-record-id="{{ donation.id }}" aria-label="Select donation {{ donation.name }}">
+                                    </td>
                                     <td data-label="Name">
                                         <strong>{{ donation.name }}</strong>
                                     </td>
@@ -315,7 +392,7 @@
 
                                                 <header class="submission-modal-head">
                                                     <h3>Donation Report</h3>
-                                                    <p class="submission-modal-project">{% if donation.project %}{{ donation.project.name }}{% else %}Unassigned Project{% endif %}</p>
+                                                    <p class="submission-modal-disaster">{% if donation.disaster %}{{ donation.disaster.name }}{% else %}Unassigned Disaster{% endif %}</p>
                                                     <p class="submission-modal-date">Submitted: {{ donation.created_at|date:"n/j/Y, g:i:s A" }}</p>
                                                 </header>
 
@@ -374,6 +451,39 @@
                                                     </section>
                                                 {% endif %}
 
+                                                <section class="actions-section">
+                                                    <h4>Actions</h4>
+                                                    <div class="actions-row">
+                                                        {% if volunteer.flagged %}
+                                                            <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn">Unflag Submission</button>
+                                                            </form>
+                                                        {% else %}
+                                                            <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-warning">Flag Submission</button>
+                                                            </form>
+                                                        {% endif %}
+
+                                                        {% if volunteer.deleted %}
+                                                            <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn">Restore Submission</button>
+                                                            </form>
+                                                            <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-danger">Permanently Delete</button>
+                                                            </form>
+                                                        {% else %}
+                                                            <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-danger">Move to Trash</button>
+                                                            </form>
+                                                        {% endif %}
+                                                    </div>
+                                                </section>
+
                                                 <footer class="submission-modal-foot">
                                                 </footer>
     </div>
@@ -382,7 +492,7 @@
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td class="dash-empty" colspan="8">No donations yet.</td>
+                                    <td class="dash-empty" colspan="9">No donations yet.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -421,7 +531,7 @@
 
                                         <header class="submission-modal-head">
                                             <h3 id="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">Volunteer Report</h3>
-                                            <p class="submission-modal-project">{% if volunteer.project %}{{ volunteer.project.name }}{% else %}Unassigned Project{% endif %}</p>
+                                            <p class="submission-modal-disaster">{% if volunteer.disaster %}{{ volunteer.disaster.name }}{% else %}Unassigned Disaster{% endif %}</p>
                                             <p class="submission-modal-date">Submitted: {{ volunteer.created_at|date:"n/j/Y, g:i:s A" }}</p>
                                         </header>
 
@@ -488,6 +598,39 @@
                                             </section>
                                         {% endif %}
 
+                                        <section class="actions-section">
+                                            <h4>Actions</h4>
+                                            <div class="actions-row">
+                                                {% if volunteer.flagged %}
+                                                    <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn">Unflag Submission</button>
+                                                    </form>
+                                                {% else %}
+                                                    <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-warning">Flag Submission</button>
+                                                    </form>
+                                                {% endif %}
+
+                                                {% if volunteer.deleted %}
+                                                    <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn">Restore Submission</button>
+                                                    </form>
+                                                    <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger">Permanently Delete</button>
+                                                    </form>
+                                                {% else %}
+                                                    <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger">Move to Trash</button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </section>
+
                                         <footer class="submission-modal-foot"></footer>
                                     </div>
                                 </div>
@@ -529,7 +672,7 @@
 
                                         <header class="submission-modal-head">
                                             <h3>Donation Report</h3>
-                                            <p class="submission-modal-project">{% if donation.project %}{{ donation.project.name }}{% else %}Unassigned Project{% endif %}</p>
+                                            <p class="submission-modal-disaster">{% if donation.disaster %}{{ donation.disaster.name }}{% else %}Unassigned Disaster{% endif %}</p>
                                             <p class="submission-modal-date">Submitted: {{ donation.created_at|date:"n/j/Y, g:i:s A" }}</p>
                                         </header>
 
@@ -588,6 +731,39 @@
                                             </section>
                                         {% endif %}
 
+                                        <section class="actions-section">
+                                            <h4>Actions</h4>
+                                            <div class="actions-row">
+                                                {% if volunteer.flagged %}
+                                                    <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn">Unflag Submission</button>
+                                                    </form>
+                                                {% else %}
+                                                    <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-warning">Flag Submission</button>
+                                                    </form>
+                                                {% endif %}
+
+                                                {% if volunteer.deleted %}
+                                                    <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn">Restore Submission</button>
+                                                    </form>
+                                                    <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger">Permanently Delete</button>
+                                                    </form>
+                                                {% else %}
+                                                    <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger">Move to Trash</button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </section>
+
                                         <footer class="submission-modal-foot"></footer>
                                     </div>
                                 </div>
@@ -600,11 +776,11 @@
         </section>
 
         <section id="settings-panel" class="tab-panel" {% if active_tab != 'settings-panel' %}hidden{% endif %}>
-            {% if project %}
+            {% if disaster %}
                 <article class="dash-block settings-shell">
                     <div class="settings-head">
-                        <h2 class="settings-title">Project Settings</h2>
-                        <p class="settings-subtitle">Configure hourly rates and project parameters</p>
+                        <h2 class="settings-title">Disaster Settings</h2>
+                        <p class="settings-subtitle">Configure hourly rates and disaster parameters</p>
                     </div>
 
                     <div class="settings-rate-grid">
@@ -612,7 +788,7 @@
                             <div class="settings-rate-wrap">
                                 <p class="settings-label">Current (base) Hourly Rate</p>
                                 <div class="settings-rate-line">
-                                    <strong class="settings-rate-value">${{ project.hourly_rate|floatformat:0 }}</strong>
+                                    <strong class="settings-rate-value">${{ disaster.hourly_rate|floatformat:0 }}</strong>
                                     <span class="settings-rate-unit">per hour</span>
                                 </div>
                             </div>
@@ -620,7 +796,7 @@
                             <div class="settings-rate-form">
                                 <label class="settings-label" for="hourly-rate">Update Hourly Rate</label>
                                 <div class="settings-rate-actions">
-                                    <input id="hourly-rate" class="settings-input" type="number" step="0.01" value="{{ project.hourly_rate|floatformat:2 }}" readonly>
+                                    <input id="hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.hourly_rate|floatformat:2 }}" readonly>
                                     <button class="btn" type="button">Update</button>
                                 </div>
                                 <p class="settings-note">Changes will affect future revenue calculations</p>
@@ -631,7 +807,7 @@
                             <div class="settings-rate-wrap">
                                 <p class="settings-label">Current Skilled Hourly Rate</p>
                                 <div class="settings-rate-line">
-                                    <strong class="settings-rate-value">${{ project.skilled_hourly_rate|floatformat:0 }}</strong>
+                                    <strong class="settings-rate-value">${{ disaster.skilled_hourly_rate|floatformat:0 }}</strong>
                                     <span class="settings-rate-unit">per hour</span>
                                 </div>
                             </div>
@@ -639,7 +815,7 @@
                             <div class="settings-rate-form">
                                 <label class="settings-label" for="skilled-hourly-rate">Update Skilled Hourly Rate</label>
                                 <div class="settings-rate-actions">
-                                    <input id="skilled-hourly-rate" class="settings-input" type="number" step="0.01" value="{{ project.skilled_hourly_rate|floatformat:2 }}" readonly>
+                                    <input id="skilled-hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.skilled_hourly_rate|floatformat:2 }}" readonly>
                                     <button class="btn" type="button">Update</button>
                                 </div>
                                 <p class="settings-note">Changes will affect future revenue calculations</p>
@@ -649,24 +825,24 @@
 
                     <hr class="settings-divider">
 
-                    <div class="project-info-block">
-                        <h3>Project Information</h3>
-                        <dl class="project-info-list">
-                            <div class="project-info-row"><dt>Project Name:</dt><dd>{{ project.name }}</dd></div>
-                            <div class="project-info-row"><dt>Location:</dt><dd>{{ project.location|default:"Not provided" }}</dd></div>
-                            <div class="project-info-row"><dt>Status:</dt><dd><span class="status-pill {% if project.active %}is-active{% else %}is-closed{% endif %}">{% if project.active %}active{% else %}closed{% endif %}</span></dd></div>
-                            <div class="project-info-row"><dt>Goal Amount:</dt><dd>${{ total_value }}</dd></div>
-                            <div class="project-info-row"><dt>Created:</dt><dd>{{ project.declaration_date|date:"n/j/Y" }}</dd></div>
+                    <div class="disaster-info-block">
+                        <h3>Disaster Information</h3>
+                        <dl class="disaster-info-list">
+                            <div class="disaster-info-row"><dt>Disaster Name:</dt><dd>{{ disaster.name }}</dd></div>
+                            <div class="disaster-info-row"><dt>Location:</dt><dd>{{ disaster.location|default:"Not provided" }}</dd></div>
+                            <div class="disaster-info-row"><dt>Status:</dt><dd><span class="status-pill {% if disaster.active %}is-active{% else %}is-closed{% endif %}">{% if disaster.active %}active{% else %}closed{% endif %}</span></dd></div>
+                            <div class="disaster-info-row"><dt>Goal Amount:</dt><dd>${{ total_value }}</dd></div>
+                            <div class="disaster-info-row"><dt>Created:</dt><dd>{{ disaster.declaration_date|date:"n/j/Y" }}</dd></div>
                         </dl>
                     </div>
 
-                    <div class="actions-row project-settings-actions">
-                        <button class="btn open-modal-btn" data-target="modal-{{ project.id }}" type="button">Edit Project</button>
+                    <div class="actions-row disaster-settings-actions">
+                        <button class="btn open-modal-btn" data-target="modal-{{ disaster.id }}" type="button">Edit Disaster</button>
                     </div>
                 </article>
             {% else %}
                 <article class="dash-block">
-                    <p>Select a project to edit.</p>
+                    <p>Select a disaster to edit.</p>
                 </article>
             {% endif %}
         </section>
@@ -720,9 +896,9 @@
         </section>
 
         <div id="formModal" class="modal" aria-hidden="true">
-            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="createProjectTitle">
+            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="createDisasterTitle">
                 <span class="close" aria-label="Close">&times;</span>
-                <h2 id="createProjectTitle">Create New Project</h2>
+                <h2 id="createDisasterTitle">Create New Disaster</h2>
                 <form method="post" action="{% url 'admin_dashboard' %}">
                     {% csrf_token %}
                     {{ create_form.name.label_tag }}
@@ -761,17 +937,17 @@
                     {{ create_form.applicant.label_tag }}
                     {{ create_form.applicant }}
                     
-                    <button type="submit" class="btn">Create Project</button>
+                    <button type="submit" class="btn">Create Disaster</button>
                 </form>
             </div>
         </div>
 
-        {% if project %}
-            <div id="modal-{{ project.id }}" class="modal" aria-hidden="true">
-                <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="editProjectTitle-{{ project.id }}">
+        {% if disaster %}
+            <div id="modal-{{ disaster.id }}" class="modal" aria-hidden="true">
+                <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="editDisasterTitle-{{ disaster.id }}">
                     <span class="close" aria-label="Close">&times;</span>
-                    <h2 id="editProjectTitle-{{ project.id }}">Editing: {{ project.name }}</h2>
-                    <form method="post" action="{% url 'edit_project' project.id %}">
+                    <h2 id="editDisasterTitle-{{ disaster.id }}">Editing: {{ disaster.name }}</h2>
+                    <form method="post" action="{% url 'edit_disaster' disaster.id %}">
                         {% csrf_token %}
                         {{ edit_form.name.label_tag }}
                         {{ edit_form.name }}
@@ -879,27 +1055,6 @@ function toggleDonationFlaggedStatus(donationId) {
 document.addEventListener('DOMContentLoaded', function () {
     const tabs = document.querySelectorAll('.dash-tab');
     const panels = document.querySelectorAll('.tab-panel');
-    const filterForms = document.querySelectorAll('.filter-form');
-    const searchForms = document.querySelectorAll('.search-form');
-
-    function updateFilterVisibility(targetId) {
-        filterForms.forEach(form => {
-            const filterFor = form.dataset.filterFor;
-            form.classList.toggle('filter-hidden', filterFor !== targetId);
-
-            const hiddenActiveTab = form.querySelector('input[name="active_tab"]');
-            if (hiddenActiveTab) {
-                hiddenActiveTab.value = targetId;
-            }
-        });
-
-        searchForms.forEach(form => {
-            const hiddenActiveTab = form.querySelector('input[name="active_tab"]');
-            if (hiddenActiveTab) {
-                hiddenActiveTab.value = targetId;
-            }
-        });
-    }
 
     tabs.forEach(tab => {
         tab.addEventListener('click', function () {
@@ -914,15 +1069,88 @@ document.addEventListener('DOMContentLoaded', function () {
             panels.forEach(panel => {
                 panel.hidden = panel.id !== targetId;
             });
-
-            updateFilterVisibility(targetId);
         });
     });
 
-    const initialActive = document.querySelector('.dash-tab.is-active');
-    if (initialActive) {
-        updateFilterVisibility(initialActive.dataset.target);
-    }
+    document.querySelectorAll('.js-select-all-rows').forEach(function (checkbox) {
+        checkbox.addEventListener('change', function () {
+            const panelId = checkbox.getAttribute('data-panel-target');
+            if (!panelId) {
+                return;
+            }
+
+            const checkboxes = Array.from(document.querySelectorAll(`#${panelId} .js-admin-select-row`));
+            if (!checkboxes.length) {
+                return;
+            }
+
+            const shouldCheck = checkbox.checked;
+
+            checkboxes.forEach(function (rowCheckbox) {
+                rowCheckbox.checked = shouldCheck;
+                const row = rowCheckbox.closest('tr');
+                if (row) {
+                    row.classList.toggle('is-selected', rowCheckbox.checked);
+                }
+            });
+
+            checkbox.indeterminate = false;
+        });
+    });
+
+    document.querySelectorAll('.js-admin-select-row').forEach(function (checkbox) {
+        checkbox.addEventListener('change', function () {
+            const row = checkbox.closest('tr');
+            if (row) {
+                row.classList.toggle('is-selected', checkbox.checked);
+            }
+
+            const panel = checkbox.closest('.tab-panel');
+            if (!panel) {
+                return;
+            }
+
+            const panelId = panel.id;
+            const rowCheckboxes = Array.from(document.querySelectorAll(`#${panelId} .js-admin-select-row`));
+            const selectAll = document.querySelector(`.js-select-all-rows[data-panel-target="${panelId}"]`);
+
+            if (selectAll && rowCheckboxes.length) {
+                const checkedCount = rowCheckboxes.filter(function (rowCheckbox) {
+                    return rowCheckbox.checked;
+                }).length;
+
+                selectAll.checked = checkedCount === rowCheckboxes.length;
+                selectAll.indeterminate = checkedCount > 0 && checkedCount < rowCheckboxes.length;
+            }
+        });
+    });
+
+    document.querySelectorAll('.js-export-selected').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const panelId = button.getAttribute('data-panel-target');
+            const exportUrl = button.getAttribute('data-export-url');
+            const disasterId = button.getAttribute('data-disaster-id');
+            if (!panelId || !exportUrl) {
+                return;
+            }
+
+            const selected = Array.from(document.querySelectorAll(`#${panelId} .js-admin-select-row:checked`));
+            const selectedIds = selected
+                .map(function (checkbox) { return checkbox.getAttribute('data-record-id'); })
+                .filter(function (id) { return id; });
+
+            if (!selectedIds.length) {
+                alert('Select at least one form to export.');
+                return;
+            }
+
+            const query = new URLSearchParams({ ids: selectedIds.join(',') });
+            if (disasterId) {
+                query.set('disaster_id', disasterId);
+            }
+            window.location.href = `${exportUrl}?${query.toString()}`;
+        });
+    });
 
     document.querySelectorAll('.js-toggle-flag').forEach(function(btn) {
         btn.addEventListener('click', function () {
@@ -1009,7 +1237,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Custom confirmation for closing projects
+// Custom confirmation for closing disasters
 (function() {
     // Save the original form submit
     const forms = document.querySelectorAll('form.inline-form');
@@ -1043,7 +1271,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             content.innerHTML = `
                 <h2 style="color:#b71c1c;">⚠️ WARNING!</h2>
-                <p>This action cannot be undone! Are you sure you want to close this project?</p>
+                <p>This action cannot be undone! Are you sure you want to close this disaster?</p>
                 <div style="margin-top:1.5rem; display:flex; justify-content:space-around;">
                     <button id="cancel-btn" style="padding:0.5rem 1rem; border-radius:0.35rem; cursor:pointer;">Cancel</button>
                     <button id="confirm-btn" style="padding:0.5rem 1rem; background:#e53935; color:white; font-weight:bold; border:1px solid #b71c1c; border-radius:0.35rem; cursor:pointer;">Yes, Close</button>

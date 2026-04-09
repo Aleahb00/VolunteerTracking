@@ -185,14 +185,14 @@ body {
   margin-right: 0.25rem;
 }
 
-/* Projects List */
-.projects-list {
+/* Disasters List */
+.disasters-list {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.project-item {
+.disaster-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -202,26 +202,26 @@ body {
   transition: background-color 0.2s;
 }
 
-.project-item:hover {
+.disaster-item:hover {
   background-color: var(--muted-bg);
 }
 
-.project-info {
+.disaster-info {
   flex: 1;
 }
 
-.project-title {
+.disaster-title {
   font-weight: 600;
   margin-bottom: 0.25rem;
 }
 
-.project-description {
+.disaster-description {
   font-size: 0.875rem;
   color: var(--text-muted);
   margin-bottom: 0.5rem;
 }
 
-.project-badges {
+.disaster-badges {
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
@@ -511,7 +511,7 @@ body {
   font-size: 2.1rem;
 }
 
-.submission-modal-project,
+.submission-modal-disaster,
 .submission-modal-date {
   margin: 0.22rem 0 0;
   color: #4b6671;
@@ -819,7 +819,7 @@ body {
     gap: 1rem;
   }
 
-  .project-item {
+  .disaster-item {
     flex-direction: column;
     align-items: flex-start;
   }
