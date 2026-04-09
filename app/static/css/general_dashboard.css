@@ -38,6 +38,12 @@ body {
   margin-bottom: 1rem;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
 .header-title {
   margin-bottom: 0.5rem;
   font-size: 1.875rem;
@@ -85,6 +91,92 @@ body {
   border: none;
   background: none;
   cursor: pointer;
+}
+
+.modal-content.create-disaster-modal {
+  background: #eef2f1;
+  border: 1px solid #d7e1dd;
+  border-radius: 12px;
+  width: min(500px, calc(100vw - 1.25rem));
+  margin: 4.5% auto;
+  padding: 0.85rem 0.75rem 1rem;
+  position: relative;
+}
+
+.modal-content.create-disaster-modal h2 {
+  margin: 0 0 0.75rem;
+  color: #143744;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.modal-content.create-disaster-modal .close {
+  float: none;
+  position: absolute;
+  top: 0.75rem;
+  right: 0.9rem;
+  font-size: 1.55rem;
+  color: #4f706b;
+  cursor: pointer;
+}
+
+.create-disaster-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.create-disaster-form label {
+  color: #11343f;
+  font-weight: 700;
+  font-size: 0.95rem;
+  width: min(100%, 420px);
+}
+
+.create-disaster-form input,
+.create-disaster-form select,
+.create-disaster-form textarea {
+  border: 1px solid #d9e2de;
+  border-radius: 10px;
+  background: #e8eeec;
+  color: #244e58;
+  padding: 0.56rem 0.65rem;
+  font-size: 0.92rem;
+  width: min(100%, 420px);
+  align-self: center;
+}
+
+.create-disaster-form input:focus,
+.create-disaster-form select:focus,
+.create-disaster-form textarea:focus {
+  outline: none;
+  border-color: #59b68f;
+  box-shadow: 0 0 0 2px rgba(89, 182, 143, 0.24);
+  background: #eef6f2;
+}
+
+.create-disaster-form button {
+  margin-top: 0.35rem;
+  width: min(100%, 420px);
+  padding: 0.62rem 0.8rem;
+  border-radius: 9px;
+  font-size: 1rem;
+  font-weight: 700;
+  background: #2d7552;
+  border-color: #2d7552;
+}
+
+.create-disaster-form button:hover {
+  background: #276746;
+  border-color: #276746;
+}
+
+.modal-content.create-disaster-modal .helptext {
+  color: #5e7570;
+  font-size: 0.86rem;
 }
 
 /* Stats Grid */
@@ -185,14 +277,14 @@ body {
   margin-right: 0.25rem;
 }
 
-/* Projects List */
-.projects-list {
+/* Disasters List */
+.disasters-list {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.project-item {
+.disaster-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -202,26 +294,26 @@ body {
   transition: background-color 0.2s;
 }
 
-.project-item:hover {
+.disaster-item:hover {
   background-color: var(--muted-bg);
 }
 
-.project-info {
+.disaster-info {
   flex: 1;
 }
 
-.project-title {
+.disaster-title {
   font-weight: 600;
   margin-bottom: 0.25rem;
 }
 
-.project-description {
+.disaster-description {
   font-size: 0.875rem;
   color: var(--text-muted);
   margin-bottom: 0.5rem;
 }
 
-.project-badges {
+.disaster-badges {
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
@@ -511,7 +603,7 @@ body {
   font-size: 2.1rem;
 }
 
-.submission-modal-project,
+.submission-modal-disaster,
 .submission-modal-date {
   margin: 0.22rem 0 0;
   color: #4b6671;
@@ -819,7 +911,7 @@ body {
     gap: 1rem;
   }
 
-  .project-item {
+  .disaster-item {
     flex-direction: column;
     align-items: flex-start;
   }

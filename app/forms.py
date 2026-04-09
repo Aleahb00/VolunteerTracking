@@ -16,9 +16,9 @@ class RegistrationForm(UserCreationForm):
         fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'username', 'email', 'password1', 'password2')
 
 
-class ProjectForm(forms.ModelForm):
+class DisasterForm(forms.ModelForm):
     class Meta:
-        model = Project
+        model = Disaster
         fields = '__all__'
         widgets = {
             'name': forms.TextInput(attrs={
@@ -161,10 +161,10 @@ class VolunteerForm(forms.ModelForm):
         from django.db.models import Min
         from django.core.exceptions import ValidationError
 
-        earliest_date = Project.objects.aggregate(Min('start_date'))['start_date__min']
+        earliest_date = Disaster.objects.aggregate(Min('start_date'))['start_date__min']
 
         if earliest_date and user_date and user_date < earliest_date:
-            raise ValidationError('Date cannot be before earliest project date')
+            raise ValidationError('Date cannot be before earliest disaster date')
 
         return user_date
     
@@ -176,10 +176,10 @@ class VolunteerForm(forms.ModelForm):
         skilled_worker = (cleaned_data.get('skilled_worker') or '').strip().lower()
 
         min_similarity = 80
-        project_locations = Project.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
+        disaster_locations = Disaster.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
 
         best_similarity = max(
-            (fuzz.ratio(location.lower(), project_location.lower()) for project_location in project_locations),default=0)
+            (fuzz.ratio(location.lower(), disaster_location.lower()) for disaster_location in disaster_locations),default=0)
 
         if location and best_similarity < min_similarity:
             flags.append(Volunteer.FLAG_INVALID_LOCATION)
@@ -291,10 +291,10 @@ class DonationForm(forms.ModelForm):
         location = (cleaned_data.get('location_donated') or '').strip()
         
         min_similarity = 80
-        project_locations = Project.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
+        disaster_locations = Disaster.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
         
         best_similarity = max(
-            (fuzz.ratio(location.lower(), project_location.lower()) for project_location in project_locations),
+            (fuzz.ratio(location.lower(), disaster_location.lower()) for disaster_location in disaster_locations),
             default=0)
         
         if location and best_similarity < min_similarity:
@@ -312,9 +312,9 @@ class DonationForm(forms.ModelForm):
         from django.db.models import Min
         from django.core.exceptions import ValidationError
 
-        earliest_date = Project.objects.aggregate(Min('start_date'))['start_date__min']
+        earliest_date = Disaster.objects.aggregate(Min('start_date'))['start_date__min']
 
         if earliest_date and user_date and user_date < earliest_date:
-            raise ValidationError('Date cannot be before earliest project date')
+            raise ValidationError('Date cannot be before earliest disaster date')
 
         return user_date
