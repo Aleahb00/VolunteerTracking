@@ -232,6 +232,7 @@ header {
   border-radius: var(--radius);
   overflow: hidden;
   cursor: ew-resize;
+  -webkit-user-select: none;
   user-select: none;
   aspect-ratio: 16 / 7;
 }
@@ -281,6 +282,7 @@ header {
   height: 44px;
   border-radius: 50%;
   background: rgba(255,255,255,0.9);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -305,6 +307,7 @@ header {
   color: var(--white);
   padding: 6px 14px;
   border-radius: 6px;
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 
@@ -352,7 +355,7 @@ header {
 
 .progress-section h2 { margin-bottom: 8px; }
 
-.project-desc {
+.disaster-desc {
   text-align: center;
   color: var(--text-muted);
   font-size: 0.95rem;
@@ -575,6 +578,7 @@ header {
   border-radius: 8px;
   text-decoration: none;
   letter-spacing: 0.02em;
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   transition: background 0.2s, border-color 0.2s;
 }

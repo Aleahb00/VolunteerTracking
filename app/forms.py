@@ -16,57 +16,57 @@ class RegistrationForm(UserCreationForm):
         fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'username', 'email', 'password1', 'password2')
 
 
-class ProjectForm(forms.ModelForm):
+class DisasterForm(forms.ModelForm):
     class Meta:
-        model = Project
+        model = Disaster
         fields = '__all__'
         widgets = {
             'name': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'number': forms.NumberInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'number'}),
             
             'type': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'category': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'size': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'declaration_date': forms.DateInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'date'}),
             
             'completion_date': forms.DateInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'date'}),
             
             'start_date': forms.DateInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'date'}),
             
             'end_date': forms.DateInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'date'}),
             
             'location': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'process_step': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'applicant': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
         }
             
@@ -95,55 +95,55 @@ class VolunteerForm(forms.ModelForm):
             }
         widgets = {
             'name': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'contact_method': forms.Select(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'select'}),
             
             'email': forms.EmailInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'email'}),
             
             'phone_number': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'date_of_work': forms.DateInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'date'}),
             
             
             'total_hours': forms.NumberInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'number'}),
             
             'location_volunteered': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'work_desc': forms.Textarea(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'equipment': forms.Select(attrs={
-                'class': 'unknown',
+                'class': 'form-control',
                 'id': 'equipment-select'
             }),
 
             'other_equipment': forms.TextInput(attrs={
-                'class': 'unknown',
+                'class': 'form-control',
                 'id': 'other-equipment',
                 'placeholder': 'Please specify'
             }),
             
             'equipment_make_model': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'equipment_hours': forms.NumberInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'number'}),
             
             'skilled_worker': forms.RadioSelect(attrs={
@@ -151,7 +151,7 @@ class VolunteerForm(forms.ModelForm):
             }),
             
             'notes': forms.Textarea(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
         }
 
@@ -161,10 +161,10 @@ class VolunteerForm(forms.ModelForm):
         from django.db.models import Min
         from django.core.exceptions import ValidationError
 
-        earliest_date = Project.objects.aggregate(Min('start_date'))['start_date__min']
+        earliest_date = Disaster.objects.aggregate(Min('start_date'))['start_date__min']
 
         if earliest_date and user_date and user_date < earliest_date:
-            raise ValidationError('Date cannot be before earliest project date')
+            raise ValidationError('Date cannot be before earliest disaster date')
 
         return user_date
     
@@ -176,10 +176,10 @@ class VolunteerForm(forms.ModelForm):
         skilled_worker = (cleaned_data.get('skilled_worker') or '').strip().lower()
 
         min_similarity = 80
-        project_locations = Project.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
+        disaster_locations = Disaster.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
 
         best_similarity = max(
-            (fuzz.ratio(location.lower(), project_location.lower()) for project_location in project_locations),default=0)
+            (fuzz.ratio(location.lower(), disaster_location.lower()) for disaster_location in disaster_locations),default=0)
 
         if location and best_similarity < min_similarity:
             flags.append(Volunteer.FLAG_INVALID_LOCATION)
@@ -213,61 +213,61 @@ class DonationForm(forms.ModelForm):
         }
         widgets = {
             'name': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'contact_method': forms.Select(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'select'}),
             
             'email': forms.EmailInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'email',
                 'required': False}),
             
             'phone_number': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text',
                 'required': False}),
             
             'date_of_donation': forms.DateInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'date'}),
             
             'total_hours': forms.NumberInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'number'}),
             
             'location_donated': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'work_desc': forms.Textarea(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'notes': forms.Textarea(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'donation_type': forms.Select(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'select'}),
             
             'material_type': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'equipment_type': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'money_donated': forms.NumberInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'number'}),
             
             'other_donation_type': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
         }
 
@@ -291,10 +291,10 @@ class DonationForm(forms.ModelForm):
         location = (cleaned_data.get('location_donated') or '').strip()
         
         min_similarity = 80
-        project_locations = Project.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
+        disaster_locations = Disaster.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
         
         best_similarity = max(
-            (fuzz.ratio(location.lower(), project_location.lower()) for project_location in project_locations),
+            (fuzz.ratio(location.lower(), disaster_location.lower()) for disaster_location in disaster_locations),
             default=0)
         
         if location and best_similarity < min_similarity:
@@ -312,9 +312,9 @@ class DonationForm(forms.ModelForm):
         from django.db.models import Min
         from django.core.exceptions import ValidationError
 
-        earliest_date = Project.objects.aggregate(Min('start_date'))['start_date__min']
+        earliest_date = Disaster.objects.aggregate(Min('start_date'))['start_date__min']
 
         if earliest_date and user_date and user_date < earliest_date:
-            raise ValidationError('Date cannot be before earliest project date')
+            raise ValidationError('Date cannot be before earliest disaster date')
 
         return user_date

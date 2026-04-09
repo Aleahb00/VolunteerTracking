@@ -11,24 +11,24 @@
 <main class="print-view">
     <header class="pv-header no-print">
         <div>
-            <h1 class="pv-title">Print View{% if project %} - {{ project.name }}{% endif %}</h1>
+            <h1 class="pv-title">Print View{% if disaster %} - {{ disaster.name }}{% endif %}</h1>
             <p class="pv-subtitle">{{ volunteers|length|add:donations|length }} total submissions ({{ volunteers|length }} volunteers, {{ donations|length }} donations)</p>
         </div>
         <div class="pv-actions">
             <button class="btn" type="button" onclick="selectAllReports()">Select All</button>
             <button class="btn" type="button" onclick="printSelectedReports()">Print Selected</button>
             <button class="btn" type="button" onclick="printAllReports()">Print All Reports</button>
-            <a class="btn btn-secondary" href="{% if project %}{% url 'edit_project' project.id %}{% else %}{% url 'admin_dashboard' %}{% endif %}">Back to Dashboard</a>
+            <a class="btn btn-secondary" href="{% if disaster %}{% url 'edit_disaster' disaster.id %}{% else %}{% url 'admin_dashboard' %}{% endif %}">Back to Dashboard</a>
         </div>
     </header>
 
     <section class="pv-controls no-print">
         <div class="pv-toolbar pv-toolbar--volunteer{% if active_tab != 'volunteer-panel' %} is-hidden{% endif %}" data-toolbar-for="volunteer-panel">
-            <form method="get" class="pv-search" action="{% if project %}{% url 'submissions_full_project' project.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
+            <form method="get" class="pv-search" action="{% if disaster %}{% url 'submissions_full_disaster' disaster.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
                 <input type="hidden" name="active_tab" value="volunteer-panel">
                 <input type="text" name="q" value="{{ query|default_if_none:'' }}" placeholder="Search volunteers...">
             </form>
-            <form method="get" class="pv-filter pv-filter--stack" action="{% if project %}{% url 'submissions_full_project' project.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
+            <form method="get" class="pv-filter pv-filter--stack" action="{% if disaster %}{% url 'submissions_full_disaster' disaster.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
                 <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
                 <input type="hidden" name="active_tab" value="volunteer-panel">
                 <div class="pv-field">
@@ -41,17 +41,17 @@
                 </div>
                 <div class="pv-filter-actions">
                     <button class="btn" type="submit">Apply</button>
-                    <a class="btn btn-secondary" href="{% if project %}{% url 'submissions_full_project' project.id %}?active_tab=volunteer-panel{% else %}{% url 'submissions_full' %}?active_tab=volunteer-panel{% endif %}">Reset</a>
+                    <a class="btn btn-secondary" href="{% if disaster %}{% url 'submissions_full_disaster' disaster.id %}?active_tab=volunteer-panel{% else %}{% url 'submissions_full' %}?active_tab=volunteer-panel{% endif %}">Reset</a>
                 </div>
             </form>
         </div>
 
         <div class="pv-toolbar pv-toolbar--donation{% if active_tab != 'donation-panel' %} is-hidden{% endif %}" data-toolbar-for="donation-panel">
-            <form method="get" class="pv-search" action="{% if project %}{% url 'submissions_full_project' project.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
+            <form method="get" class="pv-search" action="{% if disaster %}{% url 'submissions_full_disaster' disaster.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
                 <input type="hidden" name="active_tab" value="donation-panel">
                 <input type="text" name="q" value="{{ query|default_if_none:'' }}" placeholder="Search donations...">
             </form>
-            <form method="get" class="pv-filter" action="{% if project %}{% url 'submissions_full_project' project.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
+            <form method="get" class="pv-filter" action="{% if disaster %}{% url 'submissions_full_disaster' disaster.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
                 <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
                 <input type="hidden" name="active_tab" value="donation-panel">
                 <div class="pv-field">
@@ -60,7 +60,7 @@
                 </div>
                 <div class="pv-filter-actions">
                     <button class="btn" type="submit">Apply</button>
-                    <a class="btn btn-secondary" href="{% if project %}{% url 'submissions_full_project' project.id %}?active_tab=donation-panel{% else %}{% url 'submissions_full' %}?active_tab=donation-panel{% endif %}">Reset</a>
+                    <a class="btn btn-secondary" href="{% if disaster %}{% url 'submissions_full_disaster' disaster.id %}?active_tab=donation-panel{% else %}{% url 'submissions_full' %}?active_tab=donation-panel{% endif %}">Reset</a>
                 </div>
             </form>
         </div>
@@ -86,11 +86,11 @@
 
                         <div class="page-header">
                             <h2>Volunteer Time Report</h2>
-                            <p class="project-name">
-                                {% if volunteer.project %}
-                                    {{ volunteer.project.name }}
+                            <p class="disaster-name">
+                                {% if volunteer.disaster %}
+                                    {{ volunteer.disaster.name }}
                                 {% else %}
-                                    Unassigned Project
+                                    Unassigned Disaster
                                 {% endif %}
                             </p>
                             <p class="submission-date">Submitted: {{ volunteer.date_of_work|date:"m/d/Y" }}</p>
@@ -218,11 +218,11 @@
 
                         <div class="page-header">
                             <h2>Donation Report</h2>
-                            <p class="project-name">
-                                {% if donation.project %}
-                                    {{ donation.project.name }}
+                            <p class="disaster-name">
+                                {% if donation.disaster %}
+                                    {{ donation.disaster.name }}
                                 {% else %}
-                                    Unassigned Project
+                                    Unassigned Disaster
                                 {% endif %}
                             </p>
                             <p class="submission-date">Submitted: {{ donation.date_of_donation|date:"m/d/Y" }}</p>

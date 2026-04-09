@@ -16,15 +16,65 @@
         <div class="header-content">
             <div>
             <h1 class="header-title">General Admin Dashboard</h1>
-            <p class="header-subtitle">Overview of all flagged submissions across projects</p>
+            <p class="header-subtitle">Overview of all flagged submissions across disasters</p>
             </div>
 
-            <button type="button" class="btn" id="open-settings" aria-haspopup="dialog" aria-controls="radix-:rle:">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="card-icon">
-                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-            Settings</button>
+            <div class="header-actions">
+                <button type="button" class="btn open-modal-btn" data-target="create-form-modal">Create New Disaster</button>
+                <button type="button" class="btn" id="open-settings" aria-haspopup="dialog" aria-controls="radix-:rle:">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="card-icon">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                Settings</button>
+            </div>
+
+            <div id="create-form-modal" class="modal" aria-hidden="true">
+                <div class="modal-content create-disaster-modal" role="dialog" aria-modal="true" aria-labelledby="createDisasterTitle">
+                    <span class="close" aria-label="Close">&times;</span>
+                    <h2 id="createDisasterTitle">Create New Disaster</h2>
+                    <form method="post" action="{% url 'admin_dashboard' %}" class="create-disaster-form">
+                        {% csrf_token %}
+                        {{ create_form.name.label_tag }}
+                        {{ create_form.name }}
+
+                        {{ create_form.number.label_tag }}
+                        {{ create_form.number }}
+
+                        {{ create_form.type.label_tag }}
+                        {{ create_form.type }}
+
+                        {{ create_form.category.label_tag }}
+                        {{ create_form.category }}
+
+                        {{ create_form.size.label_tag }}
+                        {{ create_form.size }}
+
+                        {{ create_form.declaration_date.label_tag }}
+                        {{ create_form.declaration_date }}
+
+                        {{ create_form.completion_date.label_tag }}
+                        {{ create_form.completion_date }}
+
+                        {{ create_form.start_date.label_tag }}
+                        {{ create_form.start_date }}
+
+                        {{ create_form.end_date.label_tag }}
+                        {{ create_form.end_date }}
+
+                        {{ create_form.location.label_tag }}
+                        {{ create_form.location }}
+
+                        {{ create_form.process_step.label_tag }}
+                        {{ create_form.process_step }}
+
+                        {{ create_form.applicant.label_tag }}
+                        {{ create_form.applicant }}
+
+                        <button type="submit" class="btn">Create Disaster</button>
+                    </form>
+                </div>
+            </div>
             <div id="settings-modal" class="modal hidden">
                 <div class="modal-content">
                     
@@ -71,7 +121,7 @@
         <section class="stats-grid">
         <article class="card">
             <div class="card-header">
-            <h4>Total Projects</h4>
+            <h4>Total Disasters</h4>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="card-icon">
                 <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path>
                 <path d="M12 9v4"></path>
@@ -79,8 +129,8 @@
             </svg>
             </div>
             <div class="card-content">
-            <div class="stat-value">{{ total_projects }}</div>
-            <p class="stat-label">Active projects</p>
+            <div class="stat-value">{{ total_disasters }}</div>
+            <p class="stat-label">Active disasters</p>
             </div>
         </article>
 
@@ -96,7 +146,7 @@
             </div>
             <div class="card-content">
             <div class="stat-value">{{ flagged_volunteers_count }}</div>
-            <p class="stat-label">Across all projects</p>
+            <p class="stat-label">Across all disasters</p>
             </div>
         </article>
 
@@ -109,7 +159,7 @@
             </div>
             <div class="card-content">
             <div class="stat-value">{{ flagged_donations_count }}</div>
-            <p class="stat-label">Across all projects</p>
+            <p class="stat-label">Across all disasters</p>
             </div>
         </article>
         </section>
@@ -117,26 +167,26 @@
         <section class="card">
         <div class="card-header">
             <div>
-            <h4>Projects</h4>
-            <p class="header-subtitle">View and manage individual project dashboards</p>
+            <h4>Disasters</h4>
+            <p class="header-subtitle">View and manage individual disaster dashboards</p>
             </div>
         </div>
         <div class="card-content">
-            <div class="projects-list">
-            {% for project in projects %}
-            <div class="project-item">
-                <div class="project-info">
-                <h3 class="project-title">{{ project.name }}</h3>
-                <p class="project-description">{{ project.category }}</p>
-                <div class="project-badges">
-                    <span class="badge badge-primary">{{ project.active|yesno:"Active,Inactive" }}</span>
-                    <span class="badge badge-secondary">{{ project.location|default:"No location" }}</span>
+            <div class="disasters-list">
+            {% for disaster in disasters %}
+            <div class="disaster-item">
+                <div class="disaster-info">
+                <h3 class="disaster-title">{{ disaster.name }}</h3>
+                <p class="disaster-description">{{ disaster.category }}</p>
+                <div class="disaster-badges">
+                    <span class="badge badge-primary">{{ disaster.active|yesno:"Active,Inactive" }}</span>
+                    <span class="badge badge-secondary">{{ disaster.location|default:"No location" }}</span>
                 </div>
                 </div>
-                <a href="{% url 'edit_project' project.id %}" class="btn">View Dashboard</a>
+                <a href="{% url 'edit_disaster' disaster.id %}" class="btn">View Dashboard</a>
             </div>
             {% empty %}
-            <p class="empty-state">No active projects</p>
+            <p class="empty-state">No active disasters</p>
             {% endfor %}
             </div>
         </div>
@@ -152,7 +202,7 @@
                 </svg>
                 <h4>Flagged Submissions</h4>
             </div>
-            <p class="header-subtitle">Review submissions flagged for potential issues. Most of these forms aren't appended to a project.</p>
+            <p class="header-subtitle">Review submissions flagged for potential issues. Most of these forms aren't appended to a disaster.</p>
             </div>
         </div>
 
@@ -193,7 +243,7 @@
                     <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Project</th>
+                        <th>Disaster</th>
                         <th>Hours</th>
                         <th>Date</th>
                         <th>Location</th>
@@ -207,8 +257,8 @@
                     <tr>
                         <td class="cell-strong">{{ volunteer.name }}</td>
                         <td>
-                        {% if volunteer.project %}
-                            {{ volunteer.project.name }}
+                        {% if volunteer.disaster %}
+                            {{ volunteer.disaster.name }}
                         {% else %}
                             <span class="muted-text">Unassigned</span>
                         {% endif %}
@@ -230,7 +280,7 @@
                         <td>{{ volunteer.notes|default:"-" }}</td>
                         <td>
                             <button class="btn btn-secondary open-modal-btn" data-target="modal-flagged-volunteer-{{ volunteer.id }}" type="button">View Details</button>
-                                <form method="POST" action="{% url 'delete_volunteer' volunteer.id %}">
+                                <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
                                     {% csrf_token %}
                                     <button class="btn btn-danger" type="submit">Delete</button>
                                 </form>
@@ -240,7 +290,7 @@
 
                                     <header class="submission-modal-head">
                                         <h3 id="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">Volunteer Report</h3>
-                                        <p class="submission-modal-project">{% if volunteer.project %}{{ volunteer.project.name }}{% else %}Unassigned Project{% endif %}</p>
+                                        <p class="submission-modal-disaster">{% if volunteer.disaster %}{{ volunteer.disaster.name }}{% else %}Unassigned Disaster{% endif %}</p>
                                         <p class="submission-modal-date">Submitted: {{ volunteer.created_at|date:"n/j/Y, g:i:s A" }}</p>
                                     </header>
 
@@ -307,6 +357,41 @@
                                         </section>
                                     {% endif %}
 
+                                    <section class="actions-section">
+                                        <h4>Actions</h4>
+                                        <div class="actions-row">
+                                            {% if volunteer.flagged %}
+                                                <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn">Unflag Submission</button>
+                                                </form>
+                                            {% else %}
+                                                <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-warning">Flag Submission</button>
+                                                </form>
+                                            {% endif %}
+
+                                            {% if volunteer.deleted %}
+                                                <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn">Restore Submission</button>
+                                                </form>
+                                                <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger">Permanently Delete</button>
+                                                </form>
+                                            {% else %}
+                                                <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger">Move to Trash</button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </section>
+
+
+
                                     <footer class="submission-modal-foot"></footer>
                                 </div>
                             </div>
@@ -347,7 +432,7 @@
                     <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Project</th>
+                        <th>Disaster</th>
                         <th>Hours</th>
                         <th>Date</th>
                         <th>Location</th>
@@ -361,8 +446,8 @@
                     <tr>
                         <td class="cell-strong">{{ donation.name }}</td>
                         <td>
-                        {% if donation.project %}
-                            {{ donation.project.name }}
+                        {% if donation.disaster %}
+                            {{ donation.disaster.name }}
                         {% else %}
                             <span class="muted-text">Unassigned</span>
                         {% endif %}
@@ -384,7 +469,7 @@
                         <td>{{ donation.get_donation_type_display }}</td>
                         <td>
                             <button class="btn btn-secondary open-modal-btn" data-target="modal-flagged-donation-{{ donation.id }}" type="button">View Details</button>
-                                <form method="POST" action="{% url 'delete_donation' donation.id %}">
+                                <form method="POST" action="{% url 'delete_donation_general' donation.id %}">
                                     {% csrf_token %}
                                     <button class="btn btn-danger" type="submit">Delete</button>
                                 </form>
@@ -393,7 +478,7 @@
                                     <span class="close" aria-label="Close">&times;</span>
                                     <header class="submission-modal-head">
                                         <h3 id="flaggedDonationDetailsTitle-{{ donation.id }}">Donation Report</h3>
-                                        <p class="submission-modal-project">{% if donation.project %}{{ donation.project.name }}{% else %}Unassigned Project{% endif %}</p>
+                                        <p class="submission-modal-disaster">{% if donation.disaster %}{{ donation.disaster.name }}{% else %}Unassigned Disaster{% endif %}</p>
                                         <p class="submission-modal-date">Submitted: {{ donation.created_at|date:"n/j/Y, g:i:s A" }}</p>
                                     </header>
 
@@ -452,6 +537,39 @@
                                         </section>
                                     {% endif %}
 
+                                    <section class="actions-section">
+                                        <h4>Actions</h4>
+                                        <div class="actions-row">
+                                            {% if donation.flagged %}
+                                                <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn">Unflag Submission</button>
+                                                </form>
+                                            {% else %}
+                                                <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-warning">Flag Submission</button>
+                                                </form>
+                                            {% endif %}
+
+                                            {% if donation.deleted %}
+                                                <form method="POST" action="{% url 'restore_donation_general' donation.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn">Restore Submission</button>
+                                                </form>
+                                                <form method="POST" action="{% url 'permanent_delete_donation_general' donation.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger">Permanently Delete</button>
+                                                </form>
+                                            {% else %}
+                                                <form method="POST" action="{% url 'delete_donation_general' donation.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger">Move to Trash</button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </section>
+
                                     <footer class="submission-modal-foot"></footer>
                                 </div>
                             </div>
@@ -479,8 +597,11 @@
                                 <span> {{ volunteer.date_of_work }} | {{ volunteer.total_hours }} hrs</span>
                             </div>
                             <div class="actions-row">
-                                <a href="{% url 'restore_volunteer' volunteer.id %}" class="btn">Restore</a>
-                                <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this volunteer? This action cannot be undone.');">
+                                <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn" type="submit">Restore</button>
+                                </form>
+                                <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this volunteer? This action cannot be undone.');">
                                     {% csrf_token %}
                                     <button class="btn btn-danger" type="submit">Delete Permanently</button>
                                 </form>
@@ -502,8 +623,11 @@
                                 <span> {{ donation.date_of_donation }} | {{ donation.total_hours }} hrs</span>
                             </div>
                             <div class="actions-row">
-                                <a href="{% url 'restore_donation' donation.id %}" class="btn">Restore</a>
-                                <form method="POST" action="{% url 'permanent_delete_donation' donation.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this donation? This action cannot be undone.');">
+                                <form method="POST" action="{% url 'restore_donation_general' donation.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn" type="submit">Restore</button>
+                                </form>
+                                <form method="POST" action="{% url 'permanent_delete_donation_general' donation.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this donation? This action cannot be undone.');">
                                     {% csrf_token %}
                                     <button class="btn btn-danger" type="submit">Delete Permanently</button>
                                 </form>

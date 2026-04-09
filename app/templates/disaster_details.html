@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{%block css%}
+<link rel="stylesheet" href="{% static 'css/disaster_details.css' %}">
+{%endblock%}
+
+{% include 'navbar.html' %}
+
+ <h1>Disaster Details</h1>
+    {% if disaster %}
+    <div class="disaster-details">
+        <p><strong>Name:</strong> {{ disaster.name }}</p>
+        <p><strong>Number:</strong> {{ disaster.number }}</p>
+        <p><strong>Type:</strong> {{ disaster.type }}</p>
+        <p><strong>Category:</strong> {{ disaster.category }}</p>
+        <p><strong>Size:</strong> {{ disaster.size }}</p>
+        <p><strong>Declaration date :</strong> {{ disaster.declaration_date }}</p>
+        <p><strong>Completion date:</strong> {{ disaster.completion_date }}</p>
+        <p><strong>Start date:</strong> {{ disaster.start_date }}</p>
+        <p><strong>End date:</strong> {{ disaster.end_date }}</p>
+        <p><strong>Locatino:</strong> {{ disaster.location }}</p>
+        <p><strong>Process Step:</strong> {{ disaster.process_step}}</p>
+        <p><strong>Applicant:</strong> {{ disaster.applicant }}</p>
+        
+        <p><strong>Total Submissions (this disaster):</strong> {{ total_submissions }}</p>
+        
+        <p>Volunteer Count: {{ volunteers.count }}</p>
+        <p>Donation Count: {{ donations.count }}</p>
+    </div>
+    {% else %}
+    <p>No disaster selected.</p>
+    {% endif %}
+    
+
+{% endblock content %}
