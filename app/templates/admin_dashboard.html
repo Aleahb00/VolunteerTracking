@@ -1,136 +1,843 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block content %}
-
 {% block css %}
-<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+<script src="https://unpkg.com/lucide@latest"></script>
 {% endblock css %}
 
+{% block content %}
 {% include 'navbar.html' %}
 
+<main class="dash">
+    <div class="dash-wrap">
+        <header class="dash-header">
+            <div class="dash-heading">
+                <p class="dash-kicker">Project Dashboard</p>
+                <h1>Admin Dashboard</h1>
+                <p>Manage projects and review submissions.</p>
+            </div>
+            <div class="actions-row dash-header-actions">
+                <a href="{% url 'general_dashboard' %}" class="btn btn-secondary">Back to General Dashboard</a>
+                <button id="openFormButton" class="btn" type="button">Create New Project</button>
+                {% if project and project.active %}
+                    <form method="POST" action="{% url 'close_project' project.id %}" class="inline-form" onsubmit="return confirm('Are you sure you want to close this project? This action cannot be undone!');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Close Project</button>
+                    </form>
+                {% elif project and not project.active %}
+                    <span class="status-pill is-closed">Project closed</span>
+                {% endif %}
+            </div>
+        </header>
 
-<h2 style="text-align: center; font-size: 5em;">This is the test admin page </h2>
+        <section class="dash-block dash-controls">
+            <label for="project-select" class="field-label">Select a project to view:</label>
+            <select id="project-select" class="select-field" onchange="if(this.value) window.location.href=this.value;">
+                <option value="">-- Select a Project --</option>
+                {% for project_item in projects %}
+                    <option value="{% url 'edit_project' project_item.id %}" {% if project and project.id == project_item.id %}selected{% endif %}>
+                        {{ project_item.name }}
+                    </option>
+                {% empty %}
+                    <option disabled>No projects yet.</option>
+                {% endfor %}
+            </select>
+            
+            {% if project %}
+                <a href="{% url 'submissions_full_project' project.id %}" class="btn btn-secondary">View Project Submissions</a>
+            {% else %}
+                <a href="{% url 'submissions_full' %}" class="btn btn-secondary">View All Submissions</a>
+            {% endif %}
+        </section>
 
-<div>
-    <a href="{% url 'export_csv' %}">Export Volunteer CSV</a>
-    <a href="{% url 'export_donations_csv' %}"> Export Donations CSV</a> 
-</div>
+        <section class="dash-stats">  
+            <article class="stat-card">
+                <h3>Volunteers</h3>
+                <p>{{ volunteer_count }}</p>
+                <span class="stat-note">{{ flagged_count }} flagged</span>
+            </article>
+            <article class="stat-card">
+                <h3>Donations</h3>
+                <p>{{ donation_count }}</p>
+                <span class="stat-note">{{ donation_flagged_count }} flagged</span>
+            </article>
+            <article class="stat-card">
+                <h3>Total Value</h3>
+                <p>{{ total_value }}</p>
+            </article>
+            <article class="stat-card">
+                <h3>Total Hours</h3>
+                <p>{{ total_hours }}</p>
+            </article>
+        </section>
 
-<!-- Button to open the create-project modal -->
-<div>
-    <button id="openFormButton" class="btn">Create New Project</button>
-</div>
+        <section class="dash-block dash-actions">
+            <h2>Export Data</h2>
+            <div class="actions-row">
+                <a class="btn" href="{% url 'export_csv' %}">Export Volunteer CSV</a>
+                <a class="btn" href="{% url 'export_donations_csv' %}">Export Donations CSV</a>
+            </div>
+        </section>
 
-<!-- Create Project Modal -->
-<div id="formModal" class="modal" aria-hidden="true">
-    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="createProjectTitle">
-        <span class="close" aria-label="Close">&times;</span>
-        <h2 id="createProjectTitle">Create New Project</h2>
-        <form method="post" action="{% url 'admin_dashboard' %}" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ create_form.as_p }}
-            <button type="submit">Create New</button>
-        </form>
-    </div>
-</div>
+        <section class="dash-toggle" role="tablist" aria-label="Submission Toggle">
+            <button class="dash-tab {% if active_tab == 'volunteers-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'volunteers-panel' %}true{% else %}false{% endif %}" data-target="volunteers-panel">Volunteer Submissions</button>
+            <button class="dash-tab {% if active_tab == 'donations-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'donations-panel' %}true{% else %}false{% endif %}" data-target="donations-panel">Donation Submissions</button>
+            <button class="dash-tab {% if active_tab == 'flagged-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'flagged-panel' %}true{% else %}false{% endif %}" data-target="flagged-panel">Flagged Forms</button>
+            <button class="dash-tab {% if active_tab == 'settings-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'settings-panel' %}true{% else %}false{% endif %}" data-target="settings-panel">Settings</button>
+            <button class="dash-tab {% if active_tab == 'trash-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'trash-panel' %}true{% else %}false{% endif %}" data-target="trash-panel">Trash</button>
+        </section>
 
-<div>
-    <p>Select a project</p>
-    {%for project in projects%}
-    <li>
-        <a href="{% url 'edit_project' project.id %}"> {{project.name}}</a>
-    </li>
-    {% endfor %}
-</div>
-
-<!-- List of the details of the project selected -->
-<div>
-    <h1> Selected Projects </h1>
-    {% if project %}
-    <div class="project-details">
-        <p><strong>Name:</strong> {{ project.name }}</p>
-        <p><strong>Number:</strong> {{ project.number }}</p>
-        <p><strong>Type:</strong> {{ project.type }}</p>
-        <p><strong>Category:</strong> {{ project.category }}</p>
-        <p><strong>Size:</strong> {{ project.size }}</p>
-        <p><strong>Declaration date :</strong> {{ project.declaration_date }}</p>
-        <p><strong>Completion date:</strong> {{ project.completion_date }}</p>
-        <p><strong>Start date:</strong> {{ project.start_date }}</p>
-        <p><strong>End date:</strong> {{ project.end_date }}</p>
-        <p><strong>Locatino:</strong> {{ project.location }}</p>
-        <p><strong>Process Step:</strong> {{ project.process_step}}</p>
-        <p><strong>Applicant:</strong> {{ project.applicant }}</p>
-        
-        <p><strong>Total Submissions (this project):</strong> {{ total_submissions }}</p>
-        
-        <p>Volunteer Count: {{ volunteers.count }}</p>
-        <p>Donation Count: {{ donations.count }}</p>
-    </div>
-
-    <button class="btn open-modal-btn" data-target="modal-{{ project.id }}">Edit Project</button>
-
-    <div id="modal-{{ project.id }}" class="modal" style="display:none;" aria-hidden="true">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Editing: {{ project.name }}</h2>
-            <form method="post" action="{% url 'edit_project' project.id %}">
-                {% csrf_token %}
-                {{ edit_form.as_p }}
-                <button type="submit" class="btn-save">Save Changes</button>
+        <section class="dash-block">
+            <form method="GET" class="search-form">
+                <input type="hidden" name="active_tab" value="{{ active_tab|default:'volunteers-panel' }}">
+                <input type="text" name="q" placeholder="Search submissions" value="{{ query|default_if_none:'' }}">
+                <button type="submit" class="btn">Search</button>
             </form>
-        </div>
+            <form method="get" class="filter-form filter-select-form{% if active_tab != 'volunteers-panel' %} filter-hidden{% endif %}" data-filter-for="volunteers-panel">
+                <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
+                <input type="hidden" name="active_tab" value="{{ active_tab|default:'volunteers-panel' }}">
+                <div class="filter-select-wrap">
+                    {{ volunteer_filter.form.skilled_worker.label_tag }}
+                    {{ volunteer_filter.form.skilled_worker }}
+                </div>
+                <div class="filter-select-wrap">
+                    {{ volunteer_filter.form.order_by.label_tag }}
+                    {{ volunteer_filter.form.order_by }}
+                </div>
+                <div class="actions-row">
+                    <button type="submit" class="btn">Apply Filters</button>
+                    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Reset</a>
+                </div>
+            </form>
+            <form method="get" class="filter-form filter-select-form{% if active_tab != 'donations-panel' %} filter-hidden{% endif %}" data-filter-for="donations-panel">
+                <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
+                <input type="hidden" name="active_tab" value="{{ active_tab|default:'donations-panel' }}">
+                <div class="filter-select-wrap">
+                    {{ donation_filter.form.order_by.label_tag }}
+                    {{ donation_filter.form.order_by }}
+                </div>
+                <div class="actions-row">
+                    <button type="submit" class="btn">Apply Donation Sort</button>
+                    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Reset</a>
+                </div>
+            </form>
+        </section>
+
+        <section id="volunteers-panel" class="dash-grid tab-panel" {% if active_tab != 'volunteers-panel' %}hidden{% endif %}>
+            <article class="dash-block">
+                <h2>Volunteers</h2>
+                <div class="table-shell">
+                    <table class="submission-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Location</th>
+                                <th>Hours</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for volunteer in volunteers %}
+                                <tr>
+                                    <td data-label="Name">
+                                        <strong>{{ volunteer.name }}</strong>
+                                    </td>
+                                    <td data-label="Email">{{ volunteer.email }}</td>
+                                    <td data-label="Phone">{{ volunteer.phone_number }}</td>
+                                    <td data-label="Location">{{ volunteer.location_volunteered|default:'-' }}</td>
+                                    <td data-label="Hours">{{ volunteer.total_hours }}</td>
+                                    <td data-label="Date">{{ volunteer.date_of_work|date:"n/j/Y" }}</td>
+                                    <td data-label="Status">
+                                        {% if volunteer.flagged %}
+                                            <span class="status-pill is-closed">Flagged</span>
+                                        {% else %}
+                                            <span class="status-pill is-active">Active</span>
+                                        {% endif %}
+                                    </td>
+                                    <td data-label="Actions">
+                                        <div class="actions-row table-actions">
+                                            <button class="btn btn-secondary open-modal-btn" data-target="modal-volunteer-{{ volunteer.id }}" type="button">Details</button>
+                                            <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button">{% if volunteer.flagged %}<i data-lucide="flag-off"></i>{% else %}<i data-lucide="flag"></i>{% endif %}</button>
+                                            <button data-volunteer-id="{{ volunteer.id }}" class="btn btn-secondary js-toggle-skilled" type="button">{% if volunteer.confirmed_skilled_worker %}Unmark Skilled Worker{% else %}Mark Skilled Worker{% endif %}</button>
+                                            <form method="POST" action="{% url 'delete_volunteer' volunteer.id %}">
+                                                {% csrf_token %}
+                                                <button class="btn-danger" type="submit"><i data-lucide="trash-2"></i></button>
+                                            </form>
+                                        </div>
+
+                                        <div id="modal-volunteer-{{ volunteer.id }}" class="modal" aria-hidden="true">
+                                            <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="volunteerDetailsTitle-{{ volunteer.id }}">
+                                                <span class="close" aria-label="Close">&times;</span>
+
+                                                <header class="submission-modal-head">
+                                                    <h3>Volunteer Report</h3>
+                                                    <p class="submission-modal-project">{% if volunteer.project %}{{ volunteer.project.name }}{% else %}Unassigned Project{% endif %}</p>
+                                                    <p class="submission-modal-date">Submitted: {{ volunteer.created_at|date:"n/j/Y, g:i:s A" }}</p>
+                                                </header>
+
+                                                <div class="submission-modal-divider"></div>
+
+                                                <div class="submission-status-wrap">
+                                                    <span class="submission-status {% if volunteer.flagged %}is-flagged{% else %}is-active{% endif %}">{% if volunteer.flagged %}Flagged{% else %}Active{% endif %}</span>
+                                                </div>
+
+                                                <div class="submission-id-card">
+                                                    <p class="submission-k">Submission ID</p>
+                                                    <p class="submission-v submission-v--mono">{{ volunteer.id }}</p>
+                                                </div>
+
+                                                <section class="submission-section">
+                                                    <h4>Personal Information</h4>
+                                                    <div class="submission-grid">
+                                                        <div class="submission-field"><p class="submission-k">Full Name</p><p class="submission-v">{{ volunteer.name }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{{ volunteer.email }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{{ volunteer.phone_number }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ volunteer.get_contact_method_display|default:'Not provided' }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ volunteer.location_volunteered|default:'Not provided' }}</p></div>
+                                                    </div>
+                                                </section>
+
+                                                <section class="submission-section">
+                                                    <h4>Contribution Details</h4>
+                                                    <div class="submission-grid">
+                                                        <div class="submission-field"><p class="submission-k">Hours Volunteered</p><p class="submission-v submission-v--accent">{{ volunteer.total_hours }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Service Date</p><p class="submission-v">{{ volunteer.date_of_work|date:"n/j/Y" }}</p></div>
+                                                        <div class="submission-field submission-field--full"><p class="submission-k">Work Description</p><p class="submission-v">{{ volunteer.work_desc|default:'Not provided' }}</p></div>
+                                                        {% if volunteer.notes %}
+                                                            <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ volunteer.notes }}</p></div>
+                                                        {% endif %}
+                                                    </div>
+                                                </section>
+
+                                                <section class="submission-section">
+                                                    <h4>Equipment Information</h4>
+                                                    <div class="submission-grid">
+                                                        <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ volunteer.get_equipment_display|default:'Not provided' }}</p></div>
+                                                        {% if volunteer.other_equipment %}
+                                                            <div class="submission-field"><p class="submission-k">Other Equipment</p><p class="submission-v">{{ volunteer.other_equipment }}</p></div>
+                                                        {% endif %}
+                                                        {% if volunteer.equipment_make_model %}
+                                                            <div class="submission-field"><p class="submission-k">Make / Model</p><p class="submission-v">{{ volunteer.equipment_make_model }}</p></div>
+                                                        {% endif %}
+                                                        {% if volunteer.equipment_hours %}
+                                                            <div class="submission-field"><p class="submission-k">Equipment Hours</p><p class="submission-v">{{ volunteer.equipment_hours }}</p></div>
+                                                        {% endif %}
+                                                        <div class="submission-field"><p class="submission-k">Skilled Worker Response</p><p class="submission-v">{{ volunteer.get_skilled_worker_display|default:'Not provided' }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Confirmed Skilled Worker</p><p class="submission-v">{% if volunteer.confirmed_skilled_worker %}Yes{% else %}No{% endif %}</p></div>
+                                                    </div>
+                                                </section>
+
+                                                {% if volunteer.flagged_reason %}
+                                                    <section class="submission-section">
+                                                        <h4>Flagged Reasons</h4>
+                                                        <div class="reason-list">
+                                                            {% for reason in volunteer.flagged_reason %}
+                                                                <span class="reason-tag">{{ reason }}</span>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </section>
+                                                {% endif %}
+
+                                                <footer class="submission-modal-foot">
+
+                                                </footer>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td class="dash-empty" colspan="8">No volunteers yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+
+        <section id="donations-panel" class="dash-grid tab-panel" {% if active_tab != 'donations-panel' %}hidden{% endif %}>
+            <article class="dash-block">
+                <h2>Donations</h2>
+                <div class="table-shell">
+                    <table class="submission-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Location</th>
+                                <th>Hours</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for donation in donations %}
+                                <tr>
+                                    <td data-label="Name">
+                                        <strong>{{ donation.name }}</strong>
+                                    </td>
+                                    <td data-label="Email">{{ donation.email }}</td>
+                                    <td data-label="Phone">{{ donation.phone_number }}</td>
+                                    <td data-label="Location">{{ donation.location_donated|default:'-' }}</td>
+                                    <td data-label="Hours">{{ donation.total_hours }}</td>
+                                    <td data-label="Date">{{ donation.date_of_donation|date:"n/j/Y" }}</td>
+                                    <td data-label="Status">
+                                        {% if donation.flagged %}
+                                            <span class="status-pill is-closed">Flagged</span>
+                                        {% else %}
+                                            <span class="status-pill is-active">Active</span>
+                                        {% endif %}
+                                    </td>
+                                    <td data-label="Actions">
+                                        <div class="actions-row table-actions">
+                                            <button class="btn btn-secondary open-modal-btn" data-target="modal-donation-{{ donation.id }}" type="button">Details</button>
+                                            <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button"  class = "flag-btn">{% if donation.flagged %}<i data-lucide="flag-off"></i>{% else %}<i data-lucide="flag"></i>{% endif %}</button>
+                                            <form method="POST" action="{% url 'delete_donation' donation.id %}">
+                                                {% csrf_token %}
+                                                <button class="btn btn-danger" type="submit">Delete</button>
+                                            </form>
+                                        </div>
+
+                                        <div id="modal-donation-{{ donation.id }}" class="modal" aria-hidden="true">
+                                            <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="donationDetailsTitle-{{ donation.id }}">
+                                                <span class="close" aria-label="Close">&times;</span>
+                                                <div class="submission-modal-top">
+                                                    <h2 id="donationDetailsTitle-{{ donation.id }}">Donation Submission Details</h2>
+                                                </div>
+
+                                                <header class="submission-modal-head">
+                                                    <h3>Donation Report</h3>
+                                                    <p class="submission-modal-project">{% if donation.project %}{{ donation.project.name }}{% else %}Unassigned Project{% endif %}</p>
+                                                    <p class="submission-modal-date">Submitted: {{ donation.created_at|date:"n/j/Y, g:i:s A" }}</p>
+                                                </header>
+
+                                                <div class="submission-modal-divider"></div>
+
+                                                <div class="submission-status-wrap">
+                                                    <span class="submission-status {% if donation.flagged %}is-flagged{% else %}is-active{% endif %}">{% if donation.flagged %}Flagged{% else %}Active{% endif %}</span>
+                                                </div>
+
+                                                <div class="submission-id-card">
+                                                    <p class="submission-k">Submission ID</p>
+                                                    <p class="submission-v submission-v--mono">{{ donation.id }}</p>
+                                                </div>
+
+                                                <section class="submission-section">
+                                                    <h4>Personal Information</h4>
+                                                    <div class="submission-grid">
+                                                        <div class="submission-field"><p class="submission-k">Full Name</p><p class="submission-v">{{ donation.name }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{{ donation.email }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{{ donation.phone_number }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ donation.get_contact_method_display|default:'Not provided' }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ donation.location_donated|default:'Not provided' }}</p></div>
+                                                    </div>
+                                                </section>
+
+                                                <section class="submission-section">
+                                                    <h4>Donation Details</h4>
+                                                    <div class="submission-grid">
+                                                        <div class="submission-field"><p class="submission-k">Hours</p><p class="submission-v submission-v--accent">{{ donation.total_hours }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Donation Type</p><p class="submission-v">{{ donation.get_donation_type_display|default:'Not provided' }}</p></div>
+                                                        {% if donation.material_type %}
+                                                            <div class="submission-field"><p class="submission-k">Material Type</p><p class="submission-v">{{ donation.material_type }}</p></div>
+                                                        {% endif %}
+                                                        {% if donation.equipment_type %}
+                                                            <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ donation.equipment_type }}</p></div>
+                                                        {% endif %}
+                                                        {% if donation.other_donation_type %}
+                                                            <div class="submission-field"><p class="submission-k">Other Donation Type</p><p class="submission-v">{{ donation.other_donation_type }}</p></div>
+                                                        {% endif %}
+                                                        <div class="submission-field"><p class="submission-k">Donation Date</p><p class="submission-v">{{ donation.date_of_donation|date:"n/j/Y" }}</p></div>
+                                                        <div class="submission-field submission-field--full"><p class="submission-k">Description</p><p class="submission-v">{{ donation.work_desc|default:'Not provided' }}</p></div>
+                                                        {% if donation.notes %}
+                                                            <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ donation.notes }}</p></div>
+                                                        {% endif %}
+                                                    </div>
+                                                </section>
+
+                                                {% if donation.flagged_reason %}
+                                                    <section class="submission-section">
+                                                        <h4>Flagged Reasons</h4>
+                                                        <div class="reason-list">
+                                                            {% for reason in donation.flagged_reason %}
+                                                                <span class="reason-tag">{{ reason }}</span>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </section>
+                                                {% endif %}
+
+                                                <footer class="submission-modal-foot">
+                                                </footer>
     </div>
-
-    <form method="POST" action="{% url 'delete_project' project.id %}">
-        {% csrf_token %}
-        <input type="hidden" name="_method" value="DELETE">
-        <button type="submit">Delete Project</button>
-    </form>
-    <hr>
-    {% else %}
-        <p>Select a project from the list above to view its specific data and counts.</p>
-    {% endif %}
 </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td class="dash-empty" colspan="8">No donations yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
 
+        <section id="flagged-panel" class="dash-grid tab-panel" {% if active_tab != 'flagged-panel' %}hidden{% endif %}>
+            <article class="dash-block">
+                <h2>Flagged Volunteers</h2>
+                <ul class="record-list">
+                    {% for volunteer in flagged_volunteers %}
+                            <li class="record-item">
+                                <div>
+                                    <strong>{{ volunteer.name }}</strong>
+                                    <span> {{ volunteer.date_of_work }} | {{ volunteer.total_hours }} hrs</span>
+                                    <span class="flag-badge">Flagged</span>
+                                    {% if volunteer.flagged_reason %}
+                                        <div class="reason-list">
+                                            {% for reason in volunteer.flagged_reason %}
+                                                <span class="reason-tag">{{ reason }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="actions-row">
+                                    <button class="btn btn-secondary open-modal-btn" data-target="modal-flagged-volunteer-{{ volunteer.id }}" type="button">Details</button>
+                                    <button data-volunteer-id="{{ volunteer.id }}" class="btn btn-flag btn-flag-compact" type="button">Unflag</button>
 
+                                </div>
 
-<!-- List of the volunteer details -->
-        <form method="GET" class='input-container'>
-            <input type="text" name="q" placeholder="Search..." >
-            <button type="submit" class='button'>Search</button>
-        </form>
-<div>
-    <h1>List of Volunteers</h1>
-    {% for volunteer in volunteers %}
-        <p>{{ volunteer.name }}</p>
-        <p>Email: {{ volunteer.email }}</p>
-        <p>Phone Number: {{ volunteer.phone_number }}</p>
-        <p>Date of Work: {{ volunteer.date_of_work }}</p>
-        <p>Total Hours: {{ volunteer.total_hours }}</p>
-        <p>Location Volunteered: {{ volunteer.location_volunteered }}</p>
-        <p>Work Description: {{ volunteer.work_desc }}</p>
-        <p>Flagged: {{ volunteer.flagged }}</p>
-        <button onclick="toggleFlaggedStatus({{ volunteer.id }})" class="btn-flag">{% if volunteer.flagged %}Unflag{% else %}Flag{% endif %}</button>
-        <p>Project: {{ volunteer.project.name }}</p>
-        <hr>
-    {% empty %}
-        <p>No volunteers yet.</p>
-    {% endfor %}
-</div>
+                                <div id="modal-flagged-volunteer-{{ volunteer.id }}" class="modal" aria-hidden="true">
+                                    <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">
+                                        <span class="close" aria-label="Close">&times;</span>
 
+                                        <header class="submission-modal-head">
+                                            <h3 id="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">Volunteer Report</h3>
+                                            <p class="submission-modal-project">{% if volunteer.project %}{{ volunteer.project.name }}{% else %}Unassigned Project{% endif %}</p>
+                                            <p class="submission-modal-date">Submitted: {{ volunteer.created_at|date:"n/j/Y, g:i:s A" }}</p>
+                                        </header>
 
-{% comment %} || NOTES || CRUD is in one view for this temp for project but it's definelt gonna hve to be changed
-because it jsut manages project rn and ediit form interfeares with create form (it doesnt break anything it just
-looks weird and i dont like it ){% endcomment %}
+                                        <div class="submission-modal-divider"></div>
 
-{% csrf_token %}
-<script> 
+                                        <div class="submission-status-wrap">
+                                            <span class="submission-status {% if volunteer.flagged %}is-flagged{% else %}is-active{% endif %}">{% if volunteer.flagged %}Flagged{% else %}Active{% endif %}</span>
+                                        </div>
+
+                                        <div class="submission-id-card">
+                                            <p class="submission-k">Submission ID</p>
+                                            <p class="submission-v submission-v--mono">{{ volunteer.id }}</p>
+                                        </div>
+
+                                        <section class="submission-section">
+                                            <h4>Personal Information</h4>
+                                            <div class="submission-grid">
+                                                <div class="submission-field"><p class="submission-k">Full Name</p><p class="submission-v">{{ volunteer.name }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{{ volunteer.email }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{{ volunteer.phone_number }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ volunteer.get_contact_method_display|default:'Not provided' }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ volunteer.location_volunteered|default:'Not provided' }}</p></div>
+                                            </div>
+                                        </section>
+
+                                        <section class="submission-section">
+                                            <h4>Contribution Details</h4>
+                                            <div class="submission-grid">
+                                                <div class="submission-field"><p class="submission-k">Hours Volunteered</p><p class="submission-v submission-v--accent">{{ volunteer.total_hours }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Service Date</p><p class="submission-v">{{ volunteer.date_of_work|date:"n/j/Y" }}</p></div>
+                                                <div class="submission-field submission-field--full"><p class="submission-k">Work Description</p><p class="submission-v">{{ volunteer.work_desc|default:'Not provided' }}</p></div>
+                                                {% if volunteer.notes %}
+                                                    <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ volunteer.notes }}</p></div>
+                                                {% endif %}
+                                            </div>
+                                        </section>
+
+                                        <section class="submission-section">
+                                            <h4>Equipment Information</h4>
+                                            <div class="submission-grid">
+                                                <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ volunteer.get_equipment_display|default:'Not provided' }}</p></div>
+                                                {% if volunteer.other_equipment %}
+                                                    <div class="submission-field"><p class="submission-k">Other Equipment</p><p class="submission-v">{{ volunteer.other_equipment }}</p></div>
+                                                {% endif %}
+                                                {% if volunteer.equipment_make_model %}
+                                                    <div class="submission-field"><p class="submission-k">Make / Model</p><p class="submission-v">{{ volunteer.equipment_make_model }}</p></div>
+                                                {% endif %}
+                                                {% if volunteer.equipment_hours %}
+                                                    <div class="submission-field"><p class="submission-k">Equipment Hours</p><p class="submission-v">{{ volunteer.equipment_hours }}</p></div>
+                                                {% endif %}
+                                                <div class="submission-field"><p class="submission-k">Skilled Worker Response</p><p class="submission-v">{{ volunteer.get_skilled_worker_display|default:'Not provided' }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Confirmed Skilled Worker</p><p class="submission-v">{% if volunteer.confirmed_skilled_worker %}Yes{% else %}No{% endif %}</p></div>
+                                            </div>
+                                        </section>
+
+                                        {% if volunteer.flagged_reason %}
+                                            <section class="submission-section">
+                                                <h4>Flagged Reasons</h4>
+                                                <div class="reason-list">
+                                                    {% for reason in volunteer.flagged_reason %}
+                                                        <span class="reason-tag">{{ reason }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                            </section>
+                                        {% endif %}
+
+                                        <footer class="submission-modal-foot"></footer>
+                                    </div>
+                                </div>
+                            </li>
+                    {% empty %}
+                        <li class="dash-empty">No volunteers yet.</li>
+                    {% endfor %}
+                </ul>
+            </article>
+
+            <article class="dash-block">
+                <h2>Flagged Donations</h2>
+                <ul class="record-list">
+                    {% for donation in flagged_donations %}
+                            <li class="record-item">
+                                <div>
+                                    <strong>{{ donation.name }}</strong>
+                                    <span> {{ donation.date_of_donation }} | {{ donation.total_hours }} hrs</span>
+                                    <span class="flag-badge">Flagged</span>
+                                    {% if donation.flagged_reason %}
+                                        <div class="reason-list">
+                                            {% for reason in donation.flagged_reason %}
+                                                <span class="reason-tag">{{ reason }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="actions-row">
+                                    <button class="btn btn-secondary open-modal-btn" data-target="modal-flagged-donation-{{ donation.id }}" type="button">Details</button>
+                                    <button data-donation-id="{{ donation.id }}" class="btn btn-flag btn-flag-compact js-toggle-donation-flag" type="button">{% if donation.flagged %}Unflag{% else %}Flag{% endif %}</button>
+                                </div>
+
+                                <div id="modal-flagged-donation-{{ donation.id }}" class="modal" aria-hidden="true">
+                                    <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedDonationDetailsTitle-{{ donation.id }}">
+                                        <span class="close" aria-label="Close">&times;</span>
+                                        <div class="submission-modal-top">
+                                            <h2 id="flaggedDonationDetailsTitle-{{ donation.id }}">Donation Submission Details</h2>
+                                        </div>
+
+                                        <header class="submission-modal-head">
+                                            <h3>Donation Report</h3>
+                                            <p class="submission-modal-project">{% if donation.project %}{{ donation.project.name }}{% else %}Unassigned Project{% endif %}</p>
+                                            <p class="submission-modal-date">Submitted: {{ donation.created_at|date:"n/j/Y, g:i:s A" }}</p>
+                                        </header>
+
+                                        <div class="submission-modal-divider"></div>
+
+                                        <div class="submission-status-wrap">
+                                            <span class="submission-status {% if donation.flagged %}is-flagged{% else %}is-active{% endif %}">{% if donation.flagged %}Flagged{% else %}Active{% endif %}</span>
+                                        </div>
+
+                                        <div class="submission-id-card">
+                                            <p class="submission-k">Submission ID</p>
+                                            <p class="submission-v submission-v--mono">{{ donation.id }}</p>
+                                        </div>
+
+                                        <section class="submission-section">
+                                            <h4>Personal Information</h4>
+                                            <div class="submission-grid">
+                                                <div class="submission-field"><p class="submission-k">Full Name</p><p class="submission-v">{{ donation.name }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{{ donation.email }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{{ donation.phone_number }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ donation.get_contact_method_display|default:'Not provided' }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ donation.location_donated|default:'Not provided' }}</p></div>
+                                            </div>
+                                        </section>
+
+                                        <section class="submission-section">
+                                            <h4>Donation Details</h4>
+                                            <div class="submission-grid">
+                                                <div class="submission-field"><p class="submission-k">Hours</p><p class="submission-v submission-v--accent">{{ donation.total_hours }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Donation Type</p><p class="submission-v">{{ donation.get_donation_type_display|default:'Not provided' }}</p></div>
+                                                {% if donation.material_type %}
+                                                    <div class="submission-field"><p class="submission-k">Material Type</p><p class="submission-v">{{ donation.material_type }}</p></div>
+                                                {% endif %}
+                                                {% if donation.equipment_type %}
+                                                    <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ donation.equipment_type }}</p></div>
+                                                {% endif %}
+                                                {% if donation.other_donation_type %}
+                                                    <div class="submission-field"><p class="submission-k">Other Donation Type</p><p class="submission-v">{{ donation.other_donation_type }}</p></div>
+                                                {% endif %}
+                                                <div class="submission-field"><p class="submission-k">Donation Date</p><p class="submission-v">{{ donation.date_of_donation|date:"n/j/Y" }}</p></div>
+                                                <div class="submission-field submission-field--full"><p class="submission-k">Description</p><p class="submission-v">{{ donation.work_desc|default:'Not provided' }}</p></div>
+                                                {% if donation.notes %}
+                                                    <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ donation.notes }}</p></div>
+                                                {% endif %}
+                                            </div>
+                                        </section>
+
+                                        {% if donation.flagged_reason %}
+                                            <section class="submission-section">
+                                                <h4>Flagged Reasons</h4>
+                                                <div class="reason-list">
+                                                    {% for reason in donation.flagged_reason %}
+                                                        <span class="reason-tag">{{ reason }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                            </section>
+                                        {% endif %}
+
+                                        <footer class="submission-modal-foot"></footer>
+                                    </div>
+                                </div>
+                            </li>
+                    {% empty %}
+                        <li class="dash-empty">No donations yet.</li>
+                    {% endfor %}
+                </ul>
+            </article>
+        </section>
+
+        <section id="settings-panel" class="tab-panel" {% if active_tab != 'settings-panel' %}hidden{% endif %}>
+            {% if project %}
+                <article class="dash-block settings-shell">
+                    <div class="settings-head">
+                        <h2 class="settings-title">Project Settings</h2>
+                        <p class="settings-subtitle">Configure hourly rates and project parameters</p>
+                    </div>
+
+                    <div class="settings-rate-grid">
+                        <div class="settings-rate-card">
+                            <div class="settings-rate-wrap">
+                                <p class="settings-label">Current (base) Hourly Rate</p>
+                                <div class="settings-rate-line">
+                                    <strong class="settings-rate-value">${{ project.hourly_rate|floatformat:0 }}</strong>
+                                    <span class="settings-rate-unit">per hour</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-rate-form">
+                                <label class="settings-label" for="hourly-rate">Update Hourly Rate</label>
+                                <div class="settings-rate-actions">
+                                    <input id="hourly-rate" class="settings-input" type="number" step="0.01" value="{{ project.hourly_rate|floatformat:2 }}" readonly>
+                                    <button class="btn" type="button">Update</button>
+                                </div>
+                                <p class="settings-note">Changes will affect future revenue calculations</p>
+                            </div>
+                        </div>
+
+                        <div class="settings-rate-card">
+                            <div class="settings-rate-wrap">
+                                <p class="settings-label">Current Skilled Hourly Rate</p>
+                                <div class="settings-rate-line">
+                                    <strong class="settings-rate-value">${{ project.skilled_hourly_rate|floatformat:0 }}</strong>
+                                    <span class="settings-rate-unit">per hour</span>
+                                </div>
+                            </div>
+
+                            <div class="settings-rate-form">
+                                <label class="settings-label" for="skilled-hourly-rate">Update Skilled Hourly Rate</label>
+                                <div class="settings-rate-actions">
+                                    <input id="skilled-hourly-rate" class="settings-input" type="number" step="0.01" value="{{ project.skilled_hourly_rate|floatformat:2 }}" readonly>
+                                    <button class="btn" type="button">Update</button>
+                                </div>
+                                <p class="settings-note">Changes will affect future revenue calculations</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="settings-divider">
+
+                    <div class="project-info-block">
+                        <h3>Project Information</h3>
+                        <dl class="project-info-list">
+                            <div class="project-info-row"><dt>Project Name:</dt><dd>{{ project.name }}</dd></div>
+                            <div class="project-info-row"><dt>Location:</dt><dd>{{ project.location|default:"Not provided" }}</dd></div>
+                            <div class="project-info-row"><dt>Status:</dt><dd><span class="status-pill {% if project.active %}is-active{% else %}is-closed{% endif %}">{% if project.active %}active{% else %}closed{% endif %}</span></dd></div>
+                            <div class="project-info-row"><dt>Goal Amount:</dt><dd>${{ total_value }}</dd></div>
+                            <div class="project-info-row"><dt>Created:</dt><dd>{{ project.declaration_date|date:"n/j/Y" }}</dd></div>
+                        </dl>
+                    </div>
+
+                    <div class="actions-row project-settings-actions">
+                        <button class="btn open-modal-btn" data-target="modal-{{ project.id }}" type="button">Edit Project</button>
+                    </div>
+                </article>
+            {% else %}
+                <article class="dash-block">
+                    <p>Select a project to edit.</p>
+                </article>
+            {% endif %}
+        </section>
+
+        <section id="trash-panel" class="dash-grid tab-panel" {% if active_tab != 'trash-panel' %}hidden{% endif %}>
+            <article class="dash-block">
+                <h2>Deleted Volunteers</h2>
+                <ul class="record-list">
+                    {% for volunteer in deleted_volunteers %}
+                        <li class="record-item">
+                            <div>
+                                <strong>{{ volunteer.name }}</strong>
+                                <span> {{ volunteer.date_of_work }} | {{ volunteer.total_hours }} hrs</span>
+                            </div>
+                            <div class="actions-row">
+                                <a href="{% url 'restore_volunteer' volunteer.id %}" class="btn">Restore</a>
+                                <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this volunteer? This action cannot be undone.');">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger" type="submit">Delete Permanently</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li class="dash-empty">No deleted volunteers.</li>
+                    {% endfor %}
+                </ul>
+            </article>
+
+            <article class="dash-block">
+                <h2>Deleted Donations</h2>
+                <ul class="record-list">
+                    {% for donation in deleted_donations %}
+                        <li class="record-item">
+                            <div>
+                                <strong>{{ donation.name }}</strong>
+                                <span> {{ donation.date_of_donation }} | {{ donation.total_hours }} hrs</span>
+                            </div>
+                            <div class="actions-row">
+                                <a href="{% url 'restore_donation' donation.id %}" class="btn">Restore</a>
+                                <form method="POST" action="{% url 'permanent_delete_donation' donation.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this donation? This action cannot be undone.');">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger" type="submit">Delete Permanently</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li class="dash-empty">No deleted donations.</li>
+                    {% endfor %}
+                </ul>
+            </article>
+        </section>
+
+        <div id="formModal" class="modal" aria-hidden="true">
+            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="createProjectTitle">
+                <span class="close" aria-label="Close">&times;</span>
+                <h2 id="createProjectTitle">Create New Project</h2>
+                <form method="post" action="{% url 'admin_dashboard' %}">
+                    {% csrf_token %}
+                    {{ create_form.name.label_tag }}
+                    {{ create_form.name }}
+
+                    {{ create_form.number.label_tag }}
+                    {{ create_form.number }}
+
+                    {{ create_form.type.label_tag }}
+                    {{ create_form.type }}
+                    
+                    {{ create_form.category.label_tag }}
+                    {{ create_form.category }}
+
+                    {{ create_form.size.label_tag }}
+                    {{ create_form.size }}
+
+                    {{ create_form.declaration_date.label_tag }}
+                    {{ create_form.declaration_date }}
+
+                    {{ create_form.completion_date.label_tag }}
+                    {{ create_form.completion_date }}
+
+                    {{ create_form.start_date.label_tag }}
+                    {{ create_form.start_date }}
+
+                    {{ create_form.end_date.label_tag }}
+                    {{ create_form.end_date }}
+
+                    {{ create_form.location.label_tag }}
+                    {{ create_form.location }}
+
+                    {{ create_form.process_step.label_tag }}
+                    {{ create_form.process_step }}
+
+                    {{ create_form.applicant.label_tag }}
+                    {{ create_form.applicant }}
+                    
+                    <button type="submit" class="btn">Create Project</button>
+                </form>
+            </div>
+        </div>
+
+        {% if project %}
+            <div id="modal-{{ project.id }}" class="modal" aria-hidden="true">
+                <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="editProjectTitle-{{ project.id }}">
+                    <span class="close" aria-label="Close">&times;</span>
+                    <h2 id="editProjectTitle-{{ project.id }}">Editing: {{ project.name }}</h2>
+                    <form method="post" action="{% url 'edit_project' project.id %}">
+                        {% csrf_token %}
+                        {{ edit_form.name.label_tag }}
+                        {{ edit_form.name }}
+
+                        {{ edit_form.number.label_tag }}
+                        {{ edit_form.number }}
+
+                        {{ edit_form.type.label_tag }}
+                        {{ edit_form.type }}
+
+                        {{ edit_form.category.label_tag }}
+                        {{ edit_form.category }}
+
+                        {{ edit_form.size.label_tag }}
+                        {{ edit_form.size }}
+
+                        {{ edit_form.declaration_date.label_tag }}
+                        {{ edit_form.declaration_date }}
+
+                        {{ edit_form.completion_date.label_tag }}
+                        {{ edit_form.completion_date }}
+
+                        {{ edit_form.start_date.label_tag }}
+                        {{ edit_form.start_date }}
+
+                        {{ edit_form.end_date.label_tag }}
+                        {{ edit_form.end_date }}
+
+                        {{ edit_form.location.label_tag }}
+                        {{ edit_form.location }}
+
+                        {{ edit_form.process_step.label_tag }}
+                        {{ edit_form.process_step }}
+
+                        {{ edit_form.applicant.label_tag }}
+                        {{ edit_form.applicant }}
+                        <button type="submit" class="btn">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</main>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 function toggleFlaggedStatus(volunteerId) {
     fetch(`/toggle_flagged_status/${volunteerId}/`, {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
+            'X-CSRFToken': getCookie('csrftoken'),
             'Content-Type': 'application/json'
         },
     })
@@ -142,10 +849,240 @@ function toggleFlaggedStatus(volunteerId) {
             alert('Error toggling flagged status.');
         }
     })
-    .catch(error => {
-        console.error('Error:', error);
+    .catch(() => {
         alert('An error occurred while toggling flagged status.');
     });
 }
+
+function toggleDonationFlaggedStatus(donationId) {
+    fetch(`/toggle_donation_flagged_status/${donationId}/`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            location.reload();
+        } else {
+            alert('Error toggling donation flagged status.');
+        }
+    })
+    .catch(() => {
+        alert('An error occurred while toggling donation flagged status.');
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const tabs = document.querySelectorAll('.dash-tab');
+    const panels = document.querySelectorAll('.tab-panel');
+    const filterForms = document.querySelectorAll('.filter-form');
+    const searchForms = document.querySelectorAll('.search-form');
+
+    function updateFilterVisibility(targetId) {
+        filterForms.forEach(form => {
+            const filterFor = form.dataset.filterFor;
+            form.classList.toggle('filter-hidden', filterFor !== targetId);
+
+            const hiddenActiveTab = form.querySelector('input[name="active_tab"]');
+            if (hiddenActiveTab) {
+                hiddenActiveTab.value = targetId;
+            }
+        });
+
+        searchForms.forEach(form => {
+            const hiddenActiveTab = form.querySelector('input[name="active_tab"]');
+            if (hiddenActiveTab) {
+                hiddenActiveTab.value = targetId;
+            }
+        });
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function () {
+            const targetId = tab.dataset.target;
+
+            tabs.forEach(currentTab => {
+                const isActive = currentTab === tab;
+                currentTab.classList.toggle('is-active', isActive);
+                currentTab.setAttribute('aria-selected', String(isActive));
+            });
+
+            panels.forEach(panel => {
+                panel.hidden = panel.id !== targetId;
+            });
+
+            updateFilterVisibility(targetId);
+        });
+    });
+
+    const initialActive = document.querySelector('.dash-tab.is-active');
+    if (initialActive) {
+        updateFilterVisibility(initialActive.dataset.target);
+    }
+
+    document.querySelectorAll('.js-toggle-flag').forEach(function(btn) {
+        btn.addEventListener('click', function () {
+            const vid = btn.getAttribute('data-volunteer-id');
+            if (vid) {
+                toggleFlaggedStatus(vid);
+            }
+        });
+    });
+
+    document.querySelectorAll('.js-toggle-donation-flag').forEach(function(btn) {
+        btn.addEventListener('click', function () {
+            const did = btn.getAttribute('data-donation-id');
+            if (did) {
+                toggleDonationFlaggedStatus(did);
+            }
+        });
+    });
+
+    document.querySelectorAll('.js-toggle-skilled').forEach(function(btn) {
+        btn.addEventListener('click', function () {
+            const vid = btn.getAttribute('data-volunteer-id');
+            if (vid) {
+                fetch(`/toggle_skilled_worker_status/${vid}/`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert('Error toggling skilled worker status.');
+                    }
+                })
+                .catch(() => {
+                    alert('An error occurred while toggling skilled worker status.');
+                });
+            }
+        });
+    });
+
+    const formModal = document.getElementById('formModal');
+    const openCreateBtn = document.getElementById('openFormButton');
+
+    if (openCreateBtn && formModal) {
+        openCreateBtn.addEventListener('click', function () {
+            formModal.style.display = 'block';
+            formModal.setAttribute('aria-hidden', 'false');
+        });
+    }
+
+    document.querySelectorAll('.open-modal-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const target = document.getElementById(btn.dataset.target);
+            if (target) {
+                target.style.display = 'block';
+                target.setAttribute('aria-hidden', 'false');
+            }
+        });
+    });
+
+    document.querySelectorAll('.modal .close').forEach(closeBtn => {
+        closeBtn.addEventListener('click', function () {
+            const modal = closeBtn.closest('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        });
+    });
+
+    window.addEventListener('click', function (event) {
+        document.querySelectorAll('.modal').forEach(modal => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        });
+    });
+});
+
+// Custom confirmation for closing projects
+(function() {
+    // Save the original form submit
+    const forms = document.querySelectorAll('form.inline-form');
+
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // stop default submission
+
+            // Create custom dangerous modal
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = 0;
+            modal.style.left = 0;
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.background = 'rgba(0,0,0,0.8)';
+            modal.style.display = 'flex';
+            modal.style.justifyContent = 'center';
+            modal.style.alignItems = 'center';
+            modal.style.zIndex = 10000;
+
+            // Modal content
+            const content = document.createElement('div');
+            content.style.background = '#fff';
+            content.style.border = '3px solid #b71c1c';
+            content.style.padding = '2rem';
+            content.style.borderRadius = '0.5rem';
+            content.style.textAlign = 'center';
+            content.style.maxWidth = '400px';
+            content.style.animation = 'shake 0.3s';
+
+            content.innerHTML = `
+                <h2 style="color:#b71c1c;">⚠️ WARNING!</h2>
+                <p>This action cannot be undone! Are you sure you want to close this project?</p>
+                <div style="margin-top:1.5rem; display:flex; justify-content:space-around;">
+                    <button id="cancel-btn" style="padding:0.5rem 1rem; border-radius:0.35rem; cursor:pointer;">Cancel</button>
+                    <button id="confirm-btn" style="padding:0.5rem 1rem; background:#e53935; color:white; font-weight:bold; border:1px solid #b71c1c; border-radius:0.35rem; cursor:pointer;">Yes, Close</button>
+                </div>
+            `;
+
+            // Add modal to page
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+
+            // Shake animation
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes shake {
+                    0% { transform: translateX(0); }
+                    25% { transform: translateX(-5px); }
+                    50% { transform: translateX(5px); }
+                    75% { transform: translateX(-5px); }
+                    100% { transform: translateX(0); }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Cancel button
+            modal.querySelector('#cancel-btn').addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+
+            // Confirm button
+            modal.querySelector('#confirm-btn').addEventListener('click', () => {
+                form.submit();
+            });
+        });
+    });
+})();
 </script>
+<script>
+lucide.createIcons();
+</script>
+
 {% endblock content %}
+

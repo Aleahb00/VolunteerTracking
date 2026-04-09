@@ -68,3 +68,37 @@ option 4 combine option 1 & 3 for optimal security
 
 option 5 (bad option) we can hide the login & register page behind a different address than expected and just leave it without checkers
 but that poses an obvious security risk 
+
+
+how is the donation value calculated? is it the same byhourloy rate becasue of how many hours you donated something? 
+but then it would be different for like food and things like that
+-- right now donation value is set to hourly-rate * hours donated
+
+also the hourly rate is already added onthere along wiht project details being on a different html page 
+
+
+
+if there more than one disaster in one location the which one does the form go to? need some more 
+clarification to which form does to which disaster 
+
+
+from mobile swap from deleted donations and volunteers
+
+forms are multiplied by the set hourly rate right but if they're a skilled worker 
+then they get multiplied by a different hourly rate but 
+how do we distinct from that? we don't so that needs to be fixed somehow
+
+we can add another boolean field skilled worker yes no if no then multiply by normal rate
+if yes then multiply by skilled worker rate if unsure then multiply by normal until review
+BUT that does beg the question how can she change the rate that its multiplied by? I suppose
+there needs to be an edit for the form where she can change if they are a skilled worker or 
+not but you can really just add a button like with the flag and unflag
+
+feel like we could also implement a section where like theres a how to? just in case
+she forgets or something or to clear up like what part is data and whats analytics etc 
+
+
+extra field for other on donation type
+need to add money as a donation type 
+skilled worker thing
+flagged reasons need to be restyled 

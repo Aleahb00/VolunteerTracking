@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{%block css%}
+<link rel="stylesheet" href="{% static 'css/project_details.css' %}">
+{%endblock%}
+
+{% include 'navbar.html' %}
+
+ <h1>Project Details</h1>
+    {% if project %}
+    <div class="project-details">
+        <p><strong>Name:</strong> {{ project.name }}</p>
+        <p><strong>Number:</strong> {{ project.number }}</p>
+        <p><strong>Type:</strong> {{ project.type }}</p>
+        <p><strong>Category:</strong> {{ project.category }}</p>
+        <p><strong>Size:</strong> {{ project.size }}</p>
+        <p><strong>Declaration date :</strong> {{ project.declaration_date }}</p>
+        <p><strong>Completion date:</strong> {{ project.completion_date }}</p>
+        <p><strong>Start date:</strong> {{ project.start_date }}</p>
+        <p><strong>End date:</strong> {{ project.end_date }}</p>
+        <p><strong>Locatino:</strong> {{ project.location }}</p>
+        <p><strong>Process Step:</strong> {{ project.process_step}}</p>
+        <p><strong>Applicant:</strong> {{ project.applicant }}</p>
+        
+        <p><strong>Total Submissions (this project):</strong> {{ total_submissions }}</p>
+        
+        <p>Volunteer Count: {{ volunteers.count }}</p>
+        <p>Donation Count: {{ donations.count }}</p>
+    </div>
+    {% else %}
+    <p>No project selected.</p>
+    {% endif %}
+    
+
+{% endblock content %}

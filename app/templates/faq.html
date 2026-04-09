@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/faq.css' %}">
+{% endblock css %}
+
+{% block content %}
+
+{% include 'navbar.html' %}
+
+<main class="faq-page">
+	<section class="faq-hero">
+		<h1 class="faq-title">Frequently Asked Questions</h1>
+		<p class="faq-subtitle">Find answers to common questions about volunteering and donations.</p>
+	</section>
+
+	<section class="faq-card" aria-label="Frequently asked questions">
+		<details class="faq-item">
+			<summary class="faq-question">How do I sign up to volunteer?</summary>
+			<p class="faq-answer">Go to the submissions form, select Volunteer, complete your details, and submit your hours.</p>
+		</details>
+
+		<details class="faq-item">
+			<summary class="faq-question">How does volunteer time generate funding?</summary>
+			<p class="faq-answer">Volunteer hours are tracked and converted into value using the project hourly rate configured by the admin.</p>
+		</details>
+
+		<details class="faq-item">
+			<summary class="faq-question">Can I submit volunteer hours after completing them?</summary>
+			<p class="faq-answer">Yes. Enter the date you completed the work and provide a clear description in the form.</p>
+		</details>
+
+		<details class="faq-item">
+			<summary class="faq-question">Are donations tax-deductible?</summary>
+			<p class="faq-answer">Tax treatment depends on your local laws and organization status, so verify with your tax advisor.</p>
+		</details>
+
+		<details class="faq-item">
+			<summary class="faq-question">How can I see the impact of my contribution?</summary>
+			<p class="faq-answer">Admins can review totals, hours, and project summaries from the dashboard to track impact over time.</p>
+		</details>
+
+		<details class="faq-item">
+			<summary class="faq-question">What types of volunteer work qualify?</summary>
+			<p class="faq-answer">Any approved project-related service qualifies, including setup, logistics, cleanup, and support roles.</p>
+		</details>
+
+		<details class="faq-item">
+			<summary class="faq-question">Can I volunteer if I am under 18?</summary>
+			<p class="faq-answer">It depends on project rules. Some projects may require guardian consent or minimum age requirements.</p>
+		</details>
+
+		<details class="faq-item">
+			<summary class="faq-question">How long will the recovery project be active?</summary>
+			<p class="faq-answer">Project timelines vary. Check the selected project details page for current status and availability.</p>
+		</details>
+	</section>
+
+	<section class="faq-help">
+		<h2 class="faq-help-title">Still have questions?</h2>
+		<p class="faq-help-text">Contact your project coordinator or admin team for additional support.</p>
+	</section>
+</main>
+
+
+{% endblock content %}

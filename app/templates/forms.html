@@ -20,7 +20,10 @@
         {% if messages %}
             <div class="forms-messages">
                 {% for message in messages %}
-                    <p class="forms-message">{{ message }}</p>
+                    {# Include the message.tags so CSS can target success/warning/error #}
+                    <p class="forms-message {{ message.tags }}">{{ message }}
+                        <button type="button" class="toast-close" aria-label="Dismiss">×</button>
+                    </p>
                 {% endfor %}
             </div>
         {% endif %}
@@ -66,6 +69,7 @@
                         class="form-input"
                         min="{{ earliest_date|date:'Y-m-d' }}"
                         value="{{ volunteerForm.date_of_work.value|default_if_none:'' }}"
+                        required
                     >
                 </div>
                 <div class="form-field form-field-full">
@@ -92,6 +96,24 @@
                 <div class="form-field">
                     {{ volunteerForm.equipment_hours.label_tag }}
                     {{ volunteerForm.equipment_hours }}
+                </div>
+                <div class="form-field form-field-full">
+                    {{ volunteerForm.skilled_worker.label_tag }}
+                    <div class="radio-group">
+                        {% for value, label in volunteerForm.skilled_worker.field.choices %}
+                            {% if value %}
+                            <label class="radio-option">
+                                <input
+                                    type="radio"
+                                    name="{{ volunteerForm.skilled_worker.html_name }}"
+                                    value="{{ value }}"
+                                    {% if volunteerForm.skilled_worker.value|stringformat:"s" == value|stringformat:"s" %}checked{% endif %}
+                                >
+                                <span>{{ label }}</span>
+                            </label>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
                 <div class="form-field form-field-full">
                     {{ volunteerForm.notes.label_tag }}
@@ -138,6 +160,7 @@
                         class="form-input"
                         min="{{ earliest_date|date:'Y-m-d' }}"
                         value="{{ donationForm.date_of_donation.value|default_if_none:'' }}"
+                        required
                     >
                 </div>
                 <div class="form-field form-field-full">
@@ -153,6 +176,10 @@
                     {{ donationForm.donation_type }}
                     <span class="donation-select" data-trigger="donation_type"></span>
                 </div>
+                <div class="form-field conditional-field" data-show-when="donation_type=other">
+                    {{ donationForm.other_donation_type.label_tag }}
+                    {{ donationForm.other_donation_type }}
+                </div>
                 <div class="form-field conditional-field" data-show-when="donation_type=material">
                     {{ donationForm.material_type.label_tag }}
                     {{ donationForm.material_type }}
@@ -161,11 +188,14 @@
                     {{ donationForm.equipment_type.label_tag }}
                     {{ donationForm.equipment_type }}
                 </div>
+                <div class="form-field conditional-field" data-show-when="donation_type=money">
+                    {{ donationForm.money_donated.label_tag }}
+                    {{ donationForm.money_donated }}
+                </div>
                 <div class="form-field form-field-full">
                     {{ donationForm.notes.label_tag }}
                     {{ donationForm.notes }}
                 </div>
-
                 <button type="submit" name="submit_donation" class="form-submit">Submit Donation Form</button>
             </form>
         </section>
@@ -219,7 +249,7 @@
                     const triggerField = form.querySelector(`select[name="${fieldName}"]`);
                     
                     if (triggerField && triggerField.value === fieldValue) {
-                        field.style.display = 'block';
+                        field.style.display = 'flex';
                     } else {
                         field.style.display = 'none';
                     }
@@ -236,9 +266,58 @@
             updateVisibility();
         }
 
+        function setupRadioGroups(formSelector) {
+            const form = document.querySelector(formSelector);
+            if (!form) return;
+
+            const groups = form.querySelectorAll('.radio-group');
+
+            groups.forEach((group) => {
+                const radios = group.querySelectorAll('input[type="radio"]');
+
+                function syncSelection() {
+                    group.querySelectorAll('.radio-option').forEach((option) => {
+                        const input = option.querySelector('input[type="radio"]');
+                        option.classList.toggle('is-selected', Boolean(input && input.checked));
+                    });
+                }
+
+                radios.forEach((radio) => {
+                    radio.addEventListener('change', syncSelection);
+                });
+
+                syncSelection();
+            });
+        }
+
         // Setup both forms
         setupConditionalFields('#volunteer-panel .forms-grid-form');
         setupConditionalFields('#donation-panel .forms-grid-form');
+        setupRadioGroups('#volunteer-panel .forms-grid-form');
+        setupRadioGroups('#donation-panel .forms-grid-form');
+
+        // Toast auto-dismiss and close handling
+        const toastContainer = document.querySelector('.forms-messages');
+        if (toastContainer) {
+            const toasts = Array.from(toastContainer.querySelectorAll('.forms-message'));
+            toasts.forEach((toast) => {
+                // Auto-dismiss after 6s
+                const timeout = setTimeout(() => {
+                    toast.style.animation = 'toast-out 220ms ease forwards';
+                    setTimeout(() => toast.remove(), 250);
+                }, 6000);
+
+                // Close button
+                const closeBtn = toast.querySelector('.toast-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        clearTimeout(timeout);
+                        toast.style.animation = 'toast-out 180ms ease forwards';
+                        setTimeout(() => toast.remove(), 220);
+                    });
+                }
+            });
+        }
     })();
 </script>
 {% endblock content %}

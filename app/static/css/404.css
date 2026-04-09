@@ -1,9 +1,8 @@
 @import url('https://fonts.googleapis.com/css?family=Eczar:800');
 @import url('https://fonts.googleapis.com/css?family=Poppins:600');
 
-
 body {
-	font-family: "Poppins";
+	font-family: "Poppins", sans-serif;
 	height: 100vh;
 	background: #121212;
 	padding: 1em;
@@ -15,18 +14,19 @@ body {
 	width: 100%;
 	height: 100%;
 	user-select: none;
-	h1 {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%) rotate(-45deg);
-		font-family: "Eczar";
-		font-size: 60vmax;
-		color: #282828;
-		letter-spacing: 0.025em;
-		margin: 0;
-		transition: 750ms ease-in-out;
-	}
+}
+
+.background-wrapper h1 {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) rotate(-45deg);
+	font-family: "Eczar", serif;
+	font-size: 60vmax;
+	color: #282828;
+	letter-spacing: 0.025em;
+	margin: 0;
+	transition: 750ms ease-in-out;
 }
 
 a {
@@ -39,20 +39,24 @@ a {
 	display: flex;
 	align-items: center;
 	transition: 150ms;
-	svg > polyline {
-		transition: 150ms;
-	}
-	&:hover {
-		color: #333;
-		background: #dadada;
-		border-color:transparent;
-		svg > polyline {
-			stroke: #000;
-		}
-		+ .background-wrapper > h1 {
-			color: #dadada;
-		}
-	}
+}
+
+a svg > polyline {
+	transition: 150ms;
+}
+
+a:hover {
+	color: #333;
+	background: #dadada;
+	border-color: transparent;
+}
+
+a:hover svg > polyline {
+	stroke: #000;
+}
+
+a:hover + .background-wrapper > h1 {
+	color: #dadada;
 }
 
 p {
@@ -64,15 +68,28 @@ p {
 	margin: 0;
 	text-align: right;
 	text-shadow: -1px -1px 0 #121212, 1px 1px 0 #121212, -1px 1px 0 #121212, 1px -1px 0 #121212;
-	@media screen and (min-width: 340px) {
+}
+
+@media screen and (min-width: 340px) {
+	p {
 		width: 70%;
 	}
-	@media screen and (min-width: 560px) {
+}
+
+@media screen and (min-width: 560px) {
+	p {
 		width: 50%;
 	}
-	@media screen and (min-width: 940px) {
+}
+
+@media screen and (min-width: 940px) {
+	p {
 		width: 30%;
 	}
-	@media screen and (min-width: 1300px) {
+}
+
+@media screen and (min-width: 1300px) {
+	p {
 		width: 25%;
-	}}
+	}
+}
