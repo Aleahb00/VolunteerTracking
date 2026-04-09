@@ -4,7 +4,7 @@
 {% block content %}
 
 {%block css%}
-<link rel="stylesheet" href="{% static 'css/project_details.css' %}">
+<link rel="stylesheet" href="{% static 'css/disaster_details.css' %}">
 {%endblock%}
 
 {% include 'navbar.html' %}
@@ -25,7 +25,7 @@
             <p><strong>Location:</strong> {{ donation.location_donated }}</p>
             <p><strong>Description:</strong> {{ donation.work_desc }}</p>
             <p><strong>Flagged:</strong> {{ donation.flagged }}</p>
-            <p><strong>Project:</strong> {{ donation.project.name }}</p>
+            <p><strong>Disaster:</strong> {{ donation.disaster.name }}</p>
         </div>
     {% empty %}
         <p>No donations yet.</p>

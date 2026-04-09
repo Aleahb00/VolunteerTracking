@@ -6,7 +6,7 @@ from  django.core.validators import MaxValueValidator
 
 # Create your models here.
 
-class Project(models.Model):
+class Disaster(models.Model):
     name = models.CharField(max_length=100)
     number = models.CharField(max_length=100)
     type = models.CharField(max_length=100)
@@ -89,7 +89,7 @@ class Volunteer(SafeDeleteModel):
     flagged = models.BooleanField(default=False)
     flagged_reason = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
+    disaster = models.ForeignKey(Disaster, on_delete=models.CASCADE, blank=True, null=True)
 
 
 class Donations(SafeDeleteModel):
@@ -135,4 +135,4 @@ class Donations(SafeDeleteModel):
     created_at = models.DateTimeField(auto_now_add=True)
     flagged = models.BooleanField(default=False)
     flagged_reason = models.JSONField(blank=True, null=True)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, blank=True, null=True)
+    disaster = models.ForeignKey(Disaster, on_delete=models.CASCADE, blank=True, null=True)
