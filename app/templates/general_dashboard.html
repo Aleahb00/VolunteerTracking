@@ -597,7 +597,10 @@
                                 <span> {{ volunteer.date_of_work }} | {{ volunteer.total_hours }} hrs</span>
                             </div>
                             <div class="actions-row">
-                                <a href="{% url 'restore_volunteer_general' volunteer.id %}" class="btn">Restore</a>
+                                <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn" type="submit">Restore</button>
+                                </form>
                                 <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this volunteer? This action cannot be undone.');">
                                     {% csrf_token %}
                                     <button class="btn btn-danger" type="submit">Delete Permanently</button>
@@ -620,7 +623,10 @@
                                 <span> {{ donation.date_of_donation }} | {{ donation.total_hours }} hrs</span>
                             </div>
                             <div class="actions-row">
-                                <a href="{% url 'restore_donation_general' donation.id %}" class="btn">Restore</a>
+                                <form method="POST" action="{% url 'restore_donation_general' donation.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn" type="submit">Restore</button>
+                                </form>
                                 <form method="POST" action="{% url 'permanent_delete_donation_general' donation.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this donation? This action cannot be undone.');">
                                     {% csrf_token %}
                                     <button class="btn btn-danger" type="submit">Delete Permanently</button>

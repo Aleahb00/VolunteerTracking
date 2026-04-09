@@ -175,6 +175,7 @@
     font-weight: 600;
     color: #29444f;
     cursor: pointer;
+    -webkit-user-select: none;
     user-select: none;
 }
 

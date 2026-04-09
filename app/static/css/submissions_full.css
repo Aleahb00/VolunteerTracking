@@ -407,7 +407,7 @@ body {
     .report-page,
     .pdf-page {
         padding: 1.3rem;
-        min-height: auto;
+        min-height: 0;
     }
 
     .report-grid,
@@ -461,7 +461,7 @@ body {
         border-radius: 0;
         box-shadow: none;
         max-width: 100%;
-        min-height: auto;
+        min-height: 0;
         margin: 0;
         padding: 0;
         page-break-after: auto;
