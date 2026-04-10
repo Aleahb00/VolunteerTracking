@@ -323,7 +323,7 @@ header {
   position: relative;
   background:
     linear-gradient(rgba(10,35,30,0.70), rgba(10,35,30,0.70)),
-    url('images/icestorm.png') center/cover no-repeat;
+    url('/static/images/icestorm.png') center/cover no-repeat;
   background-color: var(--teal-dark);
   padding: 110px 40px;
   text-align: center;
@@ -625,4 +625,15 @@ footer {
   .hero { padding: 80px 0; }
   .progress-section .stats-grid { grid-template-columns: 1fr 1fr; }
   .before-after { aspect-ratio: 4/3; }
+}
+
+
+@media (prefers-color-scheme: dark ) {
+  :root {
+      --dark-screen: #083030;;
+  }
+}
+
+body{
+  background-color: var(--bg-color);
 }
