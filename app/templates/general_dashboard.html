@@ -214,6 +214,8 @@
                 <button type="button" role="tab" data-target="trash-panel" data-state="{% if active_tab == 'trash-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'trash-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Trash</button>
             </div>
 
+
+
             <section id="volunteer-panel" class="tab-panel" role="tabpanel" {% if active_tab != 'volunteer-panel' %}hidden{% endif %}>
                 <div class="panel-search">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
@@ -587,7 +589,13 @@
             </section>
 
             <section id="trash-panel" class="dash-grid tab-panel" role="tabpanel" {% if active_tab != 'trash-panel' %}hidden{% endif %}>
-            <article class="dash-block">
+
+            <div class="tabs-list" role="tablist">
+                <button type="button" class="tab-trigger" data-target="trash-volunteers">Volunteers</button>
+                <button type="button" class="tab-trigger" data-target="trash-donations">Donations</button>
+            </div>
+
+            <article id="trash-volunteers" class="tab-panel">
                 <h2>Deleted Volunteers</h2>
                 <ul class="record-list">
                     {% for volunteer in deleted_volunteers %}
@@ -613,7 +621,7 @@
                 </ul>
             </article>
 
-            <article class="dash-block">
+            <article id="trash-donations" class="tab-panel">
                 <h2>Deleted Donations</h2>
                 <ul class="record-list">
                     {% for donation in deleted_donations %}
@@ -668,6 +676,27 @@
 
         });
         });
+    });
+
+    document.querySelectorAll('.tabs-list').forEach(tabGroup => {
+    const tabs = tabGroup.querySelectorAll('[role="tab"], .tab-trigger');
+    const container = tabGroup.closest('.submissions-tabs, #trash-panel, body');
+    const panels = container.querySelectorAll(':scope > .tab-panel, :scope .tab-panel');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetId = tab.dataset.target;
+
+            // update tabs
+            tabs.forEach(t => t.classList.remove('is-active'));
+            tab.classList.add('active');
+
+            // update panels (ONLY inside this group)
+            panels.forEach(panel => {
+                panel.hidden = panel.id !== targetId;
+            });
+        });
+    });
     });
 
     document.querySelectorAll('.open-modal-btn').forEach(btn => {
