@@ -236,6 +236,7 @@
                     <div class="actions-row">
                         <button type="submit" class="btn">Apply</button>
                         <a href="{% url 'general_dashboard' %}" class="btn">Reset</a>
+
                     </div>
                 </form>
                 </div>
@@ -284,7 +285,7 @@
                             <button class="btn btn-secondary open-modal-btn" data-target="modal-flagged-volunteer-{{ volunteer.id }}" type="button">View Details</button>
                                 <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
                                     {% csrf_token %}
-                                    <button class="btn btn-danger" type="submit">Delete</button>
+                                    <button style="width:100%;" class="btn btn-danger" type="submit">Delete</button>
                                 </form>
                             <div id="modal-flagged-volunteer-{{ volunteer.id }}" class="modal" aria-hidden="true">
                                 <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">
