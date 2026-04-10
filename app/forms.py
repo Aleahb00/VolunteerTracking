@@ -19,7 +19,20 @@ class RegistrationForm(UserCreationForm):
 class DisasterForm(forms.ModelForm):
     class Meta:
         model = Disaster
-        fields = '__all__'
+        fields = [
+            'name',
+            'number',
+            'type',
+            'category',
+            'size',
+            'declaration_date',
+            'completion_date',
+            'start_date',
+            'end_date',
+            'location',
+            'process_step',
+            'applicant',
+        ]
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',

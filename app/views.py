@@ -28,42 +28,12 @@ from .filters import VolunteerFilter, DonationFilter
 
 # Create your views here.
 
-# NOTE CLIENT SIDE VIEWS
+# NOTE PUBLIC USER VIEWS
 def landing_view(request:HttpRequest)->HttpResponse:
     return render(request, 'landing.html')
 
 def faq_view(request:HttpRequest)->HttpResponse:
     return render(request, 'faq.html')
-
-def status_403_view(request:HttpRequest, exception=None)->HttpResponse:
-    return render(request, '403.html', status=403)
-
-def status_404_view(request:HttpRequest, exception=None)->HttpResponse:
-    return render(request, '404.html', status=404)
-
-def status_429_view(request:HttpRequest, exception=None)->HttpResponse:
-    return render(request, '429.html', status=429)
-
-def status_500_view(request:HttpRequest)->HttpResponse:
-    return render(request, '500.html', status=500)
-
-def ratelimit_error(request, exception=None):
-    return render(request, '429.html', status=429)
-
-
-# def disaster_test_view(request:HttpRequest)->HttpResponse:
-#     disasters = Disaster.objects.all()
-
-#     if request.method == 'POST':
-#         form = DisasterForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('landing')
-#     else:
-#         form = DisasterForm()
-
-#     return render(request, 'temp_admin.html', {'form': form, 'disasters': disasters})
-# is this needed? where is this being used?
 
 @check_honeypot
 @ratelimit(key='ip', rate='5/m', method='POST', block=False)
@@ -158,25 +128,7 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
 
 
-# NOTE ADMIN SIDE VIEWS
-# Search query needs to be implemented into this view if this is the one that were searching on
-
-
-
-# def register_view(request:HttpRequest)->HttpResponse:
-#     if request.method == 'POST':
-#         form = AuthenticationForm(request, data=request.POST)
-#         if form.is_valid():
-#             user = form.get_user()
-#             login(request, user)
-#             return redirect('admin_dashboard')
-#     else:
-#         form = AuthenticationForm()
-#     return render(request, 'register.html', {'form': form})
-
-# NOTE I don't think this view is needed since the plan is to just make the admin account
-
-
+# NOTE ADMIN ACCOUNT VIEWS
 def login_view(request:HttpRequest)->HttpResponse:
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -188,17 +140,126 @@ def login_view(request:HttpRequest)->HttpResponse:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
 
-
 def logout_view(request:HttpRequest)->HttpResponse:
     logout(request)
     return redirect('landing')
 # may need to redirect to somewhere else considering it's admin
 
 
+
+# NOTE GENERAL DASHBOARD VIEWS
+def general_dashboard_view(request:HttpRequest)->HttpResponse:
+    active_tab = request.GET.get('active_tab', 'volunteer-panel')
+    search_query = (request.GET.get('q') or '').strip()
+    create_form = DisasterForm()
+    disasters = Disaster.objects.filter(active=True).select_related()
+    base_flagged_volunteers = Volunteer.objects.filter(flagged=True).select_related('disaster').order_by('-created_at')
+    base_flagged_donations = Donations.objects.filter(flagged=True).select_related('disaster').order_by('-created_at')
+    flagged_volunteers = base_flagged_volunteers
+    flagged_donations = base_flagged_donations
+    deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
+    deleted_donations = Donations.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
+    admin_user = request.user.is_authenticated
+
+    # Keep tab badge counts stable and independent from current filter/search state.
+    flagged_volunteers_count = base_flagged_volunteers.count()
+    flagged_donations_count = base_flagged_donations.count()
+
+    volunteer_filter = VolunteerFilter(request.GET, queryset=flagged_volunteers, prefix='volunteer')
+    donation_filter = DonationFilter(request.GET, queryset=flagged_donations, prefix='donation')
+
+    if active_tab == 'volunteer-panel':
+        flagged_volunteers = volunteer_filter.qs.filter(flagged=True)
+        if search_query:
+            flagged_volunteers = flagged_volunteers.filter(
+                Q(name__icontains=search_query)
+                | Q(email__icontains=search_query)
+                | Q(phone_number__icontains=search_query)
+                | Q(location_volunteered__icontains=search_query)
+                | Q(work_desc__icontains=search_query)
+                | Q(notes__icontains=search_query)
+                | Q(disaster__name__icontains=search_query)
+            )
+    elif active_tab == 'donation-panel':
+        flagged_donations = donation_filter.qs.filter(flagged=True)
+        if search_query:
+            flagged_donations = flagged_donations.filter(
+                Q(name__icontains=search_query)
+                | Q(email__icontains=search_query)
+                | Q(phone_number__icontains=search_query)
+                | Q(location_donated__icontains=search_query)
+                | Q(work_desc__icontains=search_query)
+                | Q(notes__icontains=search_query)
+                | Q(material_type__icontains=search_query)
+                | Q(equipment_type__icontains=search_query)
+                | Q(other_donation_type__icontains=search_query)
+                | Q(disaster__name__icontains=search_query)
+            )
+    
+    # Ensure flagged_reason is always a list, never None
+    for volunteer in flagged_volunteers:
+        if volunteer.flagged_reason is None:
+            volunteer.flagged_reason = []
+    
+    for donation in flagged_donations:
+        if donation.flagged_reason is None:
+            donation.flagged_reason = []
+    
+    return render(request, 'general_dashboard.html', {
+        'disasters': disasters,
+        'total_disasters': disasters.count(),
+        'flagged_volunteers': flagged_volunteers,
+        'flagged_volunteers_count': flagged_volunteers_count,
+        'flagged_donations': flagged_donations,
+        'flagged_donations_count': flagged_donations_count,
+        'volunteer_filter': volunteer_filter,
+        'donation_filter': donation_filter,
+        'active_tab': active_tab,
+        'search_query': search_query,
+        'deleted_volunteers': deleted_volunteers,
+        'deleted_donations': deleted_donations,
+        'create_form': create_form,
+    })
+
+
+def general_delete_volunteer_view(request, volunteer_id):
+    volunteer = get_object_or_404(Volunteer, id=volunteer_id)
+    volunteer.delete()
+    return redirect('general_dashboard')
+
+def general_permanent_delete_volunteer_view(request, id):
+    volunteer = get_object_or_404(Volunteer.all_objects, id=id)
+    volunteer.delete()
+    return redirect('general_dashboard')
+
+def general_restore_volunteer_view(request, id):
+    volunteer = get_object_or_404(Volunteer.all_objects, id=id)
+    volunteer.undelete()
+    return redirect('general_dashboard')
+
+
+def general_delete_donation_view(request, donation_id):
+    donation = get_object_or_404(Donations, id=donation_id)
+    donation.delete()
+    return redirect('general_dashboard')
+
+def general_permanent_delete_donation_view(request, id):
+    donation = get_object_or_404(Donations.all_objects, id=id)
+    donation.delete()
+    return redirect('general_dashboard')
+
+def general_restore_donation_view(request, id):
+    donation = get_object_or_404(Donations.all_objects, id=id)
+    donation.undelete()
+    return redirect('general_dashboard')
+
+
+
+
+# NOTE ADMIN DASHBOARD VIEWS
 def admin_dashboard_view(request: HttpRequest, disaster_id=None) -> HttpResponse:
     disaster = get_object_or_404(Disaster, id=disaster_id) if disaster_id else None
     active_tab = request.GET.get('active_tab', 'volunteers-panel')
-    
 
     # DELETE
     if request.method == 'POST' and request.POST.get('_method') == 'DELETE':
@@ -312,165 +373,8 @@ def admin_dashboard_view(request: HttpRequest, disaster_id=None) -> HttpResponse
         'donation_filter': donation_filter,
         'active_tab': active_tab,
     })
-    
-def submissions_full_view(request: HttpRequest, disaster_id=None) -> HttpResponse:
-    disaster = get_object_or_404(Disaster, id=disaster_id) if disaster_id else None
-    active_tab = request.GET.get('active_tab', 'volunteer-panel')
-    query = request.GET.get('q')
-
-    if disaster:
-        volunteers = Volunteer.objects.filter(disaster=disaster).select_related('disaster').order_by('-created_at')
-        donations = Donations.objects.filter(disaster=disaster).select_related('disaster').order_by('-created_at')
-    else:
-        volunteers = Volunteer.objects.select_related('disaster').order_by('-created_at')
-        donations = Donations.objects.select_related('disaster').order_by('-created_at')
-
-    if query and active_tab == 'volunteer-panel':
-        volunteers = volunteers.filter(
-            Q(name__icontains=query) |
-            Q(email__icontains=query) |
-            Q(phone_number__icontains=query) |
-            Q(location_volunteered__icontains=query) |
-            Q(work_desc__icontains=query) |
-            Q(notes__icontains=query)
-        )
-    elif query and active_tab == 'donation-panel':
-        donations = donations.filter(
-            Q(name__icontains=query) |
-            Q(email__icontains=query) |
-            Q(phone_number__icontains=query) |
-            Q(location_donated__icontains=query) |
-            Q(work_desc__icontains=query) |
-            Q(notes__icontains=query)
-        )
-
-    volunteer_filter = VolunteerFilter(request.GET, queryset=volunteers, prefix='volunteer')
-    donation_filter = DonationFilter(request.GET, queryset=donations, prefix='donation')
-
-    if active_tab == 'volunteer-panel':
-        volunteers = volunteer_filter.qs
-    elif active_tab == 'donation-panel':
-        donations = donation_filter.qs
 
 
-    return render(request, 'submissions_full.html', {
-        'disaster': disaster,
-        'active_tab': active_tab,
-        'query': query,
-        'volunteers': volunteers,
-        'donations': donations,
-        'volunteer_filter': volunteer_filter,
-        'donation_filter': donation_filter,
-    })
-
-def general_dashboard_view(request:HttpRequest)->HttpResponse:
-    active_tab = request.GET.get('active_tab', 'volunteer-panel')
-    search_query = (request.GET.get('q') or '').strip()
-    create_form = DisasterForm()
-    disasters = Disaster.objects.filter(active=True).select_related()
-    base_flagged_volunteers = Volunteer.objects.filter(flagged=True).select_related('disaster').order_by('-created_at')
-    base_flagged_donations = Donations.objects.filter(flagged=True).select_related('disaster').order_by('-created_at')
-    flagged_volunteers = base_flagged_volunteers
-    flagged_donations = base_flagged_donations
-    deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
-    deleted_donations = Donations.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
-    admin_user = request.user.is_authenticated
-
-    # Keep tab badge counts stable and independent from current filter/search state.
-    flagged_volunteers_count = base_flagged_volunteers.count()
-    flagged_donations_count = base_flagged_donations.count()
-
-    volunteer_filter = VolunteerFilter(request.GET, queryset=flagged_volunteers, prefix='volunteer')
-    donation_filter = DonationFilter(request.GET, queryset=flagged_donations, prefix='donation')
-
-    if active_tab == 'volunteer-panel':
-        flagged_volunteers = volunteer_filter.qs.filter(flagged=True)
-        if search_query:
-            flagged_volunteers = flagged_volunteers.filter(
-                Q(name__icontains=search_query)
-                | Q(email__icontains=search_query)
-                | Q(phone_number__icontains=search_query)
-                | Q(location_volunteered__icontains=search_query)
-                | Q(work_desc__icontains=search_query)
-                | Q(notes__icontains=search_query)
-                | Q(disaster__name__icontains=search_query)
-            )
-    elif active_tab == 'donation-panel':
-        flagged_donations = donation_filter.qs.filter(flagged=True)
-        if search_query:
-            flagged_donations = flagged_donations.filter(
-                Q(name__icontains=search_query)
-                | Q(email__icontains=search_query)
-                | Q(phone_number__icontains=search_query)
-                | Q(location_donated__icontains=search_query)
-                | Q(work_desc__icontains=search_query)
-                | Q(notes__icontains=search_query)
-                | Q(material_type__icontains=search_query)
-                | Q(equipment_type__icontains=search_query)
-                | Q(other_donation_type__icontains=search_query)
-                | Q(disaster__name__icontains=search_query)
-            )
-    
-    # Ensure flagged_reason is always a list, never None
-    for volunteer in flagged_volunteers:
-        if volunteer.flagged_reason is None:
-            volunteer.flagged_reason = []
-    
-    for donation in flagged_donations:
-        if donation.flagged_reason is None:
-            donation.flagged_reason = []
-    
-    return render(request, 'general_dashboard.html', {
-        'disasters': disasters,
-        'total_disasters': disasters.count(),
-        'flagged_volunteers': flagged_volunteers,
-        'flagged_volunteers_count': flagged_volunteers_count,
-        'flagged_donations': flagged_donations,
-        'flagged_donations_count': flagged_donations_count,
-        'volunteer_filter': volunteer_filter,
-        'donation_filter': donation_filter,
-        'active_tab': active_tab,
-        'search_query': search_query,
-        'deleted_volunteers': deleted_volunteers,
-        'deleted_donations': deleted_donations,
-        'create_form': create_form,
-    })
-
-def general_delete_volunteer_view(request, volunteer_id):
-    volunteer = get_object_or_404(Volunteer, id=volunteer_id)
-    volunteer.delete()
-    return redirect('general_dashboard')
-
-def general_permanent_delete_volunteer_view(request, id):
-    volunteer = get_object_or_404(Volunteer.all_objects, id=id)
-    volunteer.delete()
-    return redirect('general_dashboard')
-
-
-def general_delete_donation_view(request, donation_id):
-    donation = get_object_or_404(Donations, id=donation_id)
-    donation.delete()
-    return redirect('general_dashboard')
-
-def general_permanent_delete_donation_view(request, id):
-    donation = get_object_or_404(Donations.all_objects, id=id)
-    donation.delete()
-    return redirect('general_dashboard')
-
-def general_restore_volunteer_view(request, id):
-    volunteer = get_object_or_404(Volunteer.all_objects, id=id)
-    volunteer.undelete()
-    return redirect('general_dashboard')
-
-def general_restore_donation_view(request, id):
-    donation = get_object_or_404(Donations.all_objects, id=id)
-    donation.undelete()
-    return redirect('general_dashboard')
-
-
-
-
-# DISASTER DASHBOARD
 def delete_volunteer_view(request, volunteer_id):
     volunteer = get_object_or_404(Volunteer, id=volunteer_id)
     volunteer_disaster_id = volunteer.disaster_id
@@ -491,93 +395,6 @@ def restore_volunteer_view(request, id):
     if volunteer_disaster_id:
         return redirect('edit_disaster', disaster_id=volunteer_disaster_id)
     return redirect('admin_dashboard')
-
-
-def delete_donation_view(request, donation_id):
-    donation = get_object_or_404(Donations, id=donation_id)
-    donation_disaster_id = donation.disaster_id
-    donation.delete()
-    if donation_disaster_id:
-        return redirect('edit_disaster', disaster_id=donation_disaster_id)
-    return redirect('admin_dashboard')
-
-def permanent_delete_donation_view(request, id):
-    donation = get_object_or_404(Donations.all_objects, id=id)
-    donation.delete()
-    return redirect('admin_dashboard')
-
-def restore_donation_view(request, id):
-    donation = get_object_or_404(Donations.all_objects, id=id)
-    donation_disaster_id = donation.disaster_id
-    donation.undelete()
-    if donation_disaster_id:
-        return redirect('edit_disaster', disaster_id=donation_disaster_id)
-    return redirect('admin_dashboard')
-
-
-def close_disaster_view(request, disaster_id):
-    disaster = get_object_or_404(Disaster, id=disaster_id)
-    disaster.active = False
-    disaster.save()
-    return redirect('admin_dashboard')
-
-# def disaster_detail_view(request: HttpRequest, disaster_id: int) -> HttpResponse:
-#     disaster = get_object_or_404(Disaster, id=disaster_id)
-#     volunteers = Volunteer.objects.filter(disaster=disaster)
-#     donations = Donations.objects.filter(disaster=disaster)
-
-#     total_submissions = volunteers.count() + donations.count()
-
-#     hourly_rate = disaster.hourly_rate
-#     total_hours = volunteers.aggregate(total=Sum('total_hours'))['total'] or 0
-#     volunteer_value = Decimal(str(total_hours)) * hourly_rate
-#     flagged_count = volunteers.filter(flagged=True).count()
-
-#     return render(request, 'disaster_details.html', {
-#         'disaster': disaster,
-#         'volunteers': volunteers,
-#         'donations': donations,
-#         'total_submissions': total_submissions,
-#         'total_hours': total_hours,
-#         'volunteer_value': volunteer_value,
-#         'hourly_rate': hourly_rate,
-#         'flagged_count': flagged_count,
-#     })
-
-
-def volunteer_pdf_view(request: HttpRequest, volunteer_id: int) -> HttpResponse:
-    """Render a PDF-like page for a single volunteer submission (wrapped div for print)."""
-    volunteer = get_object_or_404(Volunteer, id=volunteer_id)
-    # reuse volunteers_pdf.html by passing a single-item list
-    return render(request, 'volunteers_pdf.html', {'volunteers': [volunteer]})
-
-
-def donation_pdf_view(request: HttpRequest, donation_id: int) -> HttpResponse:
-    """Render a PDF-like page for a single donation submission (wrapped div for print)."""
-    donation = get_object_or_404(Donations, id=donation_id)
-    return render(request, 'donations_pdf.html', {'donations': [donation]})
-    
-
-
-def toggle_flagged_status(request, volunteer_id):
-    volunteer = get_object_or_404(Volunteer, id=volunteer_id)
-    volunteer.flagged = not volunteer.flagged
-    volunteer.save()
-    return JsonResponse({'flagged': volunteer.flagged, 'status': 'success'})
-
-
-def toggle_donation_flagged_status(request, donation_id):
-    donation = get_object_or_404(Donations, id=donation_id)
-    donation.flagged = not donation.flagged
-    donation.save()
-    return JsonResponse({'flagged': donation.flagged, 'status': 'success'})
-
-
-def toggle_skilled_worker_status(request, volunteer_id):
-    volunteer = get_object_or_404(Volunteer, id=volunteer_id)
-    volunteer.confirmed_skilled_worker = not volunteer.confirmed_skilled_worker
-    volunteer.save(update_fields=['confirmed_skilled_worker'])
-    return JsonResponse({'confirmed_skilled_worker': volunteer.confirmed_skilled_worker, 'status': 'success'})
 
 def generate_volunteer_csv(request):
     response = HttpResponse(
@@ -622,6 +439,27 @@ def generate_volunteer_csv(request):
     return response
 
 
+def delete_donation_view(request, donation_id):
+    donation = get_object_or_404(Donations, id=donation_id)
+    donation_disaster_id = donation.disaster_id
+    donation.delete()
+    if donation_disaster_id:
+        return redirect('edit_disaster', disaster_id=donation_disaster_id)
+    return redirect('admin_dashboard')
+
+def permanent_delete_donation_view(request, id):
+    donation = get_object_or_404(Donations.all_objects, id=id)
+    donation.delete()
+    return redirect('admin_dashboard')
+
+def restore_donation_view(request, id):
+    donation = get_object_or_404(Donations.all_objects, id=id)
+    donation_disaster_id = donation.disaster_id
+    donation.undelete()
+    if donation_disaster_id:
+        return redirect('edit_disaster', disaster_id=donation_disaster_id)
+    return redirect('admin_dashboard')
+
 def generate_donation_csv(request):
     response = HttpResponse(
         content_type="text/csv",
@@ -664,6 +502,98 @@ def generate_donation_csv(request):
     return response
 
 
-# def print_view(request, v_d_form_id):
-#     pet = get_object_or_404(Disaster, id=v_d_form_id)
-#     return render(request, 'pets.html', {'pet': pet})
+def close_disaster_view(request, disaster_id):
+    disaster = get_object_or_404(Disaster, id=disaster_id)
+    disaster.active = False
+    disaster.save()
+    return redirect('admin_dashboard')
+
+
+def toggle_flagged_status(request, volunteer_id):
+    volunteer = get_object_or_404(Volunteer, id=volunteer_id)
+    volunteer.flagged = not volunteer.flagged
+    volunteer.save()
+    return JsonResponse({'flagged': volunteer.flagged, 'status': 'success'})
+
+def toggle_donation_flagged_status(request, donation_id):
+    donation = get_object_or_404(Donations, id=donation_id)
+    donation.flagged = not donation.flagged
+    donation.save()
+    return JsonResponse({'flagged': donation.flagged, 'status': 'success'})
+
+
+def toggle_skilled_worker_status(request, volunteer_id):
+    volunteer = get_object_or_404(Volunteer, id=volunteer_id)
+    volunteer.confirmed_skilled_worker = not volunteer.confirmed_skilled_worker
+    volunteer.save(update_fields=['confirmed_skilled_worker'])
+    return JsonResponse({'confirmed_skilled_worker': volunteer.confirmed_skilled_worker, 'status': 'success'})
+
+
+def submissions_full_view(request: HttpRequest, disaster_id=None) -> HttpResponse:
+    disaster = get_object_or_404(Disaster, id=disaster_id) if disaster_id else None
+    active_tab = request.GET.get('active_tab', 'volunteer-panel')
+    query = request.GET.get('q')
+
+    if disaster:
+        volunteers = Volunteer.objects.filter(disaster=disaster).select_related('disaster').order_by('-created_at')
+        donations = Donations.objects.filter(disaster=disaster).select_related('disaster').order_by('-created_at')
+    else:
+        volunteers = Volunteer.objects.select_related('disaster').order_by('-created_at')
+        donations = Donations.objects.select_related('disaster').order_by('-created_at')
+
+    if query and active_tab == 'volunteer-panel':
+        volunteers = volunteers.filter(
+            Q(name__icontains=query) |
+            Q(email__icontains=query) |
+            Q(phone_number__icontains=query) |
+            Q(location_volunteered__icontains=query) |
+            Q(work_desc__icontains=query) |
+            Q(notes__icontains=query)
+        )
+    elif query and active_tab == 'donation-panel':
+        donations = donations.filter(
+            Q(name__icontains=query) |
+            Q(email__icontains=query) |
+            Q(phone_number__icontains=query) |
+            Q(location_donated__icontains=query) |
+            Q(work_desc__icontains=query) |
+            Q(notes__icontains=query)
+        )
+
+    volunteer_filter = VolunteerFilter(request.GET, queryset=volunteers, prefix='volunteer')
+    donation_filter = DonationFilter(request.GET, queryset=donations, prefix='donation')
+
+    if active_tab == 'volunteer-panel':
+        volunteers = volunteer_filter.qs
+    elif active_tab == 'donation-panel':
+        donations = donation_filter.qs
+
+    return render(request, 'submissions_full.html', {
+        'disaster': disaster,
+        'active_tab': active_tab,
+        'query': query,
+        'volunteers': volunteers,
+        'donations': donations,
+        'volunteer_filter': volunteer_filter,
+        'donation_filter': donation_filter,
+    })
+
+
+
+
+# NOTE STATUS CODE ERROR VIEWS
+def status_403_view(request:HttpRequest, exception=None)->HttpResponse:
+    return render(request, '403.html', status=403)
+
+def status_404_view(request:HttpRequest, exception=None)->HttpResponse:
+    return render(request, '404.html', status=404)
+
+def status_429_view(request:HttpRequest, exception=None)->HttpResponse:
+    return render(request, '429.html', status=429)
+
+def status_500_view(request:HttpRequest)->HttpResponse:
+    return render(request, '500.html', status=500)
+
+def ratelimit_error(request, exception=None):
+    return render(request, '429.html', status=429)
+

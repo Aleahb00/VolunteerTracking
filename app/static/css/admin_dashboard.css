@@ -498,7 +498,6 @@
     font-weight: 600;
     color: var(--color-slate-1);
     cursor: pointer;
-    user-select: none;
 }
 
 .select-all-control input {
