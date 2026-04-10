@@ -302,6 +302,67 @@ body {
   flex: 1;
 }
 
+/* Responsive adjustments for disaster list and action button */
+@media (max-width: 640px) {
+  .disaster-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+
+  .disaster-info {
+    /* ensure text wraps and spacing looks good */
+    flex: none;
+    width: 100%;
+  }
+
+  .disaster-title {
+    font-size: 1.05rem;
+    margin-bottom: 0.25rem;
+    word-break: break-word;
+  }
+
+  .disaster-description {
+    margin-bottom: 0.35rem;
+  }
+
+  .disaster-badges {
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .disaster-item > a.btn {
+    /* make the button full width on small screens to avoid overflow */
+    display: inline-flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    box-sizing: border-box;
+    /* allow the label to wrap if needed */
+    white-space: normal;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--primary-color);
+    transition: background 180ms ease, transform 120ms ease, box-shadow 180ms ease;
+  }
+
+  .disaster-item > a.btn:hover {
+    background: rgba(27,92,103,0.06);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+  }
+
+  .disaster-item {
+    transition: transform 160ms ease, box-shadow 160ms ease;
+  }
+
+  .disaster-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 26px rgba(16,24,40,0.06);
+  }
+}
+
 .disaster-title {
   font-weight: 600;
   margin-bottom: 0.25rem;
@@ -926,6 +987,11 @@ body {
   .disaster-item {
     flex-direction: column;
     align-items: flex-start;
+    display: flex;
+  }
+
+  .btn{
+    width: 100%;
   }
 
   .dash-grid {
@@ -949,6 +1015,7 @@ body {
   .panel-filter-form,
   .panel-filter-form .actions-row {
     width: 100%;
+    flex-direction: column;
   }
 
   .filter-select-wrap,
