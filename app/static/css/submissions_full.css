@@ -365,7 +365,7 @@ body {
 
 .pdf-page.selected {
     border: 2px solid var(--primary);
-    background: #eef2ff;
+    background: rgba(83, 145, 49, 0.15);
 }
 
 
