@@ -15,7 +15,7 @@ urlpatterns = [
 
 
     # ANCHOR ADMIN ACCOUNT URLS
-    path('admin-register/', register_view, name='register'),
+    # path('admin-register/', register_view, name='register'),
     path('admin-login/', login_view, name='login'),
     path('admin-logout/', logout_view, name='logout'),
 

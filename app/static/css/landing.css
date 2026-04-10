@@ -65,7 +65,7 @@ header {
   position: relative;
   background:
     linear-gradient(rgba(10,35,30,0.65), rgba(10,35,30,0.65)),
-    url('/static/images/dog.jpg') center/cover no-repeat;
+    url('/static/images/floods.png') center/cover no-repeat;
   background-color: var(--teal-dark);
   color: var(--white);
   padding: 120px 0;
