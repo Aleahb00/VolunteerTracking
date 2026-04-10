@@ -163,16 +163,18 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
 
 
-def register_view(request:HttpRequest)->HttpResponse:
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('admin_dashboard')
-    else:
-        form = AuthenticationForm()
-    return render(request, 'register.html', {'form': form})
+# def register_view(request:HttpRequest)->HttpResponse:
+#     if request.method == 'POST':
+#         form = AuthenticationForm(request, data=request.POST)
+#         if form.is_valid():
+#             user = form.get_user()
+#             login(request, user)
+#             return redirect('admin_dashboard')
+#     else:
+#         form = AuthenticationForm()
+#     return render(request, 'register.html', {'form': form})
+
+# NOTE I don't think this view is needed since the plan is to just make the admin account
 
 
 def login_view(request:HttpRequest)->HttpResponse:
@@ -181,7 +183,7 @@ def login_view(request:HttpRequest)->HttpResponse:
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('admin_dashboard')
+            return redirect('general_dashboard')
     else:
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
@@ -372,6 +374,7 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
     flagged_donations = base_flagged_donations
     deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
     deleted_donations = Donations.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
+    admin_user = request.user.is_authenticated
 
     # Keep tab badge counts stable and independent from current filter/search state.
     flagged_volunteers_count = base_flagged_volunteers.count()
