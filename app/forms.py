@@ -22,51 +22,51 @@ class DisasterForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'name': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'number': forms.NumberInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'number'}),
             
             'type': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'category': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'size': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'declaration_date': forms.DateInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'date'}),
             
             'completion_date': forms.DateInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'date'}),
             
             'start_date': forms.DateInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'date'}),
             
             'end_date': forms.DateInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'date'}),
             
             'location': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'process_step': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'applicant': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
         }
             
@@ -95,55 +95,55 @@ class VolunteerForm(forms.ModelForm):
             }
         widgets = {
             'name': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'contact_method': forms.Select(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'select'}),
             
             'email': forms.EmailInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'email'}),
             
             'phone_number': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'date_of_work': forms.DateInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'date'}),
             
             
             'total_hours': forms.NumberInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'number'}),
             
             'location_volunteered': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'work_desc': forms.Textarea(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'equipment': forms.Select(attrs={
-                'class': 'unknown',
+                'class': 'form-control',
                 'id': 'equipment-select'
             }),
 
             'other_equipment': forms.TextInput(attrs={
-                'class': 'unknown',
+                'class': 'form-control',
                 'id': 'other-equipment',
                 'placeholder': 'Please specify'
             }),
             
             'equipment_make_model': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'equipment_hours': forms.NumberInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'number'}),
             
             'skilled_worker': forms.RadioSelect(attrs={
@@ -151,7 +151,7 @@ class VolunteerForm(forms.ModelForm):
             }),
             
             'notes': forms.Textarea(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
         }
 
@@ -213,61 +213,61 @@ class DonationForm(forms.ModelForm):
         }
         widgets = {
             'name': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'contact_method': forms.Select(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'select'}),
             
             'email': forms.EmailInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'email',
                 'required': False}),
             
             'phone_number': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text',
                 'required': False}),
             
             'date_of_donation': forms.DateInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'date'}),
             
             'total_hours': forms.NumberInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'number'}),
             
             'location_donated': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'work_desc': forms.Textarea(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'notes': forms.Textarea(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'donation_type': forms.Select(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'select'}),
             
             'material_type': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'equipment_type': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
             
             'money_donated': forms.NumberInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'number'}),
             
             'other_donation_type': forms.TextInput(attrs={
-                'class' : 'unknown',
+                'class': 'form-control',
                 'type': 'text'}),
         }
 

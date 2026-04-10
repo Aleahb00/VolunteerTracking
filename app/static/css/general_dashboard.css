@@ -414,6 +414,17 @@ body {
   gap: 0;
 }
 
+.scnd-tabs-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  background-color: var(--muted-bg);
+  color: var(--text-muted);
+  height: 2.25rem;
+  border-radius: 0.75rem;
+  padding: 0.1875rem;
+  gap: 0;
+}
+
 .tab-trigger {
   display: inline-flex;
   align-items: center;
@@ -446,6 +457,7 @@ body {
 .tab-content[data-state="active"] {
   display: flex;
 }
+
 
 /* Search Bar */
 .search-wrapper {
@@ -943,5 +955,40 @@ body {
   .filter-form select {
     width: 100%;
     min-width: 0;
+  }
+}
+
+/* Trash panel: show tabs on mobile, but on desktop hide the tab controls
+   and display both deleted lists side-by-side. Scoped to #trash-panel so
+   other tab groups are unaffected. */
+@media (min-width: 769px) {
+  /* hide the small tab list inside the trash area on larger screens */
+  #trash-panel > .tabs-list {
+    display: none;
+  }
+
+  /* ensure the trash-panel shows its children side-by-side */
+  #trash-panel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: start;
+  }
+
+  /* show panels even if they have the `hidden` attribute (JS toggles it for tabs) */
+  #trash-panel > .tab-panel {
+    display: block;
+  }
+
+  /* override the tab-panel hidden rule only within the trash panel */
+  #trash-panel > .tab-panel[hidden] {
+    display: block !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* ensure the trash-panel's tabs use two columns on small screens */
+  #trash-panel > .tabs-list {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

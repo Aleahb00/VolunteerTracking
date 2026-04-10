@@ -84,7 +84,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-HONEYPOT_FIELD_NAME = 'address'
+HONEYPOT_FIELD_NAME = 'website'
+PHONENUMBER_DEFAULT_REGION = 'US'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

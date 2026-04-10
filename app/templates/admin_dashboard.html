@@ -260,16 +260,16 @@
                                                         {% endif %}
 
                                                         {% if volunteer.deleted %}
-                                                            <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                                            <form method="POST" action="{% url 'restore_volunteer' volunteer.id %}">
                                                                 {% csrf_token %}
                                                                 <button type="submit" class="btn">Restore Submission</button>
                                                             </form>
-                                                            <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}">
+                                                            <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}">
                                                                 {% csrf_token %}
                                                                 <button type="submit" class="btn btn-danger">Permanently Delete</button>
                                                             </form>
                                                         {% else %}
-                                                            <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
+                                                            <form method="POST" action="{% url 'delete_volunteer' volunteer.id %}">
                                                                 {% csrf_token %}
                                                                 <button type="submit" class="btn btn-danger">Move to Trash</button>
                                                             </form>
@@ -453,29 +453,29 @@
                                                 <section class="actions-section">
                                                     <h4>Actions</h4>
                                                     <div class="actions-row">
-                                                        {% if volunteer.flagged %}
-                                                            <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                        {% if donation.flagged %}
+                                                            <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
                                                                 {% csrf_token %}
                                                                 <button type="submit" class="btn">Unflag Submission</button>
                                                             </form>
                                                         {% else %}
-                                                            <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                            <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
                                                                 {% csrf_token %}
                                                                 <button type="submit" class="btn btn-warning">Flag Submission</button>
                                                             </form>
                                                         {% endif %}
 
-                                                        {% if volunteer.deleted %}
-                                                            <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                                        {% if donation.deleted %}
+                                                            <form method="POST" action="{% url 'restore_donation' donation.id %}">
                                                                 {% csrf_token %}
                                                                 <button type="submit" class="btn">Restore Submission</button>
                                                             </form>
-                                                            <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}">
+                                                            <form method="POST" action="{% url 'permanent_delete_donation' donation.id %}">
                                                                 {% csrf_token %}
                                                                 <button type="submit" class="btn btn-danger">Permanently Delete</button>
                                                             </form>
                                                         {% else %}
-                                                            <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
+                                                            <form method="POST" action="{% url 'delete_donation' donation.id %}">
                                                                 {% csrf_token %}
                                                                 <button type="submit" class="btn btn-danger">Move to Trash</button>
                                                             </form>
@@ -613,16 +613,16 @@
                                                 {% endif %}
 
                                                 {% if volunteer.deleted %}
-                                                    <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                                    <form method="POST" action="{% url 'restore_volunteer' volunteer.id %}">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn">Restore Submission</button>
                                                     </form>
-                                                    <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}">
+                                                    <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn btn-danger">Permanently Delete</button>
                                                     </form>
                                                 {% else %}
-                                                    <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
+                                                    <form method="POST" action="{% url 'delete_volunteer' volunteer.id %}">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn btn-danger">Move to Trash</button>
                                                     </form>
@@ -733,29 +733,29 @@
                                         <section class="actions-section">
                                             <h4>Actions</h4>
                                             <div class="actions-row">
-                                                {% if volunteer.flagged %}
-                                                    <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                {% if donation.flagged %}
+                                                    <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn">Unflag Submission</button>
                                                     </form>
                                                 {% else %}
-                                                    <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
+                                                    <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn btn-warning">Flag Submission</button>
                                                     </form>
                                                 {% endif %}
 
-                                                {% if volunteer.deleted %}
-                                                    <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                                {% if donation.deleted %}
+                                                    <form method="POST" action="{% url 'restore_donation' donation.id %}">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn">Restore Submission</button>
                                                     </form>
-                                                    <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}">
+                                                    <form method="POST" action="{% url 'permanent_delete_donation' donation.id %}">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn btn-danger">Permanently Delete</button>
                                                     </form>
                                                 {% else %}
-                                                    <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
+                                                    <form method="POST" action="{% url 'delete_donation' donation.id %}">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn btn-danger">Move to Trash</button>
                                                     </form>
@@ -796,7 +796,7 @@
                                 <label class="settings-label" for="hourly-rate">Update Hourly Rate</label>
                                 <div class="settings-rate-actions">
                                     <input id="hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.hourly_rate|floatformat:2 }}" readonly>
-                                    <button class="btn" type="button">Update</button>
+                                    <button class="btn" type="button" disabled aria-disabled="true">Read Only</button>
                                 </div>
                                 <p class="settings-note">Changes will affect future revenue calculations</p>
                             </div>
@@ -815,7 +815,7 @@
                                 <label class="settings-label" for="skilled-hourly-rate">Update Skilled Hourly Rate</label>
                                 <div class="settings-rate-actions">
                                     <input id="skilled-hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.skilled_hourly_rate|floatformat:2 }}" readonly>
-                                    <button class="btn" type="button">Update</button>
+                                    <button class="btn" type="button" disabled aria-disabled="true">Read Only</button>
                                 </div>
                                 <p class="settings-note">Changes will affect future revenue calculations</p>
                             </div>
@@ -857,7 +857,10 @@
                                 <span> {{ volunteer.date_of_work }} | {{ volunteer.total_hours }} hrs</span>
                             </div>
                             <div class="actions-row">
-                                <a href="{% url 'restore_volunteer' volunteer.id %}" class="btn">Restore</a>
+                                <form method="POST" action="{% url 'restore_volunteer' volunteer.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn" type="submit">Restore</button>
+                                </form>
                                 <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this volunteer? This action cannot be undone.');">
                                     {% csrf_token %}
                                     <button class="btn btn-danger" type="submit">Delete Permanently</button>
@@ -880,7 +883,10 @@
                                 <span> {{ donation.date_of_donation }} | {{ donation.total_hours }} hrs</span>
                             </div>
                             <div class="actions-row">
-                                <a href="{% url 'restore_donation' donation.id %}" class="btn">Restore</a>
+                                <form method="POST" action="{% url 'restore_donation' donation.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn" type="submit">Restore</button>
+                                </form>
                                 <form method="POST" action="{% url 'permanent_delete_donation' donation.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this donation? This action cannot be undone.');">
                                     {% csrf_token %}
                                     <button class="btn btn-danger" type="submit">Delete Permanently</button>
