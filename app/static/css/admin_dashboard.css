@@ -634,6 +634,27 @@
 .modal-close:focus {
     color: #000;
 }
+
+.modal-content {
+    position: relative;
+}
+
+.modal-content .close {
+    float: none;
+    position: absolute;
+    top: 0.75rem;
+    right: 0.9rem;
+    font-size: 1.55rem;
+    font-weight: bold;
+    color: #4f706b;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-content .close:hover,
+.modal-content .close:focus {
+    color: #000;
+}
 .modal-content--form {
     background: #eef2f1;
     border: 1px solid #d7e1dd;
@@ -716,7 +737,8 @@
     color: #5e7570;
     font-size: 0.86rem;
 }
-.modal-content--submission {
+.modal-content--submission,
+.submission-modal {
     background-color: var(--color-bg-white);
     border: 1px solid var(--color-border);
     border-radius: 10px;
@@ -731,6 +753,23 @@
     position: relative;
     display: flex;
     flex-direction: column;
+}
+
+.submission-modal .close {
+    float: none;
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+    color: #7e8799;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.submission-modal .close:hover,
+.submission-modal .close:focus {
+    color: #143744;
 }
 
 .submission-modal-top {

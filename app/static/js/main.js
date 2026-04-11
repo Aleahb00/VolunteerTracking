@@ -13,6 +13,19 @@ document.addEventListener('DOMContentLoaded', function() {
         m.setAttribute('aria-hidden', 'true');
     }
 
+    function removeSubmissionRow(form) {
+        const row = form.closest('tr');
+        if (row) {
+            row.remove();
+            return;
+        }
+
+        const item = form.closest('li');
+        if (item) {
+            item.remove();
+        }
+    }
+
     // 1. UNIVERSAL OPENER: Works for Create and Edit buttons
     document.addEventListener('click', function(event) {
         // Look for the Create button ID or the Edit button Class
@@ -45,6 +58,49 @@ document.addEventListener('DOMContentLoaded', function() {
     if (autoShowModal) {
         openModal(autoShowModal);
     }
+
+    document.addEventListener('submit', async function(event) {
+        const form = event.target.closest('form.js-ajax-action');
+        if (!form) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const confirmMessage = form.dataset.confirmMessage;
+        if (confirmMessage && !window.confirm(confirmMessage)) {
+            return;
+        }
+
+        const submitButton = form.querySelector('[type="submit"]');
+        if (submitButton) {
+            submitButton.disabled = true;
+        }
+
+        try {
+            const response = await fetch(form.action, {
+                method: form.method || 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok || payload.status !== 'success') {
+                throw new Error(payload.error || 'Request failed');
+            }
+
+            removeSubmissionRow(form);
+        } catch (error) {
+            console.error(error);
+            window.alert('The action could not be completed. Please try again.');
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+            }
+        }
+    });
 });
 
 // Apparently this code isn't being used and is suggested to remove

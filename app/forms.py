@@ -130,7 +130,10 @@ class VolunteerForm(forms.ModelForm):
             
             'total_hours': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'type': 'number'}),
+                'type': 'number',
+                'min': '0',
+                'max': '18',
+                'step': '1'}),
             
             'location_volunteered': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -174,7 +177,8 @@ class VolunteerForm(forms.ModelForm):
         from django.db.models import Min
         from django.core.exceptions import ValidationError
 
-        earliest_date = Disaster.objects.aggregate(Min('start_date'))['start_date__min']
+        active_disasters = Disaster.objects.filter(active=True)
+        earliest_date = active_disasters.aggregate(Min('start_date'))['start_date__min']
 
         if earliest_date and user_date and user_date < earliest_date:
             raise ValidationError('Date cannot be before earliest disaster date')
@@ -183,6 +187,25 @@ class VolunteerForm(forms.ModelForm):
     
     def clean(self):
         cleaned_data = super().clean()
+        contact_method = (cleaned_data.get('contact_method') or '').strip().lower()
+        email = (cleaned_data.get('email') or '').strip()
+        phone_number = cleaned_data.get('phone_number')
+
+        # Enforce conditional contact requirement and ignore validation
+        # errors on the non-selected contact field.
+        if contact_method == 'email':
+            if not email:
+                self.add_error('email', 'Email is required when contact method is Email.')
+            cleaned_data['phone_number'] = ''
+            if 'phone_number' in self._errors:
+                self._errors.pop('phone_number')
+        elif contact_method == 'phone':
+            if not phone_number:
+                self.add_error('phone_number', 'Phone number is required when contact method is Phone.')
+            cleaned_data['email'] = ''
+            if 'email' in self._errors:
+                self._errors.pop('email')
+
         flags = []
 
         location = (cleaned_data.get('location_volunteered') or '').strip()
@@ -249,7 +272,10 @@ class DonationForm(forms.ModelForm):
             
             'total_hours': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'type': 'number'}),
+                'type': 'number',
+                'min': '0',
+                'max': '18',
+                'step': '1'}),
             
             'location_donated': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -277,7 +303,10 @@ class DonationForm(forms.ModelForm):
             
             'money_donated': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'type': 'number'}),
+                'type': 'number',
+                'min': '0',
+                'max': '999999.99',
+                'step': '0.01'}),
             
             'other_donation_type': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -286,18 +315,22 @@ class DonationForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        contact_method = cleaned_data.get('contact_method')
-        email = cleaned_data.get('email')
+        contact_method = (cleaned_data.get('contact_method') or '').strip().lower()
+        email = (cleaned_data.get('email') or '').strip()
         phone_number = cleaned_data.get('phone_number')
 
         if contact_method == 'email':
             if not email:
                 self.add_error('email', 'Email is required when contact method is Email.')
             cleaned_data['phone_number'] = ''
+            if 'phone_number' in self._errors:
+                self._errors.pop('phone_number')
         elif contact_method == 'phone':
             if not phone_number:
                 self.add_error('phone_number', 'Phone number is required when contact method is Phone.')
             cleaned_data['email'] = ''
+            if 'email' in self._errors:
+                self._errors.pop('email')
 
         # Compute flagged_reason for donations
         flags = []
@@ -325,7 +358,8 @@ class DonationForm(forms.ModelForm):
         from django.db.models import Min
         from django.core.exceptions import ValidationError
 
-        earliest_date = Disaster.objects.aggregate(Min('start_date'))['start_date__min']
+        active_disasters = Disaster.objects.filter(active=True)
+        earliest_date = active_disasters.aggregate(Min('start_date'))['start_date__min']
 
         if earliest_date and user_date and user_date < earliest_date:
             raise ValidationError('Date cannot be before earliest disaster date')

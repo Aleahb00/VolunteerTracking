@@ -47,6 +47,7 @@ urlpatterns = [
     path('admin-dashboard/<int:disaster_id>/', admin_dashboard_view, name='edit_disaster'),
     path('admin-dashboard/<int:disaster_id>/delete/', admin_dashboard_view, name='delete_disaster'),
     path('admin-dashboard/close-disaster/<int:disaster_id>/', close_disaster_view, name='close_disaster'),
+    path('admin-dashboard/<int:disaster_id>/update-hourly-rate/', update_hourly_rate_view, name='update_hourly_rate'),
 
     # Disaster Dashboard - Volunteer Management
     path('admin-dashboard/delete-volunteer/<int:volunteer_id>/', delete_volunteer_view, name='delete_volunteer'),

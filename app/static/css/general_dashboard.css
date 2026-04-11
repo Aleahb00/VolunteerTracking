@@ -585,6 +585,10 @@ body {
   flex-shrink: 0;
 }
 
+.section-icon.is-hidden {
+  display: none;
+}
+
 .submissions-tabs {
   display: flex;
   flex-direction: column;

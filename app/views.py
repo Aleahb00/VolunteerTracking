@@ -19,7 +19,6 @@ import csv
 from rapidfuzz import fuzz
 from .functions import *
 from django.db.models import Sum
-import json
 from django.http import JsonResponse
 from .filters import VolunteerFilter, DonationFilter
 
@@ -38,7 +37,7 @@ def faq_view(request:HttpRequest)->HttpResponse:
 @check_honeypot
 @ratelimit(key='ip', rate='5/m', method='POST', block=False)
 def form_template_view(request:HttpRequest)->HttpResponse:
-    earliest_date = Disaster.objects.aggregate(Min('start_date'))['start_date__min']
+    earliest_date = Disaster.objects.filter(active=True).aggregate(Min('start_date'))['start_date__min']
     volunteerForm = VolunteerForm()
     donationForm = DonationForm()
     disasters = Disaster.objects.exclude(location__isnull=True).exclude(location__exact='')
@@ -46,18 +45,6 @@ def form_template_view(request:HttpRequest)->HttpResponse:
     if request.method == 'POST' and getattr(request, 'limited', False):
         return render(request, '429.html', status=429)
 
-    def find_best_disaster(location_text: str):
-        best_disaster = None
-        best_similarity = -1
-
-        for disaster in disasters:
-            if disaster.active:
-                similarity = fuzz.ratio(location_text.lower(), disaster.location.lower())
-                if similarity > best_similarity:
-                    best_similarity = similarity
-                    best_disaster = disaster
-
-        return best_disaster, best_similarity
 
     if request.method == 'POST':
         if 'submit_volunteer' in request.POST:
@@ -65,7 +52,7 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
             if volunteerForm.is_valid():
                 volunteer = volunteerForm.save(commit=False)
-                best_disaster, similarity = find_best_disaster(volunteer.location_volunteered)
+                best_disaster, _ = find_best_disaster(volunteer.location_volunteered, disasters)
                 flag_reasons = volunteerForm.cleaned_data.get('flagged_reason', [])
                 volunteer.flagged_reason = flag_reasons
                 volunteer.flagged = bool(flag_reasons)
@@ -87,14 +74,14 @@ def form_template_view(request:HttpRequest)->HttpResponse:
                 return redirect('forms')
             
 
-            messages.error(request, 'There was an error with the volunteer form. Please check and try again.')
+            add_form_error_messages(request, volunteerForm, 'Volunteer')
 
         elif 'submit_donation' in request.POST:
             donationForm = DonationForm(request.POST)
 
             if donationForm.is_valid():
                 donation = donationForm.save(commit=False)
-                best_disaster, similarity = find_best_disaster(donation.location_donated)
+                best_disaster, _ = find_best_disaster(donation.location_donated, disasters)
                 flag_reasons = donationForm.cleaned_data.get('flagged_reason', [])
                 donation.flagged_reason = flag_reasons
                 donation.flagged = bool(flag_reasons)
@@ -114,7 +101,7 @@ def form_template_view(request:HttpRequest)->HttpResponse:
                 return redirect('forms')
 
             else:
-                messages.error(request, 'There was an error with the donation form. Please check and try again.')
+                add_form_error_messages(request, donationForm, 'Donation')
 
     return render(request, 'forms.html', {
         'volunteerForm': volunteerForm,
@@ -159,7 +146,6 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
     flagged_donations = base_flagged_donations
     deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
     deleted_donations = Donations.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
-    admin_user = request.user.is_authenticated
 
     # Keep tab badge counts stable and independent from current filter/search state.
     flagged_volunteers_count = base_flagged_volunteers.count()
@@ -225,33 +211,33 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
 def general_delete_volunteer_view(request, volunteer_id):
     volunteer = get_object_or_404(Volunteer, id=volunteer_id)
     volunteer.delete()
-    return redirect('general_dashboard')
+    return JsonResponse({'status': 'success'})
 
 def general_permanent_delete_volunteer_view(request, id):
     volunteer = get_object_or_404(Volunteer.all_objects, id=id)
     volunteer.delete()
-    return redirect('general_dashboard')
+    return JsonResponse({'status': 'success'})
 
 def general_restore_volunteer_view(request, id):
     volunteer = get_object_or_404(Volunteer.all_objects, id=id)
     volunteer.undelete()
-    return redirect('general_dashboard')
+    return JsonResponse({'status': 'success'})
 
 
 def general_delete_donation_view(request, donation_id):
     donation = get_object_or_404(Donations, id=donation_id)
     donation.delete()
-    return redirect('general_dashboard')
+    return JsonResponse({'status': 'success'})
 
 def general_permanent_delete_donation_view(request, id):
     donation = get_object_or_404(Donations.all_objects, id=id)
     donation.delete()
-    return redirect('general_dashboard')
+    return JsonResponse({'status': 'success'})
 
 def general_restore_donation_view(request, id):
     donation = get_object_or_404(Donations.all_objects, id=id)
     donation.undelete()
-    return redirect('general_dashboard')
+    return JsonResponse({'status': 'success'})
 
 
 
@@ -276,8 +262,6 @@ def admin_dashboard_view(request: HttpRequest, disaster_id=None) -> HttpResponse
             return redirect('admin_dashboard', )
     else:
         form = DisasterForm(instance=disaster)
-
-        form = DisasterForm(instance=disaster)  
     
     query = request.GET.get('q')
 
@@ -507,6 +491,27 @@ def close_disaster_view(request, disaster_id):
     disaster.active = False
     disaster.save()
     return redirect('admin_dashboard')
+
+
+def update_hourly_rate_view(request, disaster_id):
+    disaster = get_object_or_404(Disaster, id=disaster_id)
+    
+    if not disaster.active:
+        return JsonResponse({'status': 'error', 'message': 'Cannot update rates for closed disasters'}, status=400)
+    
+    if 'hourly_rate' in request.POST:
+        disaster.hourly_rate = Decimal(request.POST.get('hourly_rate'))
+    
+    if 'skilled_hourly_rate' in request.POST:
+        disaster.skilled_hourly_rate = Decimal(request.POST.get('skilled_hourly_rate'))
+    
+    disaster.save()
+    
+    return JsonResponse({
+        'status': 'success',
+        'hourly_rate': str(disaster.hourly_rate),
+        'skilled_hourly_rate': str(disaster.skilled_hourly_rate)
+    })
 
 
 def toggle_flagged_status(request, volunteer_id):

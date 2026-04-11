@@ -172,11 +172,11 @@
                                         </div>
 
                                         <div id="modal-volunteer-{{ volunteer.id }}" class="modal" aria-hidden="true">
-                                            <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="volunteerDetailsTitle-{{ volunteer.id }}">
+                                            <div class="modal-content modal-content--submission submission-modal" role="dialog" aria-modal="true" aria-labelledby="volunteerDetailsTitle-{{ volunteer.id }}">
                                                 <span class="close" aria-label="Close">&times;</span>
 
                                                 <header class="submission-modal-head">
-                                                    <h3>Volunteer Report</h3>
+                                                    <h3 id="volunteerDetailsTitle-{{ volunteer.id }}">Volunteer Report</h3>
                                                     <p class="submission-modal-disaster">{% if volunteer.disaster %}{{ volunteer.disaster.name }}{% else %}Unassigned Disaster{% endif %}</p>
                                                     <p class="submission-modal-date">Submitted: {{ volunteer.created_at|date:"n/j/Y, g:i:s A" }}</p>
                                                 </header>
@@ -383,7 +383,7 @@
                                         </div>
 
                                         <div id="modal-donation-{{ donation.id }}" class="modal" aria-hidden="true">
-                                            <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="donationDetailsTitle-{{ donation.id }}">
+                                            <div class="modal-content modal-content--submission submission-modal" role="dialog" aria-modal="true" aria-labelledby="donationDetailsTitle-{{ donation.id }}">
                                                 <span class="close" aria-label="Close">&times;</span>
                                                 <div class="submission-modal-top">
                                                     <h2 id="donationDetailsTitle-{{ donation.id }}">Donation Submission Details</h2>
@@ -525,7 +525,7 @@
                                 </div>
 
                                 <div id="modal-flagged-volunteer-{{ volunteer.id }}" class="modal" aria-hidden="true">
-                                    <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">
+                                    <div class="modal-content modal-content--submission submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">
                                         <span class="close" aria-label="Close">&times;</span>
 
                                         <header class="submission-modal-head">
@@ -663,7 +663,7 @@
                                 </div>
 
                                 <div id="modal-flagged-donation-{{ donation.id }}" class="modal" aria-hidden="true">
-                                    <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedDonationDetailsTitle-{{ donation.id }}">
+                                    <div class="modal-content modal-content--submission submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedDonationDetailsTitle-{{ donation.id }}">
                                         <span class="close" aria-label="Close">&times;</span>
                                         <div class="submission-modal-top">
                                             <h2 id="flaggedDonationDetailsTitle-{{ donation.id }}">Donation Submission Details</h2>
@@ -787,7 +787,7 @@
                             <div class="settings-rate-wrap">
                                 <p class="settings-label">Current (base) Hourly Rate</p>
                                 <div class="settings-rate-line">
-                                    <strong class="settings-rate-value">${{ disaster.hourly_rate|floatformat:0 }}</strong>
+                                    <strong id="hourly-rate-display" class="settings-rate-value">${{ disaster.hourly_rate }}</strong>
                                     <span class="settings-rate-unit">per hour</span>
                                 </div>
                             </div>
@@ -795,8 +795,8 @@
                             <div class="settings-rate-form">
                                 <label class="settings-label" for="hourly-rate">Update Hourly Rate</label>
                                 <div class="settings-rate-actions">
-                                    <input id="hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.hourly_rate|floatformat:2 }}" readonly>
-                                    <button class="btn" type="button" disabled aria-disabled="true">Read Only</button>
+                                    <input id="hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.hourly_rate }}" {% if not disaster.active %}readonly{% endif %}>
+                                    <button id="hourly-rate-btn" class="btn" type="button" {% if not disaster.active %}disabled aria-disabled="true"{% endif %}>{% if disaster.active %}Save Changes{% else %}Read Only{% endif %}</button>
                                 </div>
                                 <p class="settings-note">Changes will affect future revenue calculations</p>
                             </div>
@@ -806,7 +806,7 @@
                             <div class="settings-rate-wrap">
                                 <p class="settings-label">Current Skilled Hourly Rate</p>
                                 <div class="settings-rate-line">
-                                    <strong class="settings-rate-value">${{ disaster.skilled_hourly_rate|floatformat:0 }}</strong>
+                                    <strong id="skilled-hourly-rate-display" class="settings-rate-value">${{ disaster.skilled_hourly_rate|floatformat:0 }}</strong>
                                     <span class="settings-rate-unit">per hour</span>
                                 </div>
                             </div>
@@ -814,8 +814,8 @@
                             <div class="settings-rate-form">
                                 <label class="settings-label" for="skilled-hourly-rate">Update Skilled Hourly Rate</label>
                                 <div class="settings-rate-actions">
-                                    <input id="skilled-hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.skilled_hourly_rate|floatformat:2 }}" readonly>
-                                    <button class="btn" type="button" disabled aria-disabled="true">Read Only</button>
+                                    <input id="skilled-hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.skilled_hourly_rate|floatformat:2 }}" {% if not disaster.active %}readonly{% endif %}>
+                                    <button id="skilled-hourly-rate-btn" class="btn" type="button" {% if not disaster.active %}disabled aria-disabled="true"{% endif %}>{% if disaster.active %}Save Changes{% else %}Read Only{% endif %}</button>
                                 </div>
                                 <p class="settings-note">Changes will affect future revenue calculations</p>
                             </div>
@@ -1257,6 +1257,77 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 </script>
 <script>
+// Handle hourly rate updates
+function setupHourlyRateButtons() {
+    const hourlyRateBtn = document.getElementById('hourly-rate-btn');
+    const skilledHourlyRateBtn = document.getElementById('skilled-hourly-rate-btn');
+    const hourlyRateInput = document.getElementById('hourly-rate');
+    const skilledHourlyRateInput = document.getElementById('skilled-hourly-rate');
+    const hourlyRateDisplay = document.getElementById('hourly-rate-display');
+    const skilledHourlyRateDisplay = document.getElementById('skilled-hourly-rate-display');
+    
+    if (!hourlyRateBtn || !skilledHourlyRateBtn) return;
+    
+    const disasterId = new URLSearchParams(window.location.search).get('disaster_id') || 
+                       window.location.pathname.split('/').filter(Boolean).find((part, idx, arr) => 
+                           arr[idx - 1] === 'admin-dashboard' && /^\d+$/.test(part));
+    
+    if (!disasterId) return;
+    
+    async function updateRate(fieldName, inputElement, button) {
+        const newValue = inputElement.value;
+        
+        if (!newValue) {
+            alert('Please enter a valid value');
+            return;
+        }
+        
+        const originalText = button.textContent;
+        button.textContent = 'Saving...';
+        button.disabled = true;
+        
+        try {
+            const formData = new FormData();
+            formData.append(fieldName, newValue);
+            
+            const response = await fetch(`/admin-dashboard/${disasterId}/update-hourly-rate/`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                alert(`${fieldName === 'hourly_rate' ? 'Hourly rate' : 'Skilled hourly rate'} updated successfully!`);
+                // Update the input and display values
+                if (fieldName === 'hourly_rate') {
+                    inputElement.value = data.hourly_rate;
+                    hourlyRateDisplay.textContent = '$' + data.hourly_rate;
+                } else {
+                    inputElement.value = data.skilled_hourly_rate;
+                    skilledHourlyRateDisplay.textContent = '$' + data.skilled_hourly_rate;
+                }
+            } else {
+                alert('Error updating rate: ' + (data.message || 'Unknown error'));
+            }
+        } catch (error) {
+            alert('An error occurred while updating the rate: ' + error.message);
+        } finally {
+            button.textContent = originalText;
+            button.disabled = false;
+        }
+    }
+    
+    hourlyRateBtn.addEventListener('click', () => updateRate('hourly_rate', hourlyRateInput, hourlyRateBtn));
+    skilledHourlyRateBtn.addEventListener('click', () => updateRate('skilled_hourly_rate', skilledHourlyRateInput, skilledHourlyRateBtn));
+}
+
+document.addEventListener('DOMContentLoaded', setupHourlyRateButtons);
+
 lucide.createIcons();
 </script>
 

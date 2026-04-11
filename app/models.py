@@ -82,7 +82,7 @@ class Volunteer(SafeDeleteModel):
 
     equipment_make_model = models.CharField(max_length=100, blank=True, null=True)
     equipment_hours = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
-    skilled_worker = models.CharField(max_length=10, choices=SKILL_OPTIONS, blank=True, null=True)
+    skilled_worker = models.CharField(max_length=10, choices=SKILL_OPTIONS, null=True)
     confirmed_skilled_worker = models.BooleanField(default=False)
 
     notes = models.TextField(max_length=500, blank=True)
@@ -123,7 +123,7 @@ class Donations(SafeDeleteModel):
     email = models.EmailField(blank=True)
     phone_number = PhoneNumberField(blank=True)
     date_of_donation = models.DateField()
-    total_hours = models.IntegerField()
+    total_hours = models.IntegerField(validators=[MaxValueValidator(18)])
     location_donated = models.CharField(max_length=100)
     work_desc = models.TextField(max_length=500)
     notes = models.TextField(max_length=500, blank=True)
@@ -131,7 +131,7 @@ class Donations(SafeDeleteModel):
     donation_type = models.CharField(max_length=50, choices=DONATION_TYPES)
     material_type = models.CharField(max_length=100, blank=True, null=True)
     equipment_type = models.CharField(max_length=100, blank=True, null=True)
-    money_donated = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+    money_donated = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True, validators=[MaxValueValidator(999999.99)])
     created_at = models.DateTimeField(auto_now_add=True)
     flagged = models.BooleanField(default=False)
     flagged_reason = models.JSONField(blank=True, null=True)
