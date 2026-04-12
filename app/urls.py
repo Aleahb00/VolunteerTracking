@@ -30,6 +30,7 @@ urlpatterns = [
     path('general-dashboard/delete-volunteer/<int:volunteer_id>/', general_delete_volunteer_view, name='delete_volunteer_general'),
     path('general-dashboard/restore-volunteer/<int:id>/', general_restore_volunteer_view, name='restore_volunteer_general'),
     path('general-dashboard/permanent-delete-volunteer/<int:id>/', general_permanent_delete_volunteer_view, name='permanent_delete_volunteer_general'),
+        path('general-dashboard/assign/<str:submission_type>/<int:submission_id>/', assign_submission_view, name='assign_submission_view'),
 
     # General Dashboard - Donation Management
     path('general-dashboard/delete-donation/<int:donation_id>/', general_delete_donation_view, name='delete_donation_general'),

@@ -21,6 +21,7 @@ class Disaster(models.Model):
     location = models.CharField(max_length=100, blank=True, null=True)
     process_step = models.CharField(max_length=100)
     applicant = models.CharField(max_length=100)
+    goal = models.BigIntegerField(default=0)
     active = models.BooleanField(default=True)
 
 

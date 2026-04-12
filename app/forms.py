@@ -32,6 +32,7 @@ class DisasterForm(forms.ModelForm):
             'location',
             'process_step',
             'applicant',
+            'goal',
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -81,6 +82,11 @@ class DisasterForm(forms.ModelForm):
             'applicant': forms.TextInput(attrs={
                 'class': 'form-control',
                 'type': 'text'}),
+            
+            'goal': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'type': 'number',
+                'min': '0'}),
         }
             
 
@@ -212,12 +218,36 @@ class VolunteerForm(forms.ModelForm):
         skilled_worker = (cleaned_data.get('skilled_worker') or '').strip().lower()
 
         min_similarity = 80
-        disaster_locations = Disaster.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
+        active_disaster_locations = [
+            (disaster_location or '').strip()
+            for disaster_location in Disaster.objects.filter(active=True)
+            .exclude(location__isnull=True)
+            .exclude(location__exact='')
+            .values_list('location', flat=True)
+            if (disaster_location or '').strip()
+        ]
 
         best_similarity = max(
-            (fuzz.ratio(location.lower(), disaster_location.lower()) for disaster_location in disaster_locations),default=0)
+            (fuzz.ratio(location.lower(), disaster_location.lower()) for disaster_location in active_disaster_locations),
+            default=0,
+        )
 
-        if location and best_similarity < min_similarity:
+        normalized_location_counts = {}
+        for disaster_location in active_disaster_locations:
+            key = disaster_location.lower()
+            normalized_location_counts[key] = normalized_location_counts.get(key, 0) + 1
+
+        matching_locations = [
+            disaster_location
+            for disaster_location in active_disaster_locations
+            if fuzz.ratio(location.lower(), disaster_location.lower()) == best_similarity
+        ]
+        has_duplicate_active_location_match = any(
+            normalized_location_counts.get(disaster_location.lower(), 0) > 1
+            for disaster_location in matching_locations
+        )
+
+        if location and (best_similarity < min_similarity or has_duplicate_active_location_match):
             flags.append(Volunteer.FLAG_INVALID_LOCATION)
         if skilled_worker == 'unsure':
             flags.append(Volunteer.FLAG_CHECKBOX)
@@ -337,13 +367,36 @@ class DonationForm(forms.ModelForm):
         location = (cleaned_data.get('location_donated') or '').strip()
         
         min_similarity = 80
-        disaster_locations = Disaster.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
-        
+        active_disaster_locations = [
+            (disaster_location or '').strip()
+            for disaster_location in Disaster.objects.filter(active=True)
+            .exclude(location__isnull=True)
+            .exclude(location__exact='')
+            .values_list('location', flat=True)
+            if (disaster_location or '').strip()
+        ]
+
         best_similarity = max(
-            (fuzz.ratio(location.lower(), disaster_location.lower()) for disaster_location in disaster_locations),
-            default=0)
-        
-        if location and best_similarity < min_similarity:
+            (fuzz.ratio(location.lower(), disaster_location.lower()) for disaster_location in active_disaster_locations),
+            default=0,
+        )
+
+        normalized_location_counts = {}
+        for disaster_location in active_disaster_locations:
+            key = disaster_location.lower()
+            normalized_location_counts[key] = normalized_location_counts.get(key, 0) + 1
+
+        matching_locations = [
+            disaster_location
+            for disaster_location in active_disaster_locations
+            if fuzz.ratio(location.lower(), disaster_location.lower()) == best_similarity
+        ]
+        has_duplicate_active_location_match = any(
+            normalized_location_counts.get(disaster_location.lower(), 0) > 1
+            for disaster_location in matching_locations
+        )
+
+        if location and (best_similarity < min_similarity or has_duplicate_active_location_match):
             flags.append(Donations.FLAG_INVALID_LOCATION)
         
         cleaned_data['flagged_reason'] = flags
