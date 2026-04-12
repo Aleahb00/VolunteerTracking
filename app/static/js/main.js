@@ -12,17 +12,33 @@ document.addEventListener('DOMContentLoaded', function() {
         m.style.display = 'none';
         m.setAttribute('aria-hidden', 'true');
     }
+    function isAjaxActionForm(form) {
+        if (!form) {
+            return false;
+        }
 
-    function removeSubmissionRow(form) {
-        const row = form.closest('tr');
-        if (row) {
-            row.remove();
+        if (form.classList.contains('js-ajax-action')) {
+            return true;
+        }
+
+        const action = form.action || '';
+        return /toggle_(donation_)?flagged_status|delete-volunteer|delete-donation|restore-volunteer|restore-donation|permanent-delete-volunteer|permanent-delete-donation/i.test(action);
+    }
+
+    function storeDashboardToast(payload) {
+        if (!payload || !payload.message) {
             return;
         }
 
-        const item = form.closest('li');
-        if (item) {
-            item.remove();
+        try {
+            sessionStorage.setItem('dashboardToast', JSON.stringify({
+                message: payload.message,
+                type: payload.message_type || 'success',
+            }));
+        } catch (error) {
+            if (typeof window.showDashboardMessage === 'function') {
+                window.showDashboardMessage(payload.message, payload.message_type || 'success');
+            }
         }
     }
 
@@ -60,8 +76,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.addEventListener('submit', async function(event) {
-        const form = event.target.closest('form.js-ajax-action');
-        if (!form) {
+        const form = event.target.closest('form');
+        if (!isAjaxActionForm(form)) {
             return;
         }
 
@@ -88,10 +104,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const payload = await response.json().catch(() => ({}));
             if (!response.ok || payload.status !== 'success') {
-                throw new Error(payload.error || 'Request failed');
+                if (payload.message && typeof window.showDashboardMessage === 'function') {
+                    window.showDashboardMessage(payload.message, payload.message_type || 'error');
+                } else {
+                    window.alert(payload.error || 'The action could not be completed. Please try again.');
+                }
+                return;
             }
 
-            removeSubmissionRow(form);
+            storeDashboardToast(payload);
+            window.location.reload();
         } catch (error) {
             console.error(error);
             window.alert('The action could not be completed. Please try again.');
