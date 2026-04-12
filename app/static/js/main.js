@@ -12,6 +12,35 @@ document.addEventListener('DOMContentLoaded', function() {
         m.style.display = 'none';
         m.setAttribute('aria-hidden', 'true');
     }
+    function isAjaxActionForm(form) {
+        if (!form) {
+            return false;
+        }
+
+        if (form.classList.contains('js-ajax-action')) {
+            return true;
+        }
+
+        const action = form.action || '';
+        return /toggle_(donation_)?flagged_status|delete-volunteer|delete-donation|restore-volunteer|restore-donation|permanent-delete-volunteer|permanent-delete-donation/i.test(action);
+    }
+
+    function storeDashboardToast(payload) {
+        if (!payload || !payload.message) {
+            return;
+        }
+
+        try {
+            sessionStorage.setItem('dashboardToast', JSON.stringify({
+                message: payload.message,
+                type: payload.message_type || 'success',
+            }));
+        } catch (error) {
+            if (typeof window.showDashboardMessage === 'function') {
+                window.showDashboardMessage(payload.message, payload.message_type || 'success');
+            }
+        }
+    }
 
     // 1. UNIVERSAL OPENER: Works for Create and Edit buttons
     document.addEventListener('click', function(event) {
@@ -45,6 +74,55 @@ document.addEventListener('DOMContentLoaded', function() {
     if (autoShowModal) {
         openModal(autoShowModal);
     }
+
+    document.addEventListener('submit', async function(event) {
+        const form = event.target.closest('form');
+        if (!isAjaxActionForm(form)) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const confirmMessage = form.dataset.confirmMessage;
+        if (confirmMessage && !window.confirm(confirmMessage)) {
+            return;
+        }
+
+        const submitButton = form.querySelector('[type="submit"]');
+        if (submitButton) {
+            submitButton.disabled = true;
+        }
+
+        try {
+            const response = await fetch(form.action, {
+                method: form.method || 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok || payload.status !== 'success') {
+                if (payload.message && typeof window.showDashboardMessage === 'function') {
+                    window.showDashboardMessage(payload.message, payload.message_type || 'error');
+                } else {
+                    window.alert(payload.error || 'The action could not be completed. Please try again.');
+                }
+                return;
+            }
+
+            storeDashboardToast(payload);
+            window.location.reload();
+        } catch (error) {
+            console.error(error);
+            window.alert('The action could not be completed. Please try again.');
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+            }
+        }
+    });
 });
 
 // Apparently this code isn't being used and is suggested to remove

@@ -4,12 +4,11 @@
 	z-index: 40;
 	background: #ffffff;
 	border-bottom: 1px solid #d7dfd1;
-	overflow-x: hidden;
-    max-width: 100%;
 }
 
 .site-nav__inner {
 	width: 100%;
+	box-sizing: border-box;
 	margin: 0;
 	padding: 0.8rem 1rem;
 	display: grid;
@@ -21,7 +20,7 @@
 .site-nav__brand {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.2rem;
+	gap: 0.3rem;
 	color: #133340;
 	text-decoration: none;
 	font-weight: 800;
@@ -59,7 +58,7 @@
 }
 
 .site-nav__logo {
-	height: 36px;
+	height: 32px;
 	width: auto;
 	display: block;
 	flex-shrink: 0;
@@ -77,4 +76,3 @@
 		justify-self: stretch;
 	}
 }
-

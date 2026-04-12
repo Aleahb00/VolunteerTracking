@@ -12,7 +12,7 @@
     <header class="pv-header no-print">
         <div>
             <h1 class="pv-title">Print View{% if disaster %} - {{ disaster.name }}{% endif %}</h1>
-            <p class="pv-subtitle">{{ volunteers|length|add:donations|length }} total submissions ({{ volunteers|length }} volunteers, {{ donations|length }} donations)</p>
+            <p class="pv-subtitle">{% with vol_len=volunteers|length don_len=donations|length %}{{ vol_len|add:don_len }}{% endwith %} total submissions ({{ volunteers|length }} volunteers, {{ donations|length }} donations)</p>
         </div>
         <div class="pv-actions">
             <button class="btn" type="button" onclick="selectAllReports()">Select All</button>
@@ -86,12 +86,12 @@
                         </div>
 
                         <div class="page-header">
-                            <h2>Volunteer Time Report</h2>
+                            <h2>Volunteer Report</h2>
                             <p class="disaster-name">
                                 {% if volunteer.disaster %}
                                     {{ volunteer.disaster.name }}
-                                {% else %}
-                                    Unassigned Disaster
+                                    {% else %}
+                                        N/A
                                 {% endif %}
                             </p>
                             <p class="submission-date">Submitted: {{ volunteer.date_of_work|date:"m/d/Y" }}</p>
@@ -117,19 +117,19 @@
                                 </div>
                                 <div class="info-item">
                                     <label>Email Address</label>
-                                    <p>{{ volunteer.email }}</p>
+                                    <p>{% if volunteer.contact_method == 'email' %}{{ volunteer.email|default:"N/A" }}{% else %}N/A{% endif %}</p>
                                 </div>
                                 <div class="info-item">
                                     <label>Phone Number</label>
-                                    <p>{{ volunteer.phone_number }}</p>
+                                    <p>{% if volunteer.contact_method == 'phone' %}{{ volunteer.phone_number|default:"N/A" }}{% else %}N/A{% endif %}</p>
                                 </div>
                                 <div class="info-item">
                                     <label>Preferred Contact</label>
-                                    <p>{{ volunteer.get_contact_method_display }}</p>
+                                     <p>{{ volunteer.get_contact_method_display|default:"N/A" }}</p>
                                 </div>
                                 <div class="info-item">
                                     <label>Location</label>
-                                    <p>{{ volunteer.location_volunteered }}</p>
+                                     <p>{{ volunteer.location_volunteered|default:"N/A" }}</p>
                                 </div>
                             </div>
                         </section>
@@ -145,18 +145,14 @@
                                     <label>Service Date</label>
                                     <p>{{ volunteer.date_of_work|date:"m/d/Y" }}</p>
                                 </div>
-                                {% if volunteer.work_desc %}
-                                    <div class="info-item full-width">
-                                        <label>Work Description</label>
-                                        <p>{{ volunteer.work_desc }}</p>
-                                    </div>
-                                {% endif %}
-                                {% if volunteer.notes %}
-                                    <div class="info-item full-width">
-                                        <label>Notes</label>
-                                        <p>{{ volunteer.notes }}</p>
-                                    </div>
-                                {% endif %}
+                                <div class="info-item full-width">
+                                    <label>Work Description</label>
+                                    <p>{{ volunteer.work_desc|default:"N/A" }}</p>
+                                </div>
+                                <div class="info-item full-width">
+                                    <label>Notes</label>
+                                    <p>{{ volunteer.notes|default:"N/A" }}</p>
+                                </div>
                             </div>
                         </section>
 
@@ -165,26 +161,20 @@
                             <div class="info-grid">
                                 <div class="info-item">
                                     <label>Equipment Type</label>
-                                    <p>{{ volunteer.get_equipment_display|default:"N/A" }}</p>
+                                        <p>{{ volunteer.get_equipment_display|default:"N/A" }}</p>
                                 </div>
-                                {% if volunteer.other_equipment %}
-                                    <div class="info-item">
-                                        <label>Other Equipment</label>
-                                        <p>{{ volunteer.other_equipment }}</p>
-                                    </div>
-                                {% endif %}
-                                {% if volunteer.equipment_make_model %}
-                                    <div class="info-item">
-                                        <label>Make/Model</label>
-                                        <p>{{ volunteer.equipment_make_model }}</p>
-                                    </div>
-                                {% endif %}
-                                {% if volunteer.equipment_hours %}
-                                    <div class="info-item">
-                                        <label>Equipment Hours</label>
-                                        <p>{{ volunteer.equipment_hours }}</p>
-                                    </div>
-                                {% endif %}
+                                <div class="info-item">
+                                    <label>Other Equipment</label>
+                                    <p>{{ volunteer.other_equipment|default:"N/A" }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Make/Model</label>
+                                    <p>{{ volunteer.equipment_make_model|default:"N/A" }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Equipment Hours</label>
+                                    <p>{{ volunteer.equipment_hours|default:"N/A" }}</p>
+                                </div>
                             </div>
                         </section>
 
@@ -222,8 +212,8 @@
                             <p class="disaster-name">
                                 {% if donation.disaster %}
                                     {{ donation.disaster.name }}
-                                {% else %}
-                                    Unassigned Disaster
+                                    {% else %}
+                                        N/A
                                 {% endif %}
                             </p>
                             <p class="submission-date">Submitted: {{ donation.date_of_donation|date:"m/d/Y" }}</p>
@@ -249,19 +239,19 @@
                                 </div>
                                 <div class="info-item">
                                     <label>Email Address</label>
-                                    <p>{{ donation.email }}</p>
+                                    <p>{% if donation.contact_method == 'email' %}{{ donation.email|default:"N/A" }}{% else %}N/A{% endif %}</p>
                                 </div>
                                 <div class="info-item">
                                     <label>Phone Number</label>
-                                    <p>{{ donation.phone_number }}</p>
+                                    <p>{% if donation.contact_method == 'phone' %}{{ donation.phone_number|default:"N/A" }}{% else %}N/A{% endif %}</p>
                                 </div>
                                 <div class="info-item">
                                     <label>Preferred Contact</label>
-                                    <p>{{ donation.get_contact_method_display }}</p>
+                                     <p>{{ donation.get_contact_method_display|default:"N/A" }}</p>
                                 </div>
                                 <div class="info-item">
                                     <label>Location</label>
-                                    <p>{{ donation.location_donated }}</p>
+                                     <p>{{ donation.location_donated|default:"N/A" }}</p>
                                 </div>
                             </div>
                         </section>
@@ -275,38 +265,28 @@
                                 </div>
                                 <div class="info-item">
                                     <label>Donation Type</label>
-                                    <p>{{ donation.get_donation_type_display }}</p>
+                                        <p>{{ donation.get_donation_type_display|default:"N/A" }}</p>
                                 </div>
-                                {% if donation.material_type %}
-                                    <div class="info-item">
-                                        <label>Material Type</label>
-                                        <p>{{ donation.material_type }}</p>
-                                    </div>
-                                {% endif %}
-                                {% if donation.equipment_type %}
-                                    <div class="info-item">
-                                        <label>Equipment Type</label>
-                                        <p>{{ donation.equipment_type }}</p>
-                                    </div>
-                                {% endif %}
-                                {% if donation.other_donation_type %}
-                                    <div class="info-item">
-                                        <label>Other Donation Type</label>
-                                        <p>{{ donation.other_donation_type }}</p>
-                                    </div>
-                                {% endif %}
-                                {% if donation.work_desc %}
-                                    <div class="info-item full-width">
-                                        <label>Description</label>
-                                        <p>{{ donation.work_desc }}</p>
-                                    </div>
-                                {% endif %}
-                                {% if donation.notes %}
-                                    <div class="info-item full-width">
-                                        <label>Notes</label>
-                                        <p>{{ donation.notes }}</p>
-                                    </div>
-                                {% endif %}
+                                <div class="info-item">
+                                    <label>Material Type</label>
+                                    <p>{{ donation.material_type|default:"N/A" }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Equipment Type</label>
+                                    <p>{{ donation.equipment_type|default:"N/A" }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Other Donation Type</label>
+                                    <p>{{ donation.other_donation_type|default:"N/A" }}</p>
+                                </div>
+                                <div class="info-item full-width">
+                                    <label>Description</label>
+                                    <p>{{ donation.work_desc|default:"N/A" }}</p>
+                                </div>
+                                <div class="info-item full-width">
+                                    <label>Notes</label>
+                                    <p>{{ donation.notes|default:"N/A" }}</p>
+                                </div>
                             </div>
                         </section>
 

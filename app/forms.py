@@ -32,6 +32,7 @@ class DisasterForm(forms.ModelForm):
             'location',
             'process_step',
             'applicant',
+            'goal',
         ]
         widgets = {
             'name': forms.TextInput(attrs={
@@ -81,6 +82,11 @@ class DisasterForm(forms.ModelForm):
             'applicant': forms.TextInput(attrs={
                 'class': 'form-control',
                 'type': 'text'}),
+            
+            'goal': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'type': 'number',
+                'min': '0'}),
         }
             
 
@@ -130,7 +136,10 @@ class VolunteerForm(forms.ModelForm):
             
             'total_hours': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'type': 'number'}),
+                'type': 'number',
+                'min': '0',
+                'max': '18',
+                'step': '1'}),
             
             'location_volunteered': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -174,7 +183,8 @@ class VolunteerForm(forms.ModelForm):
         from django.db.models import Min
         from django.core.exceptions import ValidationError
 
-        earliest_date = Disaster.objects.aggregate(Min('start_date'))['start_date__min']
+        active_disasters = Disaster.objects.filter(active=True)
+        earliest_date = active_disasters.aggregate(Min('start_date'))['start_date__min']
 
         if earliest_date and user_date and user_date < earliest_date:
             raise ValidationError('Date cannot be before earliest disaster date')
@@ -183,18 +193,61 @@ class VolunteerForm(forms.ModelForm):
     
     def clean(self):
         cleaned_data = super().clean()
+        contact_method = (cleaned_data.get('contact_method') or '').strip().lower()
+        email = (cleaned_data.get('email') or '').strip()
+        phone_number = cleaned_data.get('phone_number')
+
+        # Enforce conditional contact requirement and ignore validation
+        # errors on the non-selected contact field.
+        if contact_method == 'email':
+            if not email:
+                self.add_error('email', 'Email is required when contact method is Email.')
+            cleaned_data['phone_number'] = ''
+            if 'phone_number' in self._errors:
+                self._errors.pop('phone_number')
+        elif contact_method == 'phone':
+            if not phone_number:
+                self.add_error('phone_number', 'Phone number is required when contact method is Phone.')
+            cleaned_data['email'] = ''
+            if 'email' in self._errors:
+                self._errors.pop('email')
+
         flags = []
 
         location = (cleaned_data.get('location_volunteered') or '').strip()
         skilled_worker = (cleaned_data.get('skilled_worker') or '').strip().lower()
 
         min_similarity = 80
-        disaster_locations = Disaster.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
+        active_disaster_locations = [
+            (disaster_location or '').strip()
+            for disaster_location in Disaster.objects.filter(active=True)
+            .exclude(location__isnull=True)
+            .exclude(location__exact='')
+            .values_list('location', flat=True)
+            if (disaster_location or '').strip()
+        ]
 
         best_similarity = max(
-            (fuzz.ratio(location.lower(), disaster_location.lower()) for disaster_location in disaster_locations),default=0)
+            (fuzz.ratio(location.lower(), disaster_location.lower()) for disaster_location in active_disaster_locations),
+            default=0,
+        )
 
-        if location and best_similarity < min_similarity:
+        normalized_location_counts = {}
+        for disaster_location in active_disaster_locations:
+            key = disaster_location.lower()
+            normalized_location_counts[key] = normalized_location_counts.get(key, 0) + 1
+
+        matching_locations = [
+            disaster_location
+            for disaster_location in active_disaster_locations
+            if fuzz.ratio(location.lower(), disaster_location.lower()) == best_similarity
+        ]
+        has_duplicate_active_location_match = any(
+            normalized_location_counts.get(disaster_location.lower(), 0) > 1
+            for disaster_location in matching_locations
+        )
+
+        if location and (best_similarity < min_similarity or has_duplicate_active_location_match):
             flags.append(Volunteer.FLAG_INVALID_LOCATION)
         if skilled_worker == 'unsure':
             flags.append(Volunteer.FLAG_CHECKBOX)
@@ -249,7 +302,10 @@ class DonationForm(forms.ModelForm):
             
             'total_hours': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'type': 'number'}),
+                'type': 'number',
+                'min': '0',
+                'max': '18',
+                'step': '1'}),
             
             'location_donated': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -277,7 +333,10 @@ class DonationForm(forms.ModelForm):
             
             'money_donated': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'type': 'number'}),
+                'type': 'number',
+                'min': '0',
+                'max': '999999.99',
+                'step': '0.01'}),
             
             'other_donation_type': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -286,31 +345,58 @@ class DonationForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        contact_method = cleaned_data.get('contact_method')
-        email = cleaned_data.get('email')
+        contact_method = (cleaned_data.get('contact_method') or '').strip().lower()
+        email = (cleaned_data.get('email') or '').strip()
         phone_number = cleaned_data.get('phone_number')
 
         if contact_method == 'email':
             if not email:
                 self.add_error('email', 'Email is required when contact method is Email.')
             cleaned_data['phone_number'] = ''
+            if 'phone_number' in self._errors:
+                self._errors.pop('phone_number')
         elif contact_method == 'phone':
             if not phone_number:
                 self.add_error('phone_number', 'Phone number is required when contact method is Phone.')
             cleaned_data['email'] = ''
+            if 'email' in self._errors:
+                self._errors.pop('email')
 
         # Compute flagged_reason for donations
         flags = []
         location = (cleaned_data.get('location_donated') or '').strip()
         
         min_similarity = 80
-        disaster_locations = Disaster.objects.filter(active=True).exclude(location__isnull=True).exclude(location__exact='').values_list('location', flat=True)
-        
+        active_disaster_locations = [
+            (disaster_location or '').strip()
+            for disaster_location in Disaster.objects.filter(active=True)
+            .exclude(location__isnull=True)
+            .exclude(location__exact='')
+            .values_list('location', flat=True)
+            if (disaster_location or '').strip()
+        ]
+
         best_similarity = max(
-            (fuzz.ratio(location.lower(), disaster_location.lower()) for disaster_location in disaster_locations),
-            default=0)
-        
-        if location and best_similarity < min_similarity:
+            (fuzz.ratio(location.lower(), disaster_location.lower()) for disaster_location in active_disaster_locations),
+            default=0,
+        )
+
+        normalized_location_counts = {}
+        for disaster_location in active_disaster_locations:
+            key = disaster_location.lower()
+            normalized_location_counts[key] = normalized_location_counts.get(key, 0) + 1
+
+        matching_locations = [
+            disaster_location
+            for disaster_location in active_disaster_locations
+            if fuzz.ratio(location.lower(), disaster_location.lower()) == best_similarity
+        ]
+        has_duplicate_active_location_match = any(
+            normalized_location_counts.get(disaster_location.lower(), 0) > 1
+            for disaster_location in matching_locations
+        )
+
+        if location and (best_similarity < min_similarity or has_duplicate_active_location_match):
             flags.append(Donations.FLAG_INVALID_LOCATION)
         
         cleaned_data['flagged_reason'] = flags
@@ -325,7 +411,8 @@ class DonationForm(forms.ModelForm):
         from django.db.models import Min
         from django.core.exceptions import ValidationError
 
-        earliest_date = Disaster.objects.aggregate(Min('start_date'))['start_date__min']
+        active_disasters = Disaster.objects.filter(active=True)
+        earliest_date = active_disasters.aggregate(Min('start_date'))['start_date__min']
 
         if earliest_date and user_date and user_date < earliest_date:
             raise ValidationError('Date cannot be before earliest disaster date')

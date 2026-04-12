@@ -11,6 +11,7 @@
 
 <main class="dash">
     <div class="dash-wrap">
+        <div class="dashboard-messages" aria-live="polite" aria-atomic="true"></div>
         <header class="dash-header">
             <div class="dash-heading">
                 <p class="dash-kicker">Disaster Dashboard</p>
@@ -20,7 +21,7 @@
             <div class="actions-row dash-header-actions">
                 <a href="{% url 'general_dashboard' %}" class="btn btn-secondary">Back to General Dashboard</a>
                 {% if disaster and disaster.active %}
-                    <form method="POST" action="{% url 'close_disaster' disaster.id %}" class="inline-form" onsubmit="return confirm('Are you sure you want to close this disaster? This action cannot be undone!');">
+                    <form method="POST" action="{% url 'close_disaster' disaster.id %}" class="inline-form">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger">Close Disaster</button>
                     </form>
@@ -72,11 +73,12 @@
         </section>
 
         <section class="dash-toggle" role="tablist" aria-label="Submission Toggle">
-            <button class="dash-tab {% if active_tab == 'volunteers-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'volunteers-panel' %}true{% else %}false{% endif %}" data-target="volunteers-panel">Volunteer Submissions</button>
-            <button class="dash-tab {% if active_tab == 'donations-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'donations-panel' %}true{% else %}false{% endif %}" data-target="donations-panel">Donation Submissions</button>
-            <button class="dash-tab {% if active_tab == 'flagged-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'flagged-panel' %}true{% else %}false{% endif %}" data-target="flagged-panel">Flagged Forms</button>
+            <button class="dash-tab {% if active_tab == 'volunteers-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'volunteers-panel' %}true{% else %}false{% endif %}" data-target="volunteers-panel">Volunteer Submissions (<span class="js-tab-count" data-count-target="volunteers-panel">{{ volunteer_tab_count }}</span>)</button>
+            <button class="dash-tab {% if active_tab == 'donations-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'donations-panel' %}true{% else %}false{% endif %}" data-target="donations-panel">Donation Submissions (<span class="js-tab-count" data-count-target="donations-panel">{{ donation_tab_count }}</span>)</button>
+            <button class="dash-tab {% if active_tab == 'flagged-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'flagged-panel' %}true{% else %}false{% endif %}" data-target="flagged-panel">Flagged Forms (<span class="js-tab-count" data-count-target="flagged-panel">{{ flagged_tab_count }}</span>)</button>
+            <button class="dash-tab {% if active_tab == 'analytics-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'analytics-panel' %}true{% else %}false{% endif %}" data-target="analytics-panel">Analytics</button>
             <button class="dash-tab {% if active_tab == 'settings-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'settings-panel' %}true{% else %}false{% endif %}" data-target="settings-panel">Settings</button>
-            <button class="dash-tab {% if active_tab == 'trash-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'trash-panel' %}true{% else %}false{% endif %}" data-target="trash-panel">Trash</button>
+            <button class="dash-tab {% if active_tab == 'trash-panel' %}is-active{% endif %}" type="button" role="tab" aria-selected="{% if active_tab == 'trash-panel' %}true{% else %}false{% endif %}" data-target="trash-panel">Trash (<span class="js-tab-count" data-count-target="trash-panel">{{ trash_count }}</span>)</button>
         </section>
 
         <section id="volunteers-panel" class="dash-grid tab-panel" {% if active_tab != 'volunteers-panel' %}hidden{% endif %}>
@@ -135,7 +137,6 @@
                                 <th>Location</th>
                                 <th>Hours</th>
                                 <th>Date</th>
-                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -148,44 +149,37 @@
                                     <td data-label="Name">
                                         <strong>{{ volunteer.name }}</strong>
                                     </td>
-                                    <td data-label="Email">{{ volunteer.email }}</td>
-                                    <td data-label="Phone">{{ volunteer.phone_number }}</td>
-                                    <td data-label="Location">{{ volunteer.location_volunteered|default:'-' }}</td>
+                                    <td data-label="Email">{% if volunteer.contact_method == 'email' %}{{ volunteer.email|default:'N/A' }}{% else %}N/A{% endif %}</td>
+                                    <td data-label="Phone">{% if volunteer.contact_method == 'phone' %}{{ volunteer.phone_number|default:'N/A' }}{% else %}N/A{% endif %}</td>
+                                    <td data-label="Location">{{ volunteer.location_volunteered|default:'N/A' }}</td>
                                     <td data-label="Hours">{{ volunteer.total_hours }}</td>
                                     <td data-label="Date">{{ volunteer.date_of_work|date:"n/j/Y" }}</td>
-                                    <td data-label="Status">
-                                        {% if volunteer.flagged %}
-                                            <span class="status-pill is-closed">Flagged</span>
-                                        {% else %}
-                                            <span class="status-pill is-active">Active</span>
-                                        {% endif %}
-                                    </td>
                                     <td data-label="Actions">
                                         <div class="actions-row table-actions">
-                                            <button class="btn btn-secondary open-modal-btn" data-target="modal-volunteer-{{ volunteer.id }}" type="button">Details</button>
+                                            <button class="details-icon-btn open-modal-btn" data-target="modal-volunteer-{{ volunteer.id }}" type="button" aria-label="View details">
+                                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9944 15.5C13.9274 15.5 15.4944 13.933 15.4944 12C15.4944 10.067 13.9274 8.5 11.9944 8.5C10.0614 8.5 8.49439 10.067 8.49439 12C8.49439 13.933 10.0614 15.5 11.9944 15.5ZM11.9944 13.4944C11.1691 13.4944 10.5 12.8253 10.5 12C10.5 11.1747 11.1691 10.5056 11.9944 10.5056C12.8197 10.5056 13.4888 11.1747 13.4888 12C13.4888 12.8253 12.8197 13.4944 11.9944 13.4944Z" fill="currentColor"></path>
+                                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 5C7.18879 5 3.9167 7.60905 2.1893 9.47978C0.857392 10.9222 0.857393 13.0778 2.1893 14.5202C3.9167 16.391 7.18879 19 12 19C16.8112 19 20.0833 16.391 21.8107 14.5202C23.1426 13.0778 23.1426 10.9222 21.8107 9.47978C20.0833 7.60905 16.8112 5 12 5ZM3.65868 10.8366C5.18832 9.18002 7.9669 7 12 7C16.0331 7 18.8117 9.18002 20.3413 10.8366C20.9657 11.5128 20.9657 12.4872 20.3413 13.1634C18.8117 14.82 16.0331 17 12 17C7.9669 17 5.18832 14.82 3.65868 13.1634C3.03426 12.4872 3.03426 11.5128 3.65868 10.8366Z" fill="currentColor"></path>
+                                                </svg>
+                                            </button>
                                             <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button">{% if volunteer.flagged %}<i data-lucide="flag-off"></i>{% else %}<i data-lucide="flag"></i>{% endif %}</button>
-                                            <button data-volunteer-id="{{ volunteer.id }}" class="btn btn-secondary js-toggle-skilled" type="button">{% if volunteer.confirmed_skilled_worker %}Unmark Skilled Worker{% else %}Mark Skilled Worker{% endif %}</button>
-                                            <form method="POST" action="{% url 'delete_volunteer' volunteer.id %}">
+                                            <form method="POST" action="{% url 'delete_volunteer' volunteer.id %}" class="js-ajax-action">
                                                 {% csrf_token %}
                                                 <button class="btn-danger" type="submit"><i data-lucide="trash-2"></i></button>
                                             </form>
                                         </div>
 
                                         <div id="modal-volunteer-{{ volunteer.id }}" class="modal" aria-hidden="true">
-                                            <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="volunteerDetailsTitle-{{ volunteer.id }}">
+                                            <div class="modal-content modal-content--submission submission-modal" role="dialog" aria-modal="true" aria-labelledby="volunteerDetailsTitle-{{ volunteer.id }}">
                                                 <span class="close" aria-label="Close">&times;</span>
 
                                                 <header class="submission-modal-head">
-                                                    <h3>Volunteer Report</h3>
-                                                    <p class="submission-modal-disaster">{% if volunteer.disaster %}{{ volunteer.disaster.name }}{% else %}Unassigned Disaster{% endif %}</p>
+                                                    <h3 id="volunteerDetailsTitle-{{ volunteer.id }}">Volunteer Report</h3>
+                                                    <p class="submission-modal-disaster">{% if volunteer.disaster %}{{ volunteer.disaster.name }}{% else %}N/A{% endif %}</p>
                                                     <p class="submission-modal-date">Submitted: {{ volunteer.created_at|date:"n/j/Y, g:i:s A" }}</p>
                                                 </header>
 
                                                 <div class="submission-modal-divider"></div>
-
-                                                <div class="submission-status-wrap">
-                                                    <span class="submission-status {% if volunteer.flagged %}is-flagged{% else %}is-active{% endif %}">{% if volunteer.flagged %}Flagged{% else %}Active{% endif %}</span>
-                                                </div>
 
                                                 <div class="submission-id-card">
                                                     <p class="submission-k">Submission ID</p>
@@ -196,10 +190,10 @@
                                                     <h4>Personal Information</h4>
                                                     <div class="submission-grid">
                                                         <div class="submission-field"><p class="submission-k">Full Name</p><p class="submission-v">{{ volunteer.name }}</p></div>
-                                                        <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{{ volunteer.email }}</p></div>
-                                                        <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{{ volunteer.phone_number }}</p></div>
-                                                        <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ volunteer.get_contact_method_display|default:'Not provided' }}</p></div>
-                                                        <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ volunteer.location_volunteered|default:'Not provided' }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{% if volunteer.contact_method == 'email' %}{{ volunteer.email|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{% if volunteer.contact_method == 'phone' %}{{ volunteer.phone_number|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ volunteer.get_contact_method_display|default:'N/A' }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ volunteer.location_volunteered|default:'N/A' }}</p></div>
                                                     </div>
                                                 </section>
 
@@ -208,7 +202,7 @@
                                                     <div class="submission-grid">
                                                         <div class="submission-field"><p class="submission-k">Hours Volunteered</p><p class="submission-v submission-v--accent">{{ volunteer.total_hours }}</p></div>
                                                         <div class="submission-field"><p class="submission-k">Service Date</p><p class="submission-v">{{ volunteer.date_of_work|date:"n/j/Y" }}</p></div>
-                                                        <div class="submission-field submission-field--full"><p class="submission-k">Work Description</p><p class="submission-v">{{ volunteer.work_desc|default:'Not provided' }}</p></div>
+                                                        <div class="submission-field submission-field--full"><p class="submission-k">Work Description</p><p class="submission-v">{{ volunteer.work_desc|default:'N/A' }}</p></div>
                                                         {% if volunteer.notes %}
                                                             <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ volunteer.notes }}</p></div>
                                                         {% endif %}
@@ -218,7 +212,7 @@
                                                 <section class="submission-section">
                                                     <h4>Equipment Information</h4>
                                                     <div class="submission-grid">
-                                                        <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ volunteer.get_equipment_display|default:'Not provided' }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ volunteer.get_equipment_display|default:'N/A' }}</p></div>
                                                         {% if volunteer.other_equipment %}
                                                             <div class="submission-field"><p class="submission-k">Other Equipment</p><p class="submission-v">{{ volunteer.other_equipment }}</p></div>
                                                         {% endif %}
@@ -228,7 +222,7 @@
                                                         {% if volunteer.equipment_hours %}
                                                             <div class="submission-field"><p class="submission-k">Equipment Hours</p><p class="submission-v">{{ volunteer.equipment_hours }}</p></div>
                                                         {% endif %}
-                                                        <div class="submission-field"><p class="submission-k">Skilled Worker Response</p><p class="submission-v">{{ volunteer.get_skilled_worker_display|default:'Not provided' }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Skilled Worker Response</p><p class="submission-v">{{ volunteer.get_skilled_worker_display|default:'N/A' }}</p></div>
                                                         <div class="submission-field"><p class="submission-k">Confirmed Skilled Worker</p><p class="submission-v">{% if volunteer.confirmed_skilled_worker %}Yes{% else %}No{% endif %}</p></div>
                                                     </div>
                                                 </section>
@@ -244,34 +238,32 @@
                                                     </section>
                                                 {% endif %}
 
+                                                <div class="submission-modal-divider submission-modal-divider--actions"></div>
+
                                                 <section class="actions-section">
                                                     <h4>Actions</h4>
                                                     <div class="actions-row">
                                                         {% if volunteer.flagged %}
-                                                            <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
-                                                                {% csrf_token %}
-                                                                <button type="submit" class="btn">Unflag Submission</button>
-                                                            </form>
+                                                            <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button" aria-label="Unflag submission"><i data-lucide="flag-off"></i></button>
                                                         {% else %}
-                                                            <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
-                                                                {% csrf_token %}
-                                                                <button type="submit" class="btn btn-warning">Flag Submission</button>
-                                                            </form>
+                                                            <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button" aria-label="Flag submission"><i data-lucide="flag"></i></button>
                                                         {% endif %}
 
+                                                        <button data-volunteer-id="{{ volunteer.id }}" class="skilled-icon-btn js-toggle-skilled" type="button" aria-label="{% if volunteer.confirmed_skilled_worker %}Unmark skilled worker{% else %}Mark skilled worker{% endif %}">{% if volunteer.confirmed_skilled_worker %}<svg fill="#000000" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M213.333 960c0-167.36 56-321.707 149.44-446.4L1406.4 1557.227c-124.693 93.44-279.04 149.44-446.4 149.44-411.627 0-746.667-335.04-746.667-746.667m1493.334 0c0 167.36-56 321.707-149.44 446.4L513.6 362.773c124.693-93.44 279.04-149.44 446.4-149.44 411.627 0 746.667 335.04 746.667 746.667M960 0C429.76 0 0 429.76 0 960s429.76 960 960 960 960-429.76 960-960S1490.24 0 960 0" fill-rule="evenodd"></path> </g></svg><span class="skilled-icon-label">{% if volunteer.confirmed_skilled_worker %}Unmark skilled{% else %}Mark skilled{% endif %}</span>{% else %}<svg fill="#000000" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1743.858 267.012 710.747 1300.124 176.005 765.382 0 941.387l710.747 710.871 1209.24-1209.116z" fill-rule="evenodd"></path> </g></svg><span class="skilled-icon-label">{% if volunteer.confirmed_skilled_worker %}Unmark skilled{% else %}Mark skilled{% endif %}</span>{% endif %}</button>
+
                                                         {% if volunteer.deleted %}
-                                                            <form method="POST" action="{% url 'restore_volunteer' volunteer.id %}">
+                                                            <form method="POST" action="{% url 'restore_volunteer' volunteer.id %}" class="js-ajax-action">
                                                                 {% csrf_token %}
                                                                 <button type="submit" class="btn">Restore Submission</button>
                                                             </form>
-                                                            <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}">
+                                                            <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this volunteer? This action cannot be undone.">
                                                                 {% csrf_token %}
                                                                 <button type="submit" class="btn btn-danger">Permanently Delete</button>
                                                             </form>
                                                         {% else %}
                                                             <form method="POST" action="{% url 'delete_volunteer' volunteer.id %}">
                                                                 {% csrf_token %}
-                                                                <button type="submit" class="btn btn-danger">Move to Trash</button>
+                                                                <button type="submit" class="btn-danger delete-icon-btn" aria-label="Move to trash"><i data-lucide="trash-2"></i></button>
                                                             </form>
                                                         {% endif %}
                                                     </div>
@@ -286,7 +278,7 @@
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td class="dash-empty" colspan="9">No volunteers yet.</td>
+                                    <td class="dash-empty" colspan="8">No volunteers yet.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -347,7 +339,6 @@
                                 <th>Location</th>
                                 <th>Hours</th>
                                 <th>Date</th>
-                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -360,22 +351,20 @@
                                     <td data-label="Name">
                                         <strong>{{ donation.name }}</strong>
                                     </td>
-                                    <td data-label="Email">{{ donation.email }}</td>
-                                    <td data-label="Phone">{{ donation.phone_number }}</td>
-                                    <td data-label="Location">{{ donation.location_donated|default:'-' }}</td>
+                                    <td data-label="Email">{% if donation.contact_method == 'email' %}{{ donation.email|default:'N/A' }}{% else %}N/A{% endif %}</td>
+                                    <td data-label="Phone">{% if donation.contact_method == 'phone' %}{{ donation.phone_number|default:'N/A' }}{% else %}N/A{% endif %}</td>
+                                    <td data-label="Location">{{ donation.location_donated|default:'N/A' }}</td>
                                     <td data-label="Hours">{{ donation.total_hours }}</td>
                                     <td data-label="Date">{{ donation.date_of_donation|date:"n/j/Y" }}</td>
-                                    <td data-label="Status">
-                                        {% if donation.flagged %}
-                                            <span class="status-pill is-closed">Flagged</span>
-                                        {% else %}
-                                            <span class="status-pill is-active">Active</span>
-                                        {% endif %}
-                                    </td>
                                     <td data-label="Actions">
                                         <div class="actions-row table-actions">
-                                            <button class="btn btn-secondary open-modal-btn" data-target="modal-donation-{{ donation.id }}" type="button">Details</button>
-                                            <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button"  class = "flag-btn">{% if donation.flagged %}<i data-lucide="flag-off"></i>{% else %}<i data-lucide="flag"></i>{% endif %}</button>
+                                            <button class="details-icon-btn open-modal-btn" data-target="modal-donation-{{ donation.id }}" type="button" aria-label="View details">
+                                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9944 15.5C13.9274 15.5 15.4944 13.933 15.4944 12C15.4944 10.067 13.9274 8.5 11.9944 8.5C10.0614 8.5 8.49439 10.067 8.49439 12C8.49439 13.933 10.0614 15.5 11.9944 15.5ZM11.9944 13.4944C11.1691 13.4944 10.5 12.8253 10.5 12C10.5 11.1747 11.1691 10.5056 11.9944 10.5056C12.8197 10.5056 13.4888 11.1747 13.4888 12C13.4888 12.8253 12.8197 13.4944 11.9944 13.4944Z" fill="currentColor"></path>
+                                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 5C7.18879 5 3.9167 7.60905 2.1893 9.47978C0.857392 10.9222 0.857393 13.0778 2.1893 14.5202C3.9167 16.391 7.18879 19 12 19C16.8112 19 20.0833 16.391 21.8107 14.5202C23.1426 13.0778 23.1426 10.9222 21.8107 9.47978C20.0833 7.60905 16.8112 5 12 5ZM3.65868 10.8366C5.18832 9.18002 7.9669 7 12 7C16.0331 7 18.8117 9.18002 20.3413 10.8366C20.9657 11.5128 20.9657 12.4872 20.3413 13.1634C18.8117 14.82 16.0331 17 12 17C7.9669 17 5.18832 14.82 3.65868 13.1634C3.03426 12.4872 3.03426 11.5128 3.65868 10.8366Z" fill="currentColor"></path>
+                                                </svg>
+                                            </button>
+                                            <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag flag-btn" type="button">{% if donation.flagged %}<i data-lucide="flag-off"></i>{% else %}<i data-lucide="flag"></i>{% endif %}</button>
                                             <form method="POST" action="{% url 'delete_donation' donation.id %}">
                                                 {% csrf_token %}
                                                 <button class="btn btn-danger" type="submit">Delete</button>
@@ -383,7 +372,7 @@
                                         </div>
 
                                         <div id="modal-donation-{{ donation.id }}" class="modal" aria-hidden="true">
-                                            <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="donationDetailsTitle-{{ donation.id }}">
+                                            <div class="modal-content modal-content--submission submission-modal" role="dialog" aria-modal="true" aria-labelledby="donationDetailsTitle-{{ donation.id }}">
                                                 <span class="close" aria-label="Close">&times;</span>
                                                 <div class="submission-modal-top">
                                                     <h2 id="donationDetailsTitle-{{ donation.id }}">Donation Submission Details</h2>
@@ -391,15 +380,11 @@
 
                                                 <header class="submission-modal-head">
                                                     <h3>Donation Report</h3>
-                                                    <p class="submission-modal-disaster">{% if donation.disaster %}{{ donation.disaster.name }}{% else %}Unassigned Disaster{% endif %}</p>
+                                                    <p class="submission-modal-disaster">{% if donation.disaster %}{{ donation.disaster.name }}{% else %}N/A{% endif %}</p>
                                                     <p class="submission-modal-date">Submitted: {{ donation.created_at|date:"n/j/Y, g:i:s A" }}</p>
                                                 </header>
 
                                                 <div class="submission-modal-divider"></div>
-
-                                                <div class="submission-status-wrap">
-                                                    <span class="submission-status {% if donation.flagged %}is-flagged{% else %}is-active{% endif %}">{% if donation.flagged %}Flagged{% else %}Active{% endif %}</span>
-                                                </div>
 
                                                 <div class="submission-id-card">
                                                     <p class="submission-k">Submission ID</p>
@@ -410,10 +395,10 @@
                                                     <h4>Personal Information</h4>
                                                     <div class="submission-grid">
                                                         <div class="submission-field"><p class="submission-k">Full Name</p><p class="submission-v">{{ donation.name }}</p></div>
-                                                        <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{{ donation.email }}</p></div>
-                                                        <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{{ donation.phone_number }}</p></div>
-                                                        <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ donation.get_contact_method_display|default:'Not provided' }}</p></div>
-                                                        <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ donation.location_donated|default:'Not provided' }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{% if donation.contact_method == 'email' %}{{ donation.email|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{% if donation.contact_method == 'phone' %}{{ donation.phone_number|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ donation.get_contact_method_display|default:'N/A' }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ donation.location_donated|default:'N/A' }}</p></div>
                                                     </div>
                                                 </section>
 
@@ -421,7 +406,7 @@
                                                     <h4>Donation Details</h4>
                                                     <div class="submission-grid">
                                                         <div class="submission-field"><p class="submission-k">Hours</p><p class="submission-v submission-v--accent">{{ donation.total_hours }}</p></div>
-                                                        <div class="submission-field"><p class="submission-k">Donation Type</p><p class="submission-v">{{ donation.get_donation_type_display|default:'Not provided' }}</p></div>
+                                                        <div class="submission-field"><p class="submission-k">Donation Type</p><p class="submission-v">{{ donation.get_donation_type_display|default:'N/A' }}</p></div>
                                                         {% if donation.material_type %}
                                                             <div class="submission-field"><p class="submission-k">Material Type</p><p class="submission-v">{{ donation.material_type }}</p></div>
                                                         {% endif %}
@@ -432,7 +417,7 @@
                                                             <div class="submission-field"><p class="submission-k">Other Donation Type</p><p class="submission-v">{{ donation.other_donation_type }}</p></div>
                                                         {% endif %}
                                                         <div class="submission-field"><p class="submission-k">Donation Date</p><p class="submission-v">{{ donation.date_of_donation|date:"n/j/Y" }}</p></div>
-                                                        <div class="submission-field submission-field--full"><p class="submission-k">Description</p><p class="submission-v">{{ donation.work_desc|default:'Not provided' }}</p></div>
+                                                        <div class="submission-field submission-field--full"><p class="submission-k">Description</p><p class="submission-v">{{ donation.work_desc|default:'N/A' }}</p></div>
                                                         {% if donation.notes %}
                                                             <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ donation.notes }}</p></div>
                                                         {% endif %}
@@ -450,19 +435,15 @@
                                                     </section>
                                                 {% endif %}
 
+                                                <div class="submission-modal-divider submission-modal-divider--actions"></div>
+
                                                 <section class="actions-section">
                                                     <h4>Actions</h4>
                                                     <div class="actions-row">
                                                         {% if donation.flagged %}
-                                                            <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
-                                                                {% csrf_token %}
-                                                                <button type="submit" class="btn">Unflag Submission</button>
-                                                            </form>
+                                                            <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button" aria-label="Unflag submission"><i data-lucide="flag-off"></i></button>
                                                         {% else %}
-                                                            <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
-                                                                {% csrf_token %}
-                                                                <button type="submit" class="btn btn-warning">Flag Submission</button>
-                                                            </form>
+                                                            <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button" aria-label="Flag submission"><i data-lucide="flag"></i></button>
                                                         {% endif %}
 
                                                         {% if donation.deleted %}
@@ -475,9 +456,9 @@
                                                                 <button type="submit" class="btn btn-danger">Permanently Delete</button>
                                                             </form>
                                                         {% else %}
-                                                            <form method="POST" action="{% url 'delete_donation' donation.id %}">
+                                                            <form method="POST" action="{% url 'delete_donation' donation.id %}" class="js-ajax-action">
                                                                 {% csrf_token %}
-                                                                <button type="submit" class="btn btn-danger">Move to Trash</button>
+                                                                <button type="submit" class="btn-danger delete-icon-btn" aria-label="Move to trash"><i data-lucide="trash-2"></i></button>
                                                             </form>
                                                         {% endif %}
                                                     </div>
@@ -491,7 +472,7 @@
                                 </tr>
                             {% empty %}
                                 <tr>
-                                    <td class="dash-empty" colspan="9">No donations yet.</td>
+                                    <td class="dash-empty" colspan="8">No donations yet.</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -519,18 +500,27 @@
                                     {% endif %}
                                 </div>
                                 <div class="actions-row">
-                                    <button class="btn btn-secondary open-modal-btn" data-target="modal-flagged-volunteer-{{ volunteer.id }}" type="button">Details</button>
-                                    <button data-volunteer-id="{{ volunteer.id }}" class="btn btn-flag btn-flag-compact" type="button">Unflag</button>
+                                    <button class="details-icon-btn open-modal-btn" data-target="modal-flagged-volunteer-{{ volunteer.id }}" type="button" aria-label="View details">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9944 15.5C13.9274 15.5 15.4944 13.933 15.4944 12C15.4944 10.067 13.9274 8.5 11.9944 8.5C10.0614 8.5 8.49439 10.067 8.49439 12C8.49439 13.933 10.0614 15.5 11.9944 15.5ZM11.9944 13.4944C11.1691 13.4944 10.5 12.8253 10.5 12C10.5 11.1747 11.1691 10.5056 11.9944 10.5056C12.8197 10.5056 13.4888 11.1747 13.4888 12C13.4888 12.8253 12.8197 13.4944 11.9944 13.4944Z" fill="currentColor"></path>
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 5C7.18879 5 3.9167 7.60905 2.1893 9.47978C0.857392 10.9222 0.857393 13.0778 2.1893 14.5202C3.9167 16.391 7.18879 19 12 19C16.8112 19 20.0833 16.391 21.8107 14.5202C23.1426 13.0778 23.1426 10.9222 21.8107 9.47978C20.0833 7.60905 16.8112 5 12 5ZM3.65868 10.8366C5.18832 9.18002 7.9669 7 12 7C16.0331 7 18.8117 9.18002 20.3413 10.8366C20.9657 11.5128 20.9657 12.4872 20.3413 13.1634C18.8117 14.82 16.0331 17 12 17C7.9669 17 5.18832 14.82 3.65868 13.1634C3.03426 12.4872 3.03426 11.5128 3.65868 10.8366Z" fill="currentColor"></path>
+                                        </svg>
+                                    </button>
+                                    {% if volunteer.flagged %}
+                                        <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button" aria-label="Unflag submission"><i data-lucide="flag-off"></i></button>
+                                    {% else %}
+                                        <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button" aria-label="Flag submission"><i data-lucide="flag"></i></button>
+                                    {% endif %}
 
                                 </div>
 
                                 <div id="modal-flagged-volunteer-{{ volunteer.id }}" class="modal" aria-hidden="true">
-                                    <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">
+                                    <div class="modal-content modal-content--submission submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">
                                         <span class="close" aria-label="Close">&times;</span>
 
                                         <header class="submission-modal-head">
                                             <h3 id="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">Volunteer Report</h3>
-                                            <p class="submission-modal-disaster">{% if volunteer.disaster %}{{ volunteer.disaster.name }}{% else %}Unassigned Disaster{% endif %}</p>
+                                            <p class="submission-modal-disaster">{% if volunteer.disaster %}{{ volunteer.disaster.name }}{% else %}N/A{% endif %}</p>
                                             <p class="submission-modal-date">Submitted: {{ volunteer.created_at|date:"n/j/Y, g:i:s A" }}</p>
                                         </header>
 
@@ -549,10 +539,10 @@
                                             <h4>Personal Information</h4>
                                             <div class="submission-grid">
                                                 <div class="submission-field"><p class="submission-k">Full Name</p><p class="submission-v">{{ volunteer.name }}</p></div>
-                                                <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{{ volunteer.email }}</p></div>
-                                                <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{{ volunteer.phone_number }}</p></div>
-                                                <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ volunteer.get_contact_method_display|default:'Not provided' }}</p></div>
-                                                <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ volunteer.location_volunteered|default:'Not provided' }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{% if volunteer.contact_method == 'email' %}{{ volunteer.email|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{% if volunteer.contact_method == 'phone' %}{{ volunteer.phone_number|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ volunteer.get_contact_method_display|default:'N/A' }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ volunteer.location_volunteered|default:'N/A' }}</p></div>
                                             </div>
                                         </section>
 
@@ -561,7 +551,7 @@
                                             <div class="submission-grid">
                                                 <div class="submission-field"><p class="submission-k">Hours Volunteered</p><p class="submission-v submission-v--accent">{{ volunteer.total_hours }}</p></div>
                                                 <div class="submission-field"><p class="submission-k">Service Date</p><p class="submission-v">{{ volunteer.date_of_work|date:"n/j/Y" }}</p></div>
-                                                <div class="submission-field submission-field--full"><p class="submission-k">Work Description</p><p class="submission-v">{{ volunteer.work_desc|default:'Not provided' }}</p></div>
+                                                <div class="submission-field submission-field--full"><p class="submission-k">Work Description</p><p class="submission-v">{{ volunteer.work_desc|default:'N/A' }}</p></div>
                                                 {% if volunteer.notes %}
                                                     <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ volunteer.notes }}</p></div>
                                                 {% endif %}
@@ -571,7 +561,7 @@
                                         <section class="submission-section">
                                             <h4>Equipment Information</h4>
                                             <div class="submission-grid">
-                                                <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ volunteer.get_equipment_display|default:'Not provided' }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ volunteer.get_equipment_display|default:'N/A' }}</p></div>
                                                 {% if volunteer.other_equipment %}
                                                     <div class="submission-field"><p class="submission-k">Other Equipment</p><p class="submission-v">{{ volunteer.other_equipment }}</p></div>
                                                 {% endif %}
@@ -581,7 +571,7 @@
                                                 {% if volunteer.equipment_hours %}
                                                     <div class="submission-field"><p class="submission-k">Equipment Hours</p><p class="submission-v">{{ volunteer.equipment_hours }}</p></div>
                                                 {% endif %}
-                                                <div class="submission-field"><p class="submission-k">Skilled Worker Response</p><p class="submission-v">{{ volunteer.get_skilled_worker_display|default:'Not provided' }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Skilled Worker Response</p><p class="submission-v">{{ volunteer.get_skilled_worker_display|default:'N/A' }}</p></div>
                                                 <div class="submission-field"><p class="submission-k">Confirmed Skilled Worker</p><p class="submission-v">{% if volunteer.confirmed_skilled_worker %}Yes{% else %}No{% endif %}</p></div>
                                             </div>
                                         </section>
@@ -601,16 +591,12 @@
                                             <h4>Actions</h4>
                                             <div class="actions-row">
                                                 {% if volunteer.flagged %}
-                                                    <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
-                                                        {% csrf_token %}
-                                                        <button type="submit" class="btn">Unflag Submission</button>
-                                                    </form>
+                                                    <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button" aria-label="Unflag submission"><i data-lucide="flag-off"></i></button>
                                                 {% else %}
-                                                    <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
-                                                        {% csrf_token %}
-                                                        <button type="submit" class="btn btn-warning">Flag Submission</button>
-                                                    </form>
+                                                    <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button" aria-label="Flag submission"><i data-lucide="flag"></i></button>
                                                 {% endif %}
+
+                                                <button data-volunteer-id="{{ volunteer.id }}" class="skilled-icon-btn js-toggle-skilled" type="button" aria-label="{% if volunteer.confirmed_skilled_worker %}Unmark skilled worker{% else %}Mark skilled worker{% endif %}">{% if volunteer.confirmed_skilled_worker %}<svg fill="#000000" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M213.333 960c0-167.36 56-321.707 149.44-446.4L1406.4 1557.227c-124.693 93.44-279.04 149.44-446.4 149.44-411.627 0-746.667-335.04-746.667-746.667m1493.334 0c0 167.36-56 321.707-149.44 446.4L513.6 362.773c124.693-93.44 279.04-149.44 446.4-149.44 411.627 0 746.667 335.04 746.667 746.667M960 0C429.76 0 0 429.76 0 960s429.76 960 960 960 960-429.76 960-960S1490.24 0 960 0" fill-rule="evenodd"></path> </g></svg><span class="skilled-icon-label">{% if volunteer.confirmed_skilled_worker %}Unmark skilled{% else %}Mark skilled{% endif %}</span>{% else %}<svg fill="#000000" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1743.858 267.012 710.747 1300.124 176.005 765.382 0 941.387l710.747 710.871 1209.24-1209.116z" fill-rule="evenodd"></path> </g></svg><span class="skilled-icon-label">{% if volunteer.confirmed_skilled_worker %}Unmark skilled{% else %}Mark skilled{% endif %}</span>{% endif %}</button>
 
                                                 {% if volunteer.deleted %}
                                                     <form method="POST" action="{% url 'restore_volunteer' volunteer.id %}">
@@ -624,7 +610,7 @@
                                                 {% else %}
                                                     <form method="POST" action="{% url 'delete_volunteer' volunteer.id %}">
                                                         {% csrf_token %}
-                                                        <button type="submit" class="btn btn-danger">Move to Trash</button>
+                                                        <button type="submit" class="btn-danger delete-icon-btn" aria-label="Move to trash"><i data-lucide="trash-2"></i></button>
                                                     </form>
                                                 {% endif %}
                                             </div>
@@ -658,12 +644,21 @@
                                     {% endif %}
                                 </div>
                                 <div class="actions-row">
-                                    <button class="btn btn-secondary open-modal-btn" data-target="modal-flagged-donation-{{ donation.id }}" type="button">Details</button>
-                                    <button data-donation-id="{{ donation.id }}" class="btn btn-flag btn-flag-compact js-toggle-donation-flag" type="button">{% if donation.flagged %}Unflag{% else %}Flag{% endif %}</button>
+                                    <button class="details-icon-btn open-modal-btn" data-target="modal-flagged-donation-{{ donation.id }}" type="button" aria-label="View details">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9944 15.5C13.9274 15.5 15.4944 13.933 15.4944 12C15.4944 10.067 13.9274 8.5 11.9944 8.5C10.0614 8.5 8.49439 10.067 8.49439 12C8.49439 13.933 10.0614 15.5 11.9944 15.5ZM11.9944 13.4944C11.1691 13.4944 10.5 12.8253 10.5 12C10.5 11.1747 11.1691 10.5056 11.9944 10.5056C12.8197 10.5056 13.4888 11.1747 13.4888 12C13.4888 12.8253 12.8197 13.4944 11.9944 13.4944Z" fill="currentColor"></path>
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 5C7.18879 5 3.9167 7.60905 2.1893 9.47978C0.857392 10.9222 0.857393 13.0778 2.1893 14.5202C3.9167 16.391 7.18879 19 12 19C16.8112 19 20.0833 16.391 21.8107 14.5202C23.1426 13.0778 23.1426 10.9222 21.8107 9.47978C20.0833 7.60905 16.8112 5 12 5ZM3.65868 10.8366C5.18832 9.18002 7.9669 7 12 7C16.0331 7 18.8117 9.18002 20.3413 10.8366C20.9657 11.5128 20.9657 12.4872 20.3413 13.1634C18.8117 14.82 16.0331 17 12 17C7.9669 17 5.18832 14.82 3.65868 13.1634C3.03426 12.4872 3.03426 11.5128 3.65868 10.8366Z" fill="currentColor"></path>
+                                        </svg>
+                                    </button>
+                                    {% if donation.flagged %}
+                                        <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button" aria-label="Unflag submission"><i data-lucide="flag-off"></i></button>
+                                    {% else %}
+                                        <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button" aria-label="Flag submission"><i data-lucide="flag"></i></button>
+                                    {% endif %}
                                 </div>
 
                                 <div id="modal-flagged-donation-{{ donation.id }}" class="modal" aria-hidden="true">
-                                    <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedDonationDetailsTitle-{{ donation.id }}">
+                                    <div class="modal-content modal-content--submission submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedDonationDetailsTitle-{{ donation.id }}">
                                         <span class="close" aria-label="Close">&times;</span>
                                         <div class="submission-modal-top">
                                             <h2 id="flaggedDonationDetailsTitle-{{ donation.id }}">Donation Submission Details</h2>
@@ -671,7 +666,7 @@
 
                                         <header class="submission-modal-head">
                                             <h3>Donation Report</h3>
-                                            <p class="submission-modal-disaster">{% if donation.disaster %}{{ donation.disaster.name }}{% else %}Unassigned Disaster{% endif %}</p>
+                                            <p class="submission-modal-disaster">{% if donation.disaster %}{{ donation.disaster.name }}{% else %}N/A{% endif %}</p>
                                             <p class="submission-modal-date">Submitted: {{ donation.created_at|date:"n/j/Y, g:i:s A" }}</p>
                                         </header>
 
@@ -690,10 +685,10 @@
                                             <h4>Personal Information</h4>
                                             <div class="submission-grid">
                                                 <div class="submission-field"><p class="submission-k">Full Name</p><p class="submission-v">{{ donation.name }}</p></div>
-                                                <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{{ donation.email }}</p></div>
-                                                <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{{ donation.phone_number }}</p></div>
-                                                <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ donation.get_contact_method_display|default:'Not provided' }}</p></div>
-                                                <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ donation.location_donated|default:'Not provided' }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{% if donation.contact_method == 'email' %}{{ donation.email|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{% if donation.contact_method == 'phone' %}{{ donation.phone_number|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ donation.get_contact_method_display|default:'N/A' }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ donation.location_donated|default:'N/A' }}</p></div>
                                             </div>
                                         </section>
 
@@ -701,7 +696,7 @@
                                             <h4>Donation Details</h4>
                                             <div class="submission-grid">
                                                 <div class="submission-field"><p class="submission-k">Hours</p><p class="submission-v submission-v--accent">{{ donation.total_hours }}</p></div>
-                                                <div class="submission-field"><p class="submission-k">Donation Type</p><p class="submission-v">{{ donation.get_donation_type_display|default:'Not provided' }}</p></div>
+                                                <div class="submission-field"><p class="submission-k">Donation Type</p><p class="submission-v">{{ donation.get_donation_type_display|default:'N/A' }}</p></div>
                                                 {% if donation.material_type %}
                                                     <div class="submission-field"><p class="submission-k">Material Type</p><p class="submission-v">{{ donation.material_type }}</p></div>
                                                 {% endif %}
@@ -712,7 +707,7 @@
                                                     <div class="submission-field"><p class="submission-k">Other Donation Type</p><p class="submission-v">{{ donation.other_donation_type }}</p></div>
                                                 {% endif %}
                                                 <div class="submission-field"><p class="submission-k">Donation Date</p><p class="submission-v">{{ donation.date_of_donation|date:"n/j/Y" }}</p></div>
-                                                <div class="submission-field submission-field--full"><p class="submission-k">Description</p><p class="submission-v">{{ donation.work_desc|default:'Not provided' }}</p></div>
+                                                <div class="submission-field submission-field--full"><p class="submission-k">Description</p><p class="submission-v">{{ donation.work_desc|default:'N/A' }}</p></div>
                                                 {% if donation.notes %}
                                                     <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ donation.notes }}</p></div>
                                                 {% endif %}
@@ -734,30 +729,24 @@
                                             <h4>Actions</h4>
                                             <div class="actions-row">
                                                 {% if donation.flagged %}
-                                                    <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
-                                                        {% csrf_token %}
-                                                        <button type="submit" class="btn">Unflag Submission</button>
-                                                    </form>
+                                                    <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button" aria-label="Unflag submission"><i data-lucide="flag-off"></i></button>
                                                 {% else %}
-                                                    <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
-                                                        {% csrf_token %}
-                                                        <button type="submit" class="btn btn-warning">Flag Submission</button>
-                                                    </form>
+                                                    <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button" aria-label="Flag submission"><i data-lucide="flag"></i></button>
                                                 {% endif %}
 
                                                 {% if donation.deleted %}
-                                                    <form method="POST" action="{% url 'restore_donation' donation.id %}">
+                                                            <form method="POST" action="{% url 'restore_donation' donation.id %}" class="js-ajax-action">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn">Restore Submission</button>
                                                     </form>
-                                                    <form method="POST" action="{% url 'permanent_delete_donation' donation.id %}">
+                                                            <form method="POST" action="{% url 'permanent_delete_donation' donation.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this donation? This action cannot be undone.">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn btn-danger">Permanently Delete</button>
                                                     </form>
                                                 {% else %}
                                                     <form method="POST" action="{% url 'delete_donation' donation.id %}">
                                                         {% csrf_token %}
-                                                        <button type="submit" class="btn btn-danger">Move to Trash</button>
+                                                        <button type="submit" class="btn-danger delete-icon-btn" aria-label="Move to trash"><i data-lucide="trash-2"></i></button>
                                                     </form>
                                                 {% endif %}
                                             </div>
@@ -774,6 +763,16 @@
             </article>
         </section>
 
+        <section id="analytics-panel" class="dash-grid tab-panel" {% if active_tab != 'analytics-panel' %}hidden{% endif %}>
+            <article class="dash-block">
+                <h2>Analytics</h2>
+                <div class="analytics-chart-wrap">
+                    <canvas id="myChart" data-volunteer-revenue="{{ volunteer_value|default:'0' }}" data-donation-revenue="{{ donation_value|default:'0' }}" data-goal-value="{{ disaster.goal|default:'0' }}"></canvas>
+                </div>
+            </article>
+
+        </section>
+
         <section id="settings-panel" class="tab-panel" {% if active_tab != 'settings-panel' %}hidden{% endif %}>
             {% if disaster %}
                 <article class="dash-block settings-shell">
@@ -787,7 +786,7 @@
                             <div class="settings-rate-wrap">
                                 <p class="settings-label">Current (base) Hourly Rate</p>
                                 <div class="settings-rate-line">
-                                    <strong class="settings-rate-value">${{ disaster.hourly_rate|floatformat:0 }}</strong>
+                                    <strong id="hourly-rate-display" class="settings-rate-value">${{ disaster.hourly_rate }}</strong>
                                     <span class="settings-rate-unit">per hour</span>
                                 </div>
                             </div>
@@ -795,8 +794,8 @@
                             <div class="settings-rate-form">
                                 <label class="settings-label" for="hourly-rate">Update Hourly Rate</label>
                                 <div class="settings-rate-actions">
-                                    <input id="hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.hourly_rate|floatformat:2 }}" readonly>
-                                    <button class="btn" type="button" disabled aria-disabled="true">Read Only</button>
+                                    <input id="hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.hourly_rate }}" {% if not disaster.active %}readonly{% endif %}>
+                                    <button id="hourly-rate-btn" class="btn" type="button" {% if not disaster.active %}disabled aria-disabled="true"{% endif %}>{% if disaster.active %}Save Changes{% else %}Read Only{% endif %}</button>
                                 </div>
                                 <p class="settings-note">Changes will affect future revenue calculations</p>
                             </div>
@@ -806,7 +805,7 @@
                             <div class="settings-rate-wrap">
                                 <p class="settings-label">Current Skilled Hourly Rate</p>
                                 <div class="settings-rate-line">
-                                    <strong class="settings-rate-value">${{ disaster.skilled_hourly_rate|floatformat:0 }}</strong>
+                                    <strong id="skilled-hourly-rate-display" class="settings-rate-value">${{ disaster.skilled_hourly_rate|floatformat:0 }}</strong>
                                     <span class="settings-rate-unit">per hour</span>
                                 </div>
                             </div>
@@ -814,8 +813,8 @@
                             <div class="settings-rate-form">
                                 <label class="settings-label" for="skilled-hourly-rate">Update Skilled Hourly Rate</label>
                                 <div class="settings-rate-actions">
-                                    <input id="skilled-hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.skilled_hourly_rate|floatformat:2 }}" readonly>
-                                    <button class="btn" type="button" disabled aria-disabled="true">Read Only</button>
+                                    <input id="skilled-hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.skilled_hourly_rate|floatformat:2 }}" {% if not disaster.active %}readonly{% endif %}>
+                                    <button id="skilled-hourly-rate-btn" class="btn" type="button" {% if not disaster.active %}disabled aria-disabled="true"{% endif %}>{% if disaster.active %}Save Changes{% else %}Read Only{% endif %}</button>
                                 </div>
                                 <p class="settings-note">Changes will affect future revenue calculations</p>
                             </div>
@@ -828,7 +827,7 @@
                         <h3>Disaster Information</h3>
                         <dl class="disaster-info-list">
                             <div class="disaster-info-row"><dt>Disaster Name:</dt><dd>{{ disaster.name }}</dd></div>
-                            <div class="disaster-info-row"><dt>Location:</dt><dd>{{ disaster.location|default:"Not provided" }}</dd></div>
+                            <div class="disaster-info-row"><dt>Location:</dt><dd>{{ disaster.location|default:"N/A" }}</dd></div>
                             <div class="disaster-info-row"><dt>Status:</dt><dd><span class="status-pill {% if disaster.active %}is-active{% else %}is-closed{% endif %}">{% if disaster.active %}active{% else %}closed{% endif %}</span></dd></div>
                             <div class="disaster-info-row"><dt>Goal Amount:</dt><dd>${{ total_value }}</dd></div>
                             <div class="disaster-info-row"><dt>Created:</dt><dd>{{ disaster.declaration_date|date:"n/j/Y" }}</dd></div>
@@ -857,13 +856,13 @@
                                 <span> {{ volunteer.date_of_work }} | {{ volunteer.total_hours }} hrs</span>
                             </div>
                             <div class="actions-row">
-                                <form method="POST" action="{% url 'restore_volunteer' volunteer.id %}">
+                                <form method="POST" action="{% url 'restore_volunteer' volunteer.id %}" class="js-ajax-action">
                                     {% csrf_token %}
                                     <button class="btn" type="submit">Restore</button>
                                 </form>
-                                <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this volunteer? This action cannot be undone.');">
+                                <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this volunteer? This action cannot be undone.">
                                     {% csrf_token %}
-                                    <button class="btn btn-danger" type="submit">Delete Permanently</button>
+                                    <button class="btn-danger delete-icon-btn" type="submit" aria-label="Delete permanently"><i data-lucide="trash-2"></i></button>
                                 </form>
                             </div>
                         </li>
@@ -883,13 +882,13 @@
                                 <span> {{ donation.date_of_donation }} | {{ donation.total_hours }} hrs</span>
                             </div>
                             <div class="actions-row">
-                                <form method="POST" action="{% url 'restore_donation' donation.id %}">
+                                <form method="POST" action="{% url 'restore_donation' donation.id %}" class="js-ajax-action">
                                     {% csrf_token %}
                                     <button class="btn" type="submit">Restore</button>
                                 </form>
-                                <form method="POST" action="{% url 'permanent_delete_donation' donation.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this donation? This action cannot be undone.');">
+                                <form method="POST" action="{% url 'permanent_delete_donation' donation.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this donation? This action cannot be undone.">
                                     {% csrf_token %}
-                                    <button class="btn btn-danger" type="submit">Delete Permanently</button>
+                                    <button class="btn-danger delete-icon-btn" type="submit" aria-label="Delete permanently"><i data-lucide="trash-2"></i></button>
                                 </form>
                             </div>
                         </li>
@@ -902,47 +901,66 @@
 
         {% if disaster %}
             <div id="modal-{{ disaster.id }}" class="modal" aria-hidden="true">
-                <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="editDisasterTitle-{{ disaster.id }}">
+                <div class="modal-content modal-content--form" role="dialog" aria-modal="true" aria-labelledby="editDisasterTitle-{{ disaster.id }}">
                     <span class="close" aria-label="Close">&times;</span>
                     <h2 id="editDisasterTitle-{{ disaster.id }}">Editing: {{ disaster.name }}</h2>
                     <form method="post" action="{% url 'edit_disaster' disaster.id %}">
                         {% csrf_token %}
-                        {{ edit_form.name.label_tag }}
-                        {{ edit_form.name }}
-
-                        {{ edit_form.number.label_tag }}
-                        {{ edit_form.number }}
-
-                        {{ edit_form.type.label_tag }}
-                        {{ edit_form.type }}
-
-                        {{ edit_form.category.label_tag }}
-                        {{ edit_form.category }}
-
-                        {{ edit_form.size.label_tag }}
-                        {{ edit_form.size }}
-
-                        {{ edit_form.declaration_date.label_tag }}
-                        {{ edit_form.declaration_date }}
-
-                        {{ edit_form.completion_date.label_tag }}
-                        {{ edit_form.completion_date }}
-
-                        {{ edit_form.start_date.label_tag }}
-                        {{ edit_form.start_date }}
-
-                        {{ edit_form.end_date.label_tag }}
-                        {{ edit_form.end_date }}
-
-                        {{ edit_form.location.label_tag }}
-                        {{ edit_form.location }}
-
-                        {{ edit_form.process_step.label_tag }}
-                        {{ edit_form.process_step }}
-
-                        {{ edit_form.applicant.label_tag }}
-                        {{ edit_form.applicant }}
-                        <button type="submit" class="btn">Save Changes</button>
+                        <div class="form-field-grid">
+                            <div class="form-field-group">
+                                {{ edit_form.name.label_tag }}
+                                {{ edit_form.name }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ edit_form.number.label_tag }}
+                                {{ edit_form.number }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ edit_form.type.label_tag }}
+                                {{ edit_form.type }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ edit_form.category.label_tag }}
+                                {{ edit_form.category }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ edit_form.size.label_tag }}
+                                {{ edit_form.size }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ edit_form.declaration_date.label_tag }}
+                                {{ edit_form.declaration_date }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ edit_form.completion_date.label_tag }}
+                                {{ edit_form.completion_date }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ edit_form.start_date.label_tag }}
+                                {{ edit_form.start_date }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ edit_form.end_date.label_tag }}
+                                {{ edit_form.end_date }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ edit_form.location.label_tag }}
+                                {{ edit_form.location }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ edit_form.process_step.label_tag }}
+                                {{ edit_form.process_step }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ edit_form.applicant.label_tag }}
+                                {{ edit_form.applicant }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ edit_form.goal.label_tag }}
+                                {{ edit_form.goal }}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn modal-form-submit">Save Changes</button>
                     </form>
                 </div>
             </div>
@@ -950,315 +968,8 @@
     </div>
 </main>
 
-<script>
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-function toggleFlaggedStatus(volunteerId) {
-    fetch(`/toggle_flagged_status/${volunteerId}/`, {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json'
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            location.reload();
-        } else {
-            alert('Error toggling flagged status.');
-        }
-    })
-    .catch(() => {
-        alert('An error occurred while toggling flagged status.');
-    });
-}
-
-function toggleDonationFlaggedStatus(donationId) {
-    fetch(`/toggle_donation_flagged_status/${donationId}/`, {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json'
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            location.reload();
-        } else {
-            alert('Error toggling donation flagged status.');
-        }
-    })
-    .catch(() => {
-        alert('An error occurred while toggling donation flagged status.');
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    const tabs = document.querySelectorAll('.dash-tab');
-    const panels = document.querySelectorAll('.tab-panel');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function () {
-            const targetId = tab.dataset.target;
-
-            tabs.forEach(currentTab => {
-                const isActive = currentTab === tab;
-                currentTab.classList.toggle('is-active', isActive);
-                currentTab.setAttribute('aria-selected', String(isActive));
-            });
-
-            panels.forEach(panel => {
-                panel.hidden = panel.id !== targetId;
-            });
-        });
-    });
-
-    document.querySelectorAll('.js-select-all-rows').forEach(function (checkbox) {
-        checkbox.addEventListener('change', function () {
-            const panelId = checkbox.getAttribute('data-panel-target');
-            if (!panelId) {
-                return;
-            }
-
-            const checkboxes = Array.from(document.querySelectorAll(`#${panelId} .js-admin-select-row`));
-            if (!checkboxes.length) {
-                return;
-            }
-
-            const shouldCheck = checkbox.checked;
-
-            checkboxes.forEach(function (rowCheckbox) {
-                rowCheckbox.checked = shouldCheck;
-                const row = rowCheckbox.closest('tr');
-                if (row) {
-                    row.classList.toggle('is-selected', rowCheckbox.checked);
-                }
-            });
-
-            checkbox.indeterminate = false;
-        });
-    });
-
-    document.querySelectorAll('.js-admin-select-row').forEach(function (checkbox) {
-        checkbox.addEventListener('change', function () {
-            const row = checkbox.closest('tr');
-            if (row) {
-                row.classList.toggle('is-selected', checkbox.checked);
-            }
-
-            const panel = checkbox.closest('.tab-panel');
-            if (!panel) {
-                return;
-            }
-
-            const panelId = panel.id;
-            const rowCheckboxes = Array.from(document.querySelectorAll(`#${panelId} .js-admin-select-row`));
-            const selectAll = document.querySelector(`.js-select-all-rows[data-panel-target="${panelId}"]`);
-
-            if (selectAll && rowCheckboxes.length) {
-                const checkedCount = rowCheckboxes.filter(function (rowCheckbox) {
-                    return rowCheckbox.checked;
-                }).length;
-
-                selectAll.checked = checkedCount === rowCheckboxes.length;
-                selectAll.indeterminate = checkedCount > 0 && checkedCount < rowCheckboxes.length;
-            }
-        });
-    });
-
-    document.querySelectorAll('.js-export-selected').forEach(function (button) {
-        button.addEventListener('click', function () {
-            const panelId = button.getAttribute('data-panel-target');
-            const exportUrl = button.getAttribute('data-export-url');
-            const disasterId = button.getAttribute('data-disaster-id');
-            if (!panelId || !exportUrl) {
-                return;
-            }
-
-            const selected = Array.from(document.querySelectorAll(`#${panelId} .js-admin-select-row:checked`));
-            const selectedIds = selected
-                .map(function (checkbox) { return checkbox.getAttribute('data-record-id'); })
-                .filter(function (id) { return id; });
-
-            if (!selectedIds.length) {
-                alert('Select at least one form to export.');
-                return;
-            }
-
-            const query = new URLSearchParams({ ids: selectedIds.join(',') });
-            if (disasterId) {
-                query.set('disaster_id', disasterId);
-            }
-            window.location.href = `${exportUrl}?${query.toString()}`;
-        });
-    });
-
-    document.querySelectorAll('.js-toggle-flag').forEach(function(btn) {
-        btn.addEventListener('click', function () {
-            const vid = btn.getAttribute('data-volunteer-id');
-            if (vid) {
-                toggleFlaggedStatus(vid);
-            }
-        });
-    });
-
-    document.querySelectorAll('.js-toggle-donation-flag').forEach(function(btn) {
-        btn.addEventListener('click', function () {
-            const did = btn.getAttribute('data-donation-id');
-            if (did) {
-                toggleDonationFlaggedStatus(did);
-            }
-        });
-    });
-
-    document.querySelectorAll('.js-toggle-skilled').forEach(function(btn) {
-        btn.addEventListener('click', function () {
-            const vid = btn.getAttribute('data-volunteer-id');
-            if (vid) {
-                fetch(`/toggle_skilled_worker_status/${vid}/`, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json'
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        location.reload();
-                    } else {
-                        alert('Error toggling skilled worker status.');
-                    }
-                })
-                .catch(() => {
-                    alert('An error occurred while toggling skilled worker status.');
-                });
-            }
-        });
-    });
-
-    document.querySelectorAll('.open-modal-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const target = document.getElementById(btn.dataset.target);
-            if (target) {
-                target.style.display = 'block';
-                target.setAttribute('aria-hidden', 'false');
-            }
-        });
-    });
-
-    document.querySelectorAll('.modal .close').forEach(closeBtn => {
-        closeBtn.addEventListener('click', function () {
-            const modal = closeBtn.closest('.modal');
-            if (modal) {
-                modal.style.display = 'none';
-                modal.setAttribute('aria-hidden', 'true');
-            }
-        });
-    });
-
-    window.addEventListener('click', function (event) {
-        document.querySelectorAll('.modal').forEach(modal => {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-                modal.setAttribute('aria-hidden', 'true');
-            }
-        });
-    });
-});
-
-// Custom confirmation for closing disasters
-(function() {
-    // Save the original form submit
-    const forms = document.querySelectorAll('form.inline-form');
-
-    forms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault(); // stop default submission
-
-            // Create custom dangerous modal
-            const modal = document.createElement('div');
-            modal.style.position = 'fixed';
-            modal.style.top = 0;
-            modal.style.left = 0;
-            modal.style.width = '100%';
-            modal.style.height = '100%';
-            modal.style.background = 'rgba(0,0,0,0.8)';
-            modal.style.display = 'flex';
-            modal.style.justifyContent = 'center';
-            modal.style.alignItems = 'center';
-            modal.style.zIndex = 10000;
-
-            // Modal content
-            const content = document.createElement('div');
-            content.style.background = '#fff';
-            content.style.border = '3px solid #b71c1c';
-            content.style.padding = '2rem';
-            content.style.borderRadius = '0.5rem';
-            content.style.textAlign = 'center';
-            content.style.maxWidth = '400px';
-            content.style.animation = 'shake 0.3s';
-
-            content.innerHTML = `
-                <h2 style="color:#b71c1c;">⚠️ WARNING!</h2>
-                <p>This action cannot be undone! Are you sure you want to close this disaster?</p>
-                <div style="margin-top:1.5rem; display:flex; justify-content:space-around;">
-                    <button id="cancel-btn" style="padding:0.5rem 1rem; border-radius:0.35rem; cursor:pointer;">Cancel</button>
-                    <button id="confirm-btn" style="padding:0.5rem 1rem; background:#e53935; color:white; font-weight:bold; border:1px solid #b71c1c; border-radius:0.35rem; cursor:pointer;">Yes, Close</button>
-                </div>
-            `;
-
-            // Add modal to page
-            modal.appendChild(content);
-            document.body.appendChild(modal);
-
-            // Shake animation
-            const style = document.createElement('style');
-            style.innerHTML = `
-                @keyframes shake {
-                    0% { transform: translateX(0); }
-                    25% { transform: translateX(-5px); }
-                    50% { transform: translateX(5px); }
-                    75% { transform: translateX(-5px); }
-                    100% { transform: translateX(0); }
-                }
-            `;
-            document.head.appendChild(style);
-
-            // Cancel button
-            modal.querySelector('#cancel-btn').addEventListener('click', () => {
-                document.body.removeChild(modal);
-            });
-
-            // Confirm button
-            modal.querySelector('#confirm-btn').addEventListener('click', () => {
-                form.submit();
-            });
-        });
-    });
-})();
-</script>
-<script>
-lucide.createIcons();
-</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/admin_dashboard.js' %}"></script>
 
 {% endblock content %}
 
