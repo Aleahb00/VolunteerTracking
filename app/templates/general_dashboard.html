@@ -3,6 +3,7 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/general_dashboard.css' %}">
+<script src="https://unpkg.com/lucide@latest"></script>
 {% endblock %}
 
 {% block content %}
@@ -12,6 +13,7 @@
 
 <div class="dashboard-container">
     <div class="dashboard-wrapper">
+        <div class="dashboard-messages" aria-live="polite" aria-atomic="true"></div>
         <header class="dashboard-header">
         <div class="header-content">
             <div>
@@ -33,57 +35,73 @@
                 <div class="modal-content create-disaster-modal" role="dialog" aria-modal="true" aria-labelledby="createDisasterTitle">
                     <span class="close" aria-label="Close">&times;</span>
                     <h2 id="createDisasterTitle">Create New Disaster</h2>
-                    <form method="post" action="{% url 'admin_dashboard' %}" class="create-disaster-form">
+                    <form method="post" action="{% url 'admin_dashboard' %}" class="create-disaster-form js-ajax-action">
                         {% csrf_token %}
-                        {{ create_form.name.label_tag }}
-                        {{ create_form.name }}
+                        <div class="form-field-grid">
+                            <div class="form-field-group">
+                                {{ create_form.name.label_tag }}
+                                {{ create_form.name }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ create_form.number.label_tag }}
+                                {{ create_form.number }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ create_form.type.label_tag }}
+                                {{ create_form.type }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ create_form.category.label_tag }}
+                                {{ create_form.category }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ create_form.size.label_tag }}
+                                {{ create_form.size }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ create_form.declaration_date.label_tag }}
+                                {{ create_form.declaration_date }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ create_form.completion_date.label_tag }}
+                                {{ create_form.completion_date }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ create_form.start_date.label_tag }}
+                                {{ create_form.start_date }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ create_form.end_date.label_tag }}
+                                {{ create_form.end_date }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ create_form.location.label_tag }}
+                                {{ create_form.location }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ create_form.process_step.label_tag }}
+                                {{ create_form.process_step }}
+                            </div>
+                            <div class="form-field-group">
+                                {{ create_form.applicant.label_tag }}
+                                {{ create_form.applicant }}
+                            </div>
+                        </div>
 
-                        {{ create_form.number.label_tag }}
-                        {{ create_form.number }}
-
-                        {{ create_form.type.label_tag }}
-                        {{ create_form.type }}
-
-                        {{ create_form.category.label_tag }}
-                        {{ create_form.category }}
-
-                        {{ create_form.size.label_tag }}
-                        {{ create_form.size }}
-
-                        {{ create_form.declaration_date.label_tag }}
-                        {{ create_form.declaration_date }}
-
-                        {{ create_form.completion_date.label_tag }}
-                        {{ create_form.completion_date }}
-
-                        {{ create_form.start_date.label_tag }}
-                        {{ create_form.start_date }}
-
-                        {{ create_form.end_date.label_tag }}
-                        {{ create_form.end_date }}
-
-                        {{ create_form.location.label_tag }}
-                        {{ create_form.location }}
-
-                        {{ create_form.process_step.label_tag }}
-                        {{ create_form.process_step }}
-
-                        {{ create_form.applicant.label_tag }}
-                        {{ create_form.applicant }}
-
-                        <button type="submit" class="btn">Create Disaster</button>
+                        <button type="submit" class="btn modal-form-submit">Create Disaster</button>
                     </form>
                 </div>
             </div>
             <div id="settings-modal" class="modal hidden">
                 <div class="modal-content">
+                    <a href="{% url 'logout' %}" class="settings-logout-btn">Logout</a>
                     
                     <button class="close-btn" id="close-settings">&times;</button>
 
                     <h2>Admin Settings</h2>
                     <p>Manage your admin account settings</p>
 
-                    <form method="POST">
+                    <form method="POST" class="settings-form js-ajax-action">
                     {% csrf_token %}
 
                     <label>First Name</label>
@@ -172,23 +190,38 @@
             </div>
         </div>
         <div class="card-content">
+            <div class="project-toggle-row">
+                <label class="project-toggle" for="show-inactive-projects">
+                    <span class="project-toggle-labels">
+                        <span class="project-toggle-title">Inactive Projects</span>
+                    </span>
+                    <span class="project-toggle-pill">
+                        <input type="checkbox" id="show-inactive-projects" class="project-toggle-input">
+                        <span class="project-toggle-track" aria-hidden="true">
+                            <span class="project-toggle-thumb"></span>
+                        </span>
+                    </span>
+                </label>
+                <p class="project-toggle-hint">Default off shows active projects only.</p>
+            </div>
             <div class="disasters-list">
             {% for disaster in disasters %}
-            <div class="disaster-item">
+            <div class="disaster-item {% if not disaster.active %}is-inactive-project{% endif %}" data-active="{{ disaster.active|yesno:'true,false' }}" {% if not disaster.active %}hidden{% endif %}>
                 <div class="disaster-info">
                 <h3 class="disaster-title">{{ disaster.name }}</h3>
                 <p class="disaster-description">{{ disaster.category }}</p>
                 <div class="disaster-badges">
-                    <span class="badge badge-primary">{{ disaster.active|yesno:"Active,Inactive" }}</span>
+                    <span class="badge {% if disaster.active %}badge-primary{% else %}badge-danger{% endif %}">{{ disaster.active|yesno:"Active,Inactive" }}</span>
                     <span class="badge badge-secondary">{{ disaster.location|default:"No location" }}</span>
                 </div>
                 </div>
                 <a href="{% url 'edit_disaster' disaster.id %}" class="btn">View Dashboard</a>
             </div>
             {% empty %}
-            <p class="empty-state">No active disasters</p>
+            <p class="empty-state">No projects available.</p>
             {% endfor %}
             </div>
+            <p class="empty-state js-projects-empty" hidden>No active projects.</p>
         </div>
         </section>
 
@@ -196,22 +229,31 @@
         <div class="card-header submissions-header">
             <div>
             <div class="section-title-row">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="section-icon">
-                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
-                <line x1="4" x2="4" y1="22" y2="15"></line>
-                </svg>
-                <h4>Flagged Submissions</h4>
+                <span id="submissions-header-icon" class="section-icon-wrap" aria-hidden="true">
+                    <svg id="submissions-flag-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="section-icon {% if active_tab == 'trash-panel' %}is-hidden{% endif %}">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                        <line x1="4" x2="4" y1="22" y2="15"></line>
+                    </svg>
+                    <svg id="submissions-trash-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="section-icon {% if active_tab != 'trash-panel' %}is-hidden{% endif %}">
+                        <path d="M3 6h18"></path>
+                        <path d="M8 6V4h8v2"></path>
+                        <path d="M19 6l-1 14H6L5 6"></path>
+                        <path d="M10 11v6"></path>
+                        <path d="M14 11v6"></path>
+                    </svg>
+                </span>
+                <h4 id="submissions-header-title">{% if active_tab == 'trash-panel' %}Trashed Submissions{% else %}Flagged Submissions{% endif %}</h4>
             </div>
-            <p class="header-subtitle">Review submissions flagged for potential issues. Most of these forms aren't appended to a disaster.</p>
+            <p id="submissions-header-subtitle" class="header-subtitle">{% if active_tab == 'trash-panel' %}Review submissions moved to trash. You can restore them or permanently delete them.{% else %}Review submissions flagged for potential issues. Most of these forms aren't appended to a disaster.{% endif %}</p>
             </div>
         </div>
 
         <div class="card-content">
             <div class="submissions-tabs">
             <div class="tabs-list" role="tablist" aria-label="Flagged submissions">
-                <button type="button" role="tab" data-target="volunteer-panel" data-state="{% if active_tab == 'volunteer-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'volunteer-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Volunteers ({{ flagged_volunteers_count }})</button>
-                <button type="button" role="tab" data-target="donation-panel" data-state="{% if active_tab == 'donation-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'donation-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Donations ({{ flagged_donations_count }})</button>
-                <button type="button" role="tab" data-target="trash-panel" data-state="{% if active_tab == 'trash-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'trash-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Trash</button>
+                <button type="button" role="tab" data-target="volunteer-panel" data-state="{% if active_tab == 'volunteer-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'volunteer-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Volunteers (<span class="js-tab-count" data-count-target="volunteer-panel">{{ flagged_volunteers_count }}</span>)</button>
+                <button type="button" role="tab" data-target="donation-panel" data-state="{% if active_tab == 'donation-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'donation-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Donations (<span class="js-tab-count" data-count-target="donation-panel">{{ flagged_donations_count }}</span>)</button>
+                <button type="button" role="tab" data-target="trash-panel" data-state="{% if active_tab == 'trash-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'trash-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Trash (<span class="js-tab-count" data-count-target="trash-panel">{{ trash_count }}</span>)</button>
             </div>
 
 
@@ -236,6 +278,7 @@
                     <div class="actions-row">
                         <button type="submit" class="btn">Apply</button>
                         <a href="{% url 'general_dashboard' %}" class="btn">Reset</a>
+
                     </div>
                 </form>
                 </div>
@@ -262,7 +305,7 @@
                         {% if volunteer.disaster %}
                             {{ volunteer.disaster.name }}
                         {% else %}
-                            <span class="muted-text">Unassigned</span>
+                            <span class="muted-text">N/A</span>
                         {% endif %}
                         </td>
                         <td>{{ volunteer.total_hours }}</td>
@@ -279,20 +322,27 @@
                             <span class="muted-text">-</span>
                         {% endif %}
                         </td>
-                        <td>{{ volunteer.notes|default:"-" }}</td>
+                        <td>{{ volunteer.notes|default:"N/A" }}</td>
                         <td>
-                            <button class="btn btn-secondary open-modal-btn" data-target="modal-flagged-volunteer-{{ volunteer.id }}" type="button">View Details</button>
-                                <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
+                            <div class="table-actions">
+                                <button class="details-icon-btn open-modal-btn" data-target="modal-flagged-volunteer-{{ volunteer.id }}" type="button" aria-label="View details">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9944 15.5C13.9274 15.5 15.4944 13.933 15.4944 12C15.4944 10.067 13.9274 8.5 11.9944 8.5C10.0614 8.5 8.49439 10.067 8.49439 12C8.49439 13.933 10.0614 15.5 11.9944 15.5ZM11.9944 13.4944C11.1691 13.4944 10.5 12.8253 10.5 12C10.5 11.1747 11.1691 10.5056 11.9944 10.5056C12.8197 10.5056 13.4888 11.1747 13.4888 12C13.4888 12.8253 12.8197 13.4944 11.9944 13.4944Z" fill="currentColor"></path>
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 5C7.18879 5 3.9167 7.60905 2.1893 9.47978C0.857392 10.9222 0.857393 13.0778 2.1893 14.5202C3.9167 16.391 7.18879 19 12 19C16.8112 19 20.0833 16.391 21.8107 14.5202C23.1426 13.0778 23.1426 10.9222 21.8107 9.47978C20.0833 7.60905 16.8112 5 12 5ZM3.65868 10.8366C5.18832 9.18002 7.9669 7 12 7C16.0331 7 18.8117 9.18002 20.3413 10.8366C20.9657 11.5128 20.9657 12.4872 20.3413 13.1634C18.8117 14.82 16.0331 17 12 17C7.9669 17 5.18832 14.82 3.65868 13.1634C3.03426 12.4872 3.03426 11.5128 3.65868 10.8366Z" fill="currentColor"></path>
+                                    </svg>
+                                </button>
+                                <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}" class="js-ajax-action">
                                     {% csrf_token %}
-                                    <button class="btn btn-danger" type="submit">Delete</button>
+                                    <button class="btn-danger delete-icon-btn" type="submit" aria-label="Move to trash"><i data-lucide="trash-2"></i></button>
                                 </form>
+                            </div>
                             <div id="modal-flagged-volunteer-{{ volunteer.id }}" class="modal" aria-hidden="true">
                                 <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">
                                     <span class="close" aria-label="Close">&times;</span>
 
                                     <header class="submission-modal-head">
                                         <h3 id="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">Volunteer Report</h3>
-                                        <p class="submission-modal-disaster">{% if volunteer.disaster %}{{ volunteer.disaster.name }}{% else %}Unassigned Disaster{% endif %}</p>
+                                        <p class="submission-modal-disaster">{% if volunteer.disaster %}{{ volunteer.disaster.name }}{% else %}N/A{% endif %}</p>
                                         <p class="submission-modal-date">Submitted: {{ volunteer.created_at|date:"n/j/Y, g:i:s A" }}</p>
                                     </header>
 
@@ -311,10 +361,10 @@
                                         <h4>Personal Information</h4>
                                         <div class="submission-grid">
                                             <div class="submission-field"><p class="submission-k">Full Name</p><p class="submission-v">{{ volunteer.name }}</p></div>
-                                            <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{{ volunteer.email }}</p></div>
-                                            <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{{ volunteer.phone_number }}</p></div>
-                                            <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ volunteer.get_contact_method_display|default:'Not provided' }}</p></div>
-                                            <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ volunteer.location_volunteered|default:'Not provided' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{% if volunteer.contact_method == 'email' %}{{ volunteer.email|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{% if volunteer.contact_method == 'phone' %}{{ volunteer.phone_number|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ volunteer.get_contact_method_display|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ volunteer.location_volunteered|default:'N/A' }}</p></div>
                                         </div>
                                     </section>
 
@@ -323,27 +373,19 @@
                                         <div class="submission-grid">
                                             <div class="submission-field"><p class="submission-k">Hours Volunteered</p><p class="submission-v submission-v--accent">{{ volunteer.total_hours }}</p></div>
                                             <div class="submission-field"><p class="submission-k">Service Date</p><p class="submission-v">{{ volunteer.date_of_work|date:"n/j/Y" }}</p></div>
-                                            <div class="submission-field submission-field--full"><p class="submission-k">Work Description</p><p class="submission-v">{{ volunteer.work_desc|default:'Not provided' }}</p></div>
-                                            {% if volunteer.notes %}
-                                                <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ volunteer.notes }}</p></div>
-                                            {% endif %}
+                                            <div class="submission-field submission-field--full"><p class="submission-k">Work Description</p><p class="submission-v">{{ volunteer.work_desc|default:'N/A' }}</p></div>
+                                            <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ volunteer.notes|default:'N/A' }}</p></div>
                                         </div>
                                     </section>
 
                                     <section class="submission-section">
                                         <h4>Equipment Information</h4>
                                         <div class="submission-grid">
-                                            <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ volunteer.get_equipment_display|default:'Not provided' }}</p></div>
-                                            {% if volunteer.other_equipment %}
-                                                <div class="submission-field"><p class="submission-k">Other Equipment</p><p class="submission-v">{{ volunteer.other_equipment }}</p></div>
-                                            {% endif %}
-                                            {% if volunteer.equipment_make_model %}
-                                                <div class="submission-field"><p class="submission-k">Make / Model</p><p class="submission-v">{{ volunteer.equipment_make_model }}</p></div>
-                                            {% endif %}
-                                            {% if volunteer.equipment_hours %}
-                                                <div class="submission-field"><p class="submission-k">Equipment Hours</p><p class="submission-v">{{ volunteer.equipment_hours }}</p></div>
-                                            {% endif %}
-                                            <div class="submission-field"><p class="submission-k">Skilled Worker Response</p><p class="submission-v">{{ volunteer.get_skilled_worker_display|default:'Not provided' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ volunteer.get_equipment_display|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Other Equipment</p><p class="submission-v">{{ volunteer.other_equipment|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Make / Model</p><p class="submission-v">{{ volunteer.equipment_make_model|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Equipment Hours</p><p class="submission-v">{{ volunteer.equipment_hours|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Skilled Worker Response</p><p class="submission-v">{{ volunteer.get_skilled_worker_display|default:'N/A' }}</p></div>
                                             <div class="submission-field"><p class="submission-k">Confirmed Skilled Worker</p><p class="submission-v">{% if volunteer.confirmed_skilled_worker %}Yes{% else %}No{% endif %}</p></div>
                                         </div>
                                     </section>
@@ -361,32 +403,36 @@
 
                                     <section class="actions-section">
                                         <h4>Actions</h4>
+                                        <form method="POST" action="{% url 'assign_submission_view' 'volunteer' volunteer.id %}" class="js-ajax-action assign-disaster-form">
+                                            {% csrf_token %}
+                                            <select id="assign-volunteer-disaster-{{ volunteer.id }}" name="disaster_id" class="form-control" aria-label="Assign volunteer to disaster" required>
+                                                <option value="" selected disabled>Assign to disaster</option>
+                                                {% for disaster in disasters %}
+                                                    <option value="{{ disaster.id }}" {% if volunteer.disaster and volunteer.disaster.id == disaster.id %}selected{% endif %}>{{ disaster.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" class="btn">Assign to Disaster</button>
+                                        </form>
                                         <div class="actions-row">
                                             {% if volunteer.flagged %}
-                                                <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn">Unflag Submission</button>
-                                                </form>
+                                                <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button" aria-label="Unflag submission"><i data-lucide="flag-off"></i></button>
                                             {% else %}
-                                                <form method="POST" action="{% url 'toggle_flagged_status' volunteer.id %}">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-warning">Flag Submission</button>
-                                                </form>
+                                                <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button" aria-label="Flag submission"><i data-lucide="flag"></i></button>
                                             {% endif %}
 
                                             {% if volunteer.deleted %}
-                                                <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                                <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}" class="js-ajax-action">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn">Restore Submission</button>
                                                 </form>
-                                                <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}">
+                                                <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this volunteer? This action cannot be undone.">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn btn-danger">Permanently Delete</button>
                                                 </form>
                                             {% else %}
-                                                <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}">
+                                                <form method="POST" action="{% url 'delete_volunteer_general' volunteer.id %}" class="js-ajax-action">
                                                     {% csrf_token %}
-                                                    <button type="submit" class="btn btn-danger">Move to Trash</button>
+                                                    <button type="submit" class="btn-danger delete-icon-btn" aria-label="Move to trash"><i data-lucide="trash-2"></i></button>
                                                 </form>
                                             {% endif %}
                                         </div>
@@ -451,7 +497,7 @@
                         {% if donation.disaster %}
                             {{ donation.disaster.name }}
                         {% else %}
-                            <span class="muted-text">Unassigned</span>
+                            <span class="muted-text">N/A</span>
                         {% endif %}
                         </td>
                         <td>{{ donation.total_hours }}</td>
@@ -470,17 +516,24 @@
                         </td>
                         <td>{{ donation.get_donation_type_display }}</td>
                         <td>
-                            <button class="btn btn-secondary open-modal-btn" data-target="modal-flagged-donation-{{ donation.id }}" type="button">View Details</button>
-                                <form method="POST" action="{% url 'delete_donation_general' donation.id %}">
+                            <div class="table-actions">
+                                <button class="details-icon-btn open-modal-btn" data-target="modal-flagged-donation-{{ donation.id }}" type="button" aria-label="View details">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9944 15.5C13.9274 15.5 15.4944 13.933 15.4944 12C15.4944 10.067 13.9274 8.5 11.9944 8.5C10.0614 8.5 8.49439 10.067 8.49439 12C8.49439 13.933 10.0614 15.5 11.9944 15.5ZM11.9944 13.4944C11.1691 13.4944 10.5 12.8253 10.5 12C10.5 11.1747 11.1691 10.5056 11.9944 10.5056C12.8197 10.5056 13.4888 11.1747 13.4888 12C13.4888 12.8253 12.8197 13.4944 11.9944 13.4944Z" fill="currentColor"></path>
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 5C7.18879 5 3.9167 7.60905 2.1893 9.47978C0.857392 10.9222 0.857393 13.0778 2.1893 14.5202C3.9167 16.391 7.18879 19 12 19C16.8112 19 20.0833 16.391 21.8107 14.5202C23.1426 13.0778 23.1426 10.9222 21.8107 9.47978C20.0833 7.60905 16.8112 5 12 5ZM3.65868 10.8366C5.18832 9.18002 7.9669 7 12 7C16.0331 7 18.8117 9.18002 20.3413 10.8366C20.9657 11.5128 20.9657 12.4872 20.3413 13.1634C18.8117 14.82 16.0331 17 12 17C7.9669 17 5.18832 14.82 3.65868 13.1634C3.03426 12.4872 3.03426 11.5128 3.65868 10.8366Z" fill="currentColor"></path>
+                                    </svg>
+                                </button>
+                                <form method="POST" action="{% url 'delete_donation_general' donation.id %}" class="js-ajax-action">
                                     {% csrf_token %}
-                                    <button class="btn btn-danger" type="submit">Delete</button>
+                                    <button class="btn-danger delete-icon-btn" type="submit" aria-label="Move to trash"><i data-lucide="trash-2"></i></button>
                                 </form>
+                            </div>
                             <div id="modal-flagged-donation-{{ donation.id }}" class="modal" aria-hidden="true">
                                 <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedDonationDetailsTitle-{{ donation.id }}">
                                     <span class="close" aria-label="Close">&times;</span>
                                     <header class="submission-modal-head">
                                         <h3 id="flaggedDonationDetailsTitle-{{ donation.id }}">Donation Report</h3>
-                                        <p class="submission-modal-disaster">{% if donation.disaster %}{{ donation.disaster.name }}{% else %}Unassigned Disaster{% endif %}</p>
+                                        <p class="submission-modal-disaster">{% if donation.disaster %}{{ donation.disaster.name }}{% else %}N/A{% endif %}</p>
                                         <p class="submission-modal-date">Submitted: {{ donation.created_at|date:"n/j/Y, g:i:s A" }}</p>
                                     </header>
 
@@ -499,10 +552,10 @@
                                         <h4>Personal Information</h4>
                                         <div class="submission-grid">
                                             <div class="submission-field"><p class="submission-k">Full Name</p><p class="submission-v">{{ donation.name }}</p></div>
-                                            <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{{ donation.email }}</p></div>
-                                            <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{{ donation.phone_number }}</p></div>
-                                            <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ donation.get_contact_method_display|default:'Not provided' }}</p></div>
-                                            <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ donation.location_donated|default:'Not provided' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{% if donation.contact_method == 'email' %}{{ donation.email|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{% if donation.contact_method == 'phone' %}{{ donation.phone_number|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ donation.get_contact_method_display|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ donation.location_donated|default:'N/A' }}</p></div>
                                         </div>
                                     </section>
 
@@ -510,21 +563,13 @@
                                         <h4>Donation Details</h4>
                                         <div class="submission-grid">
                                             <div class="submission-field"><p class="submission-k">Hours</p><p class="submission-v submission-v--accent">{{ donation.total_hours }}</p></div>
-                                            <div class="submission-field"><p class="submission-k">Donation Type</p><p class="submission-v">{{ donation.get_donation_type_display|default:'Not provided' }}</p></div>
-                                            {% if donation.material_type %}
-                                                <div class="submission-field"><p class="submission-k">Material Type</p><p class="submission-v">{{ donation.material_type }}</p></div>
-                                            {% endif %}
-                                            {% if donation.equipment_type %}
-                                                <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ donation.equipment_type }}</p></div>
-                                            {% endif %}
-                                            {% if donation.other_donation_type %}
-                                                <div class="submission-field"><p class="submission-k">Other Donation Type</p><p class="submission-v">{{ donation.other_donation_type }}</p></div>
-                                            {% endif %}
+                                            <div class="submission-field"><p class="submission-k">Donation Type</p><p class="submission-v">{{ donation.get_donation_type_display|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Material Type</p><p class="submission-v">{{ donation.material_type|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ donation.equipment_type|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Other Donation Type</p><p class="submission-v">{{ donation.other_donation_type|default:'N/A' }}</p></div>
                                             <div class="submission-field"><p class="submission-k">Donation Date</p><p class="submission-v">{{ donation.date_of_donation|date:"n/j/Y" }}</p></div>
-                                            <div class="submission-field submission-field--full"><p class="submission-k">Description</p><p class="submission-v">{{ donation.work_desc|default:'Not provided' }}</p></div>
-                                            {% if donation.notes %}
-                                                <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ donation.notes }}</p></div>
-                                            {% endif %}
+                                            <div class="submission-field submission-field--full"><p class="submission-k">Description</p><p class="submission-v">{{ donation.work_desc|default:'N/A' }}</p></div>
+                                            <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ donation.notes|default:'N/A' }}</p></div>
                                         </div>
                                     </section>
 
@@ -541,32 +586,36 @@
 
                                     <section class="actions-section">
                                         <h4>Actions</h4>
+                                        <form method="POST" action="{% url 'assign_submission_view' 'donation' donation.id %}" class="js-ajax-action assign-disaster-form">
+                                            {% csrf_token %}
+                                            <select id="assign-donation-disaster-{{ donation.id }}" name="disaster_id" class="form-control" aria-label="Assign donation to disaster" required>
+                                                <option value="" selected disabled>Assign to disaster</option>
+                                                {% for disaster in disasters %}
+                                                    <option value="{{ disaster.id }}" {% if donation.disaster and donation.disaster.id == disaster.id %}selected{% endif %}>{{ disaster.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="submit" class="btn">Assign to Disaster</button>
+                                        </form>
                                         <div class="actions-row">
                                             {% if donation.flagged %}
-                                                <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn">Unflag Submission</button>
-                                                </form>
+                                                <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button" aria-label="Unflag submission"><i data-lucide="flag-off"></i></button>
                                             {% else %}
-                                                <form method="POST" action="{% url 'toggle_donation_flagged_status' donation.id %}">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-warning">Flag Submission</button>
-                                                </form>
+                                                <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button" aria-label="Flag submission"><i data-lucide="flag"></i></button>
                                             {% endif %}
 
                                             {% if donation.deleted %}
-                                                <form method="POST" action="{% url 'restore_donation_general' donation.id %}">
+                                                <form method="POST" action="{% url 'restore_donation_general' donation.id %}" class="js-ajax-action">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn">Restore Submission</button>
                                                 </form>
-                                                <form method="POST" action="{% url 'permanent_delete_donation_general' donation.id %}">
+                                                <form method="POST" action="{% url 'permanent_delete_donation_general' donation.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this donation? This action cannot be undone.">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn btn-danger">Permanently Delete</button>
                                                 </form>
                                             {% else %}
-                                                <form method="POST" action="{% url 'delete_donation_general' donation.id %}">
+                                                <form method="POST" action="{% url 'delete_donation_general' donation.id %}" class="js-ajax-action">
                                                     {% csrf_token %}
-                                                    <button type="submit" class="btn btn-danger">Move to Trash</button>
+                                                    <button type="submit" class="btn-danger delete-icon-btn" aria-label="Move to trash"><i data-lucide="trash-2"></i></button>
                                                 </form>
                                             {% endif %}
                                         </div>
@@ -605,11 +654,11 @@
                                 <span> {{ volunteer.date_of_work }} | {{ volunteer.total_hours }} hrs</span>
                             </div>
                             <div class="actions-row">
-                                <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}">
+                                <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}" class="js-ajax-action">
                                     {% csrf_token %}
                                     <button class="btn" type="submit">Restore</button>
                                 </form>
-                                <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this volunteer? This action cannot be undone.');">
+                                <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this volunteer? This action cannot be undone.">
                                     {% csrf_token %}
                                     <button class="btn btn-danger" type="submit">Delete Permanently</button>
                                 </form>
@@ -631,11 +680,11 @@
                                 <span> {{ donation.date_of_donation }} | {{ donation.total_hours }} hrs</span>
                             </div>
                             <div class="actions-row">
-                                <form method="POST" action="{% url 'restore_donation_general' donation.id %}">
+                                <form method="POST" action="{% url 'restore_donation_general' donation.id %}" class="js-ajax-action">
                                     {% csrf_token %}
                                     <button class="btn" type="submit">Restore</button>
                                 </form>
-                                <form method="POST" action="{% url 'permanent_delete_donation_general' donation.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this donation? This action cannot be undone.');">
+                                <form method="POST" action="{% url 'permanent_delete_donation_general' donation.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this donation? This action cannot be undone.">
                                     {% csrf_token %}
                                     <button class="btn btn-danger" type="submit">Delete Permanently</button>
                                 </form>
@@ -653,110 +702,6 @@
     </div>
     </div>
 
-    <script>
-    document.querySelectorAll('.submissions-tabs').forEach(container => {
-        const tabs = container.querySelectorAll('[role="tab"]');
-        const panels = container.querySelectorAll('[role="tabpanel"]');
-
-        tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const targetId = tab.dataset.target;
-
-            tabs.forEach(currentTab => {
-            const isActive = currentTab === tab;
-            currentTab.dataset.state = isActive ? 'active' : 'inactive';
-            currentTab.setAttribute('aria-selected', String(isActive));
-            });
-
-            panels.forEach(panel => {
-            const isActive = panel.id === targetId;
-            panel.hidden = !isActive;
-            panel.classList.toggle('is-active', isActive);
-            });
-
-        });
-        });
-    });
-
-    document.querySelectorAll('.tabs-list').forEach(tabGroup => {
-    const tabs = tabGroup.querySelectorAll('[role="tab"], .tab-trigger');
-    const container = tabGroup.closest('.submissions-tabs, #trash-panel, body');
-    const panels = container.querySelectorAll(':scope > .tab-panel, :scope .tab-panel');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const targetId = tab.dataset.target;
-
-            // update tabs
-            tabs.forEach(t => t.classList.remove('is-active'));
-            tab.classList.add('active');
-
-            // update panels (ONLY inside this group)
-            panels.forEach(panel => {
-                panel.hidden = panel.id !== targetId;
-            });
-        });
-    });
-    });
-
-    document.querySelectorAll('.open-modal-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const target = document.getElementById(btn.dataset.target);
-            if (target) {
-                target.style.display = 'block';
-                target.setAttribute('aria-hidden', 'false');
-            }
-        });
-    });
-
-    document.querySelectorAll('.modal .close').forEach(closeBtn => {
-        closeBtn.addEventListener('click', function () {
-            const modal = closeBtn.closest('.modal');
-            if (modal) {
-                modal.style.display = 'none';
-                modal.setAttribute('aria-hidden', 'true');
-            }
-        });
-    });
-
-    window.addEventListener('click', function (event) {
-        document.querySelectorAll('.modal').forEach(modal => {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-                modal.setAttribute('aria-hidden', 'true');
-            }
-        });
-    });
-
-    const openBtn = document.getElementById('open-settings');
-    const closeBtn = document.getElementById('close-settings');
-    const modal = document.getElementById('settings-modal');
-
-    // Use the same inline-style show/hide approach as other modals so
-    // CSS ordering (duplicate .modal rules) doesn't keep this modal hidden.
-    if (openBtn && modal) {
-        openBtn.addEventListener('click', () => {
-            modal.style.display = 'block';
-            modal.setAttribute('aria-hidden', 'false');
-        });
-    }
-
-    if (closeBtn && modal) {
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-            modal.setAttribute('aria-hidden', 'true');
-        });
-    }
-
-    // optional: close when clicking outside
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-                modal.setAttribute('aria-hidden', 'true');
-            }
-        });
-    }
-</script>
+    <script src="{% static 'js/general_dashboard.js' %}"></script>
 
 {% endblock content %}

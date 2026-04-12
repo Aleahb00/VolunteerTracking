@@ -27,18 +27,18 @@
 
       <div class="stats-grid">
         <div class="stat">
-          <span class="stat-number">$3+ Billion</span>
-          <span class="stat-label">Total Funding Raised</span>
+          <span class="stat-number">$130M</span>
+          <span class="stat-label">Federal Dollars Saved</span>
         </div>
 
         <div class="stat">
-          <span class="stat-number">#?</span>
-          <span class="stat-label">Active Volunteers</span>
+          <span class="stat-number">12X</span>
+          <span class="stat-label">More Efficient Data Collection</span>
         </div>
 
         <div class="stat">
-          <span class="stat-number">#%</span>
-          <span class="stat-label">Progress to Goal</span>
+          <span class="stat-number">28%</span>
+          <span class="stat-label">Faster Funding</span>
         </div>
       </div>
     </div>
@@ -132,6 +132,72 @@
       </cite>
     </div>
   </section>
+
+  <section class="progress-section">
+    <div class="container">
+      <h2>{{ latest_disaster.name|default:'Recovery Progress' }}</h2>
+      <p class="disaster-desc">
+        {% if latest_disaster %}
+          Emergency response and cleanup for {{ latest_disaster.name }}.
+        {% else %}
+          Emergency response and cleanup progress will appear here when a disaster is active.
+        {% endif %}
+      </p>
+
+      <div class="recovery-card">
+        <div class="recovery-topline">
+          <span class="recovery-value">${{ progress_total|default:0|floatformat:2 }} / ${{ progress_goal|default:0|floatformat:2 }}</span>
+        </div>
+
+        <div
+          class="recovery-track"
+          role="progressbar"
+          aria-label="Fundraising progress"
+          aria-valuemin="0"
+          aria-valuemax="{{ progress_goal|default:0 }}"
+          aria-valuenow="{{ progress_total|default:0 }}">
+          <div class="recovery-fill" style="width: {{ progress_percent|default:0 }}%;"></div>
+        </div>
+
+        <p class="recovery-percent">{{ progress_percent|default:0|floatformat:0 }}% to goal</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <div class="container">
+      <h2>How It Works</h2>
+      <div class="steps-grid">
+        <article class="step">
+          <div class="step-icon">1</div>
+          <h3>Submit Your Contribution</h3>
+          <p>After volunteering or making a donation, complete the form that matches your contribution.</p>
+        </article>
+
+        <article class="step">
+          <div class="step-icon">2</div>
+          <h3>Make an Impact</h3>
+          <p>Every volunteer hour supports funding for essential cleanup and restoration efforts.</p>
+        </article>
+
+        <article class="step">
+          <div class="step-icon">3</div>
+          <h3>See the Impact Grow</h3>
+          <p>Track progress in real time as your contributions help rebuild and restore communities.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="location">
+    <div class="container">
+      <h2>Serving Communities Across the Region</h2>
+      <p>When disaster strikes your hometown, we're there. Our volunteer network spans multiple states, bringing rapid response and coordinated relief efforts to communities in need.</p>
+      <p>As a community-focused organization, we understand that the power of investment in local recovery is undeniable. We've seen firsthand how coordinated volunteer efforts can transform devastated areas into thriving communities once again.</p>
+      <p class="tagline">The power of community action is unstoppable.</p>
+    </div>
+  </section>
+
   <section class="cta">
     <div class="container">
       <h2>Let's Get Started.</h2>
@@ -144,6 +210,8 @@
       <a href="#" class="cta-btn">Get Started →</a>
     </div>
   </section>
+  {% include 'footer.html' %}
+</main>
 
 <script src="{% static 'js/before-after.js' %}"></script>
 <script>
