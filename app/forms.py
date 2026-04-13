@@ -197,8 +197,6 @@ class VolunteerForm(forms.ModelForm):
         email = (cleaned_data.get('email') or '').strip()
         phone_number = cleaned_data.get('phone_number')
 
-        # Enforce conditional contact requirement and ignore validation
-        # errors on the non-selected contact field.
         if contact_method == 'email':
             if not email:
                 self.add_error('email', 'Email is required when contact method is Email.')
