@@ -21,6 +21,7 @@ from .functions import *
 from django.db.models import Sum
 from django.http import JsonResponse
 from .filters import VolunteerFilter, DonationFilter
+from safedelete.models import HARD_DELETE
 
 
 
@@ -308,7 +309,7 @@ def general_delete_volunteer_view(request, volunteer_id):
 
 def general_permanent_delete_volunteer_view(request, id):
     volunteer = get_object_or_404(Volunteer.all_objects, id=id)
-    volunteer.delete()
+    volunteer.delete(force_policy=HARD_DELETE)
     return JsonResponse({'status': 'success', 'message': 'Volunteer permanently deleted.', 'message_type': 'danger'})
 
 def general_restore_volunteer_view(request, id):
@@ -324,7 +325,7 @@ def general_delete_donation_view(request, donation_id):
 
 def general_permanent_delete_donation_view(request, id):
     donation = get_object_or_404(Donations.all_objects, id=id)
-    donation.delete()
+    donation.delete(force_policy=HARD_DELETE)
     return JsonResponse({'status': 'success', 'message': 'Donation permanently deleted.', 'message_type': 'danger'})
 
 def general_restore_donation_view(request, id):
@@ -507,7 +508,7 @@ def delete_volunteer_view(request, volunteer_id):
 
 def permanent_delete_volunteer_view(request, id):
     volunteer = get_object_or_404(Volunteer.all_objects, id=id)
-    volunteer.delete()
+    volunteer.delete(force_policy=HARD_DELETE)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'status': 'success', 'message': 'Volunteer permanently deleted.', 'message_type': 'danger'})
     return redirect('admin_dashboard')
@@ -577,7 +578,7 @@ def delete_donation_view(request, donation_id):
 
 def permanent_delete_donation_view(request, id):
     donation = get_object_or_404(Donations.all_objects, id=id)
-    donation.delete()
+    donation.delete(force_policy=HARD_DELETE)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'status': 'success', 'message': 'Donation permanently deleted.', 'message_type': 'danger'})
     return redirect('admin_dashboard')
