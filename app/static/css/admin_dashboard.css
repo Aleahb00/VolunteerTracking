@@ -600,9 +600,9 @@
 
 #flagged-panel .record-item {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     column-gap: 0.85rem;
 }
 
@@ -611,11 +611,20 @@
     flex: 1 1 auto;
 }
 
+#flagged-panel .record-item .flagged-reason-slot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    justify-self: center;
+}
+
 #flagged-panel .record-item .actions-row {
     justify-content: flex-end;
-    align-items: flex-start;
+    align-items: center;
     flex-wrap: nowrap;
-    align-self: flex-start;
+    align-self: center;
+    justify-self: end;
 }
 
 #flagged-panel .record-item .actions-row .details-icon-btn,
@@ -630,15 +639,97 @@
     line-height: 1;
 }
 
+#flagged-panel .record-item .actions-row .details-icon-btn {
+    color: #111111;
+}
+
+#flagged-panel .record-item .actions-row .details-icon-btn:hover {
+    color: #111111;
+    background: transparent;
+}
+
+#trash-panel .restore-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    color: #111111;
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 0.3rem 0.55rem;
+    min-height: 1.8rem;
+    border: 1px solid rgba(31, 111, 139, 0.18);
+    border-radius: 0.375rem;
+    background: linear-gradient(180deg, #ffffff 0%, #f3f9fb 100%);
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+#trash-panel .restore-btn:hover,
+#trash-panel .restore-btn:focus {
+    color: #111111;
+    background: linear-gradient(180deg, #f8fcfd 0%, #eaf6f4 100%);
+    border-color: rgba(31, 111, 139, 0.3);
+    box-shadow: 0 8px 18px rgba(23, 49, 61, 0.08);
+}
+
+#trash-panel .restore-btn svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+#trash-panel .restore-btn i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#trash-panel .details-icon-btn {
+    color: #111111;
+}
+
+#trash-panel .details-icon-btn:hover {
+    color: #111111;
+    background: transparent;
+}
+
+#trash-panel .btn-danger-compact {
+    background: #b72a2a;
+    border-color: #b72a2a;
+    color: #ffffff;
+    font-size: 0.78rem;
+    padding: 0.28rem 0.5rem;
+    min-height: 1.8rem;
+}
+
+#trash-panel .btn-danger-compact:hover {
+    background: #982222;
+    border-color: #982222;
+}
+
 #flagged-panel .record-item .actions-row .details-icon-btn svg,
 #flagged-panel .record-item .actions-row .btn-flag svg {
     width: 1.1rem;
     height: 1.1rem;
 }
 
-#flagged-panel .record-item > div:first-child .reason-list {
-    justify-content: center;
+#flagged-panel .record-item .flagged-reason-slot .reason-list {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 0.3rem;
+    margin-top: 0;
     margin-bottom: 0;
+}
+
+#flagged-panel .record-item .flagged-reason-slot .reason-tag {
+    white-space: normal;
+    line-height: 1.3;
+}
+
+#flagged-panel .submission-modal .reason-list {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
 }
 .actions-row {
     display: flex;
@@ -837,6 +928,16 @@
     color: var(--color-flag-text);
     background: var(--color-flag-bg);
     border: 1px solid var(--color-flag-border);
+}
+
+.submission-flag-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 0.15rem 0 0.75rem;
+}
+
+.submission-flag-wrap .flag-badge {
+    margin-left: 0;
 }
 
 .reason-tag {
@@ -1179,6 +1280,24 @@
     width: 100%;
 }
 
+#flagged-panel .submission-modal .actions-section > .actions-row {
+    justify-content: space-evenly;
+    gap: 0.5rem;
+}
+
+#flagged-panel .submission-modal .actions-section > .actions-row > * {
+    flex: 1 1 0;
+    display: inline-flex;
+    justify-content: center;
+}
+
+#flagged-panel .submission-modal .actions-section > .actions-row .btn,
+#flagged-panel .submission-modal .actions-section > .actions-row .btn-flag,
+#flagged-panel .submission-modal .actions-section > .actions-row .skilled-icon-btn,
+#flagged-panel .submission-modal .actions-section > .actions-row .delete-icon-btn {
+    width: 100%;
+}
+
 .submission-modal .actions-section > .actions-row form {
     margin: 0;
     display: inline-flex;
@@ -1188,6 +1307,54 @@
 .submission-modal .actions-section svg {
     width: 1.5rem;
     height: 1.5rem;
+}
+
+/* Donation detail modals use blue accents instead of green. */
+.modal[id^="modal-donation-"] .submission-modal .submission-status.is-active,
+.modal[id^="modal-flagged-donation-"] .submission-modal .submission-status.is-active,
+.modal[id^="modal-trash-donation-"] .submission-modal .submission-status.is-active {
+    background: rgba(31, 111, 139, 0.16);
+    color: #1f6f8b;
+}
+
+.modal[id^="modal-donation-"] .submission-modal .submission-id-card,
+.modal[id^="modal-flagged-donation-"] .submission-modal .submission-id-card,
+.modal[id^="modal-trash-donation-"] .submission-modal .submission-id-card {
+    background: linear-gradient(180deg, rgba(31, 111, 139, 0.12) 0%, rgba(31, 111, 139, 0.08) 100%);
+}
+
+.modal[id^="modal-donation-"] .submission-modal .submission-v--accent,
+.modal[id^="modal-flagged-donation-"] .submission-modal .submission-v--accent,
+.modal[id^="modal-trash-donation-"] .submission-modal .submission-v--accent {
+    color: #1f6f8b;
+}
+
+.modal[id^="modal-donation-"] .submission-modal .submission-modal-head h3,
+.modal[id^="modal-flagged-donation-"] .submission-modal .submission-modal-head h3,
+.modal[id^="modal-trash-donation-"] .submission-modal .submission-modal-head h3,
+.modal[id^="modal-donation-"] .submission-modal .submission-section h4,
+.modal[id^="modal-flagged-donation-"] .submission-modal .submission-section h4,
+.modal[id^="modal-trash-donation-"] .submission-modal .submission-section h4 {
+    color: #1f6f8b;
+}
+
+.modal[id^="modal-donation-"] .submission-modal .submission-modal-divider,
+.modal[id^="modal-flagged-donation-"] .submission-modal .submission-modal-divider,
+.modal[id^="modal-trash-donation-"] .submission-modal .submission-modal-divider {
+    border-top-color: rgba(31, 111, 139, 0.45);
+}
+
+.modal[id^="modal-donation-"] .submission-modal .actions-section > .actions-row,
+.modal[id^="modal-flagged-donation-"] .submission-modal .actions-section > .actions-row,
+.modal[id^="modal-trash-donation-"] .submission-modal .actions-section > .actions-row {
+    gap: 0;
+    flex-wrap: nowrap;
+}
+
+.modal[id^="modal-donation-"] .submission-modal .actions-section > .actions-row form,
+.modal[id^="modal-flagged-donation-"] .submission-modal .actions-section > .actions-row form,
+.modal[id^="modal-trash-donation-"] .submission-modal .actions-section > .actions-row form {
+    width: auto;
 }
 
 .submission-field {
@@ -1243,7 +1410,35 @@
 }
 
 .settings-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
     margin-bottom: 0.95rem;
+}
+
+.settings-head-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
+.settings-head .inline-form {
+    margin: 0;
+}
+
+.settings-head .inline-form .btn.btn-danger {
+    background: #b72a2a;
+    border-color: #b72a2a;
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(183, 42, 42, 0.18);
+}
+
+.settings-head .inline-form .btn.btn-danger:hover {
+    background: #982222;
+    border-color: #982222;
+    color: #fff;
 }
 
 .settings-title {
@@ -1400,7 +1595,7 @@
 }
 
 #trash-panel .actions-row {
-    justify-content: flex-end;
+    justify-content: center;
 }
 
 #trash-panel .actions-row form {
@@ -1462,8 +1657,8 @@
 
     #flagged-panel .record-item {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: flex-start;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        align-items: center;
     }
 
     #flagged-panel .record-item .actions-row {
@@ -1814,8 +2009,8 @@
 
     #flagged-panel .record-item {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: flex-start;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        align-items: center;
     }
 
     .record-item .actions-row {

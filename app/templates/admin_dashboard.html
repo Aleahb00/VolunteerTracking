@@ -20,14 +20,6 @@
             </div>
             <div class="actions-row dash-header-actions">
                 <a href="{% url 'general_dashboard' %}" class="btn btn-secondary">Back to General Dashboard</a>
-                {% if disaster and disaster.active %}
-                    <form method="POST" action="{% url 'close_disaster' disaster.id %}" class="inline-form">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Close Disaster</button>
-                    </form>
-                {% elif disaster and not disaster.active %}
-                    <span class="status-pill is-closed">Disaster closed</span>
-                {% endif %}
             </div>
         </header>
 
@@ -181,6 +173,12 @@
 
                                                 <div class="submission-modal-divider"></div>
 
+                                                {% if volunteer.flagged %}
+                                                    <div class="submission-flag-wrap">
+                                                        <span class="flag-badge">Flagged</span>
+                                                    </div>
+                                                {% endif %}
+
                                                 <div class="submission-id-card">
                                                     <p class="submission-k">Submission ID</p>
                                                     <p class="submission-v submission-v--mono">{{ volunteer.id }}</p>
@@ -254,7 +252,7 @@
                                                         {% if volunteer.deleted %}
                                                             <form method="POST" action="{% url 'restore_volunteer' volunteer.id %}" class="js-ajax-action">
                                                                 {% csrf_token %}
-                                                                <button type="submit" class="btn">Restore Submission</button>
+                                                                <button type="submit" class="btn restore-btn"><i data-lucide="rotate-ccw"></i><span>Restore Submission</span></button>
                                                             </form>
                                                             <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this volunteer? This action cannot be undone.">
                                                                 {% csrf_token %}
@@ -367,7 +365,7 @@
                                             <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag flag-btn" type="button">{% if donation.flagged %}<i data-lucide="flag-off"></i>{% else %}<i data-lucide="flag"></i>{% endif %}</button>
                                             <form method="POST" action="{% url 'delete_donation' donation.id %}">
                                                 {% csrf_token %}
-                                                <button class="btn btn-danger" type="submit">Delete</button>
+                                                <button class="btn-danger delete-icon-btn" type="submit" aria-label="Move to trash"><i data-lucide="trash-2"></i></button>
                                             </form>
                                         </div>
 
@@ -375,7 +373,6 @@
                                             <div class="modal-content modal-content--submission submission-modal" role="dialog" aria-modal="true" aria-labelledby="donationDetailsTitle-{{ donation.id }}">
                                                 <span class="close" aria-label="Close">&times;</span>
                                                 <div class="submission-modal-top">
-                                                    <h2 id="donationDetailsTitle-{{ donation.id }}">Donation Submission Details</h2>
                                                 </div>
 
                                                 <header class="submission-modal-head">
@@ -385,6 +382,12 @@
                                                 </header>
 
                                                 <div class="submission-modal-divider"></div>
+
+                                                {% if donation.flagged %}
+                                                    <div class="submission-flag-wrap">
+                                                        <span class="flag-badge">Flagged</span>
+                                                    </div>
+                                                {% endif %}
 
                                                 <div class="submission-id-card">
                                                     <p class="submission-k">Submission ID</p>
@@ -449,7 +452,7 @@
                                                         {% if donation.deleted %}
                                                             <form method="POST" action="{% url 'restore_donation' donation.id %}">
                                                                 {% csrf_token %}
-                                                                <button type="submit" class="btn">Restore Submission</button>
+                                                                <button type="submit" class="btn restore-btn"><i data-lucide="rotate-ccw"></i><span>Restore Submission</span></button>
                                                             </form>
                                                             <form method="POST" action="{% url 'permanent_delete_donation' donation.id %}">
                                                                 {% csrf_token %}
@@ -490,12 +493,17 @@
                                 <div>
                                     <strong>{{ volunteer.name }}</strong>
                                     <span> {{ volunteer.date_of_work }} | {{ volunteer.total_hours }} hrs</span>
-                                    <span class="flag-badge">Flagged</span>
+                                </div>
+                                <div class="flagged-reason-slot">
                                     {% if volunteer.flagged_reason %}
                                         <div class="reason-list">
                                             {% for reason in volunteer.flagged_reason %}
                                                 <span class="reason-tag">{{ reason }}</span>
                                             {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <div class="reason-list">
+                                            <span class="reason-tag">Flagged</span>
                                         </div>
                                     {% endif %}
                                 </div>
@@ -601,7 +609,7 @@
                                                 {% if volunteer.deleted %}
                                                     <form method="POST" action="{% url 'restore_volunteer' volunteer.id %}">
                                                         {% csrf_token %}
-                                                        <button type="submit" class="btn">Restore Submission</button>
+                                                        <button type="submit" class="btn restore-btn"><i data-lucide="rotate-ccw"></i><span>Restore Submission</span></button>
                                                     </form>
                                                     <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}">
                                                         {% csrf_token %}
@@ -634,12 +642,17 @@
                                 <div>
                                     <strong>{{ donation.name }}</strong>
                                     <span> {{ donation.date_of_donation }} | {{ donation.total_hours }} hrs</span>
-                                    <span class="flag-badge">Flagged</span>
+                                </div>
+                                <div class="flagged-reason-slot">
                                     {% if donation.flagged_reason %}
                                         <div class="reason-list">
                                             {% for reason in donation.flagged_reason %}
                                                 <span class="reason-tag">{{ reason }}</span>
                                             {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <div class="reason-list">
+                                            <span class="reason-tag">Flagged</span>
                                         </div>
                                     {% endif %}
                                 </div>
@@ -661,7 +674,6 @@
                                     <div class="modal-content modal-content--submission submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedDonationDetailsTitle-{{ donation.id }}">
                                         <span class="close" aria-label="Close">&times;</span>
                                         <div class="submission-modal-top">
-                                            <h2 id="flaggedDonationDetailsTitle-{{ donation.id }}">Donation Submission Details</h2>
                                         </div>
 
                                         <header class="submission-modal-head">
@@ -737,7 +749,7 @@
                                                 {% if donation.deleted %}
                                                             <form method="POST" action="{% url 'restore_donation' donation.id %}" class="js-ajax-action">
                                                         {% csrf_token %}
-                                                        <button type="submit" class="btn">Restore Submission</button>
+                                                        <button type="submit" class="btn restore-btn"><i data-lucide="rotate-ccw"></i><span>Restore Submission</span></button>
                                                     </form>
                                                             <form method="POST" action="{% url 'permanent_delete_donation' donation.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this donation? This action cannot be undone.">
                                                         {% csrf_token %}
@@ -777,8 +789,20 @@
             {% if disaster %}
                 <article class="dash-block settings-shell">
                     <div class="settings-head">
-                        <h2 class="settings-title">Disaster Settings</h2>
-                        <p class="settings-subtitle">Configure hourly rates and disaster parameters</p>
+                        <div>
+                            <h2 class="settings-title">Disaster Settings</h2>
+                            <p class="settings-subtitle">Configure hourly rates and disaster parameters</p>
+                        </div>
+                        <div class="settings-head-actions">
+                            {% if disaster.active %}
+                                <form method="POST" action="{% url 'close_disaster' disaster.id %}" class="inline-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">CLOSE DISASTER</button>
+                                </form>
+                            {% else %}
+                                <span class="status-pill is-closed">Disaster closed</span>
+                            {% endif %}
+                        </div>
                     </div>
 
                     <div class="settings-rate-grid">
@@ -829,7 +853,9 @@
                             <div class="disaster-info-row"><dt>Disaster Name:</dt><dd>{{ disaster.name }}</dd></div>
                             <div class="disaster-info-row"><dt>Location:</dt><dd>{{ disaster.location|default:"N/A" }}</dd></div>
                             <div class="disaster-info-row"><dt>Status:</dt><dd><span class="status-pill {% if disaster.active %}is-active{% else %}is-closed{% endif %}">{% if disaster.active %}active{% else %}closed{% endif %}</span></dd></div>
-                            <div class="disaster-info-row"><dt>Goal Amount:</dt><dd>${{ total_value }}</dd></div>
+                            <div class="disaster-info-row"><dt>Goal Amount:</dt><dd>{% if disaster.goal %}
+                                
+                                                                                    ${{ disaster.goal|floatformat:2 }}{% else %}0.00{% endif %}</dd></div>
                             <div class="disaster-info-row"><dt>Created:</dt><dd>{{ disaster.declaration_date|date:"n/j/Y" }}</dd></div>
                         </dl>
                     </div>
@@ -856,14 +882,99 @@
                                 <span> {{ volunteer.date_of_work }} | {{ volunteer.total_hours }} hrs</span>
                             </div>
                             <div class="actions-row">
+                                <button class="details-icon-btn open-modal-btn" data-target="modal-trash-volunteer-{{ volunteer.id }}" type="button" aria-label="View details">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9944 15.5C13.9274 15.5 15.4944 13.933 15.4944 12C15.4944 10.067 13.9274 8.5 11.9944 8.5C10.0614 8.5 8.49439 10.067 8.49439 12C8.49439 13.933 10.0614 15.5 11.9944 15.5ZM11.9944 13.4944C11.1691 13.4944 10.5 12.8253 10.5 12C10.5 11.1747 11.1691 10.5056 11.9944 10.5056C12.8197 10.5056 13.4888 11.1747 13.4888 12C13.4888 12.8253 12.8197 13.4944 11.9944 13.4944Z" fill="currentColor"></path>
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 5C7.18879 5 3.9167 7.60905 2.1893 9.47978C0.857392 10.9222 0.857393 13.0778 2.1893 14.5202C3.9167 16.391 7.18879 19 12 19C16.8112 19 20.0833 16.391 21.8107 14.5202C23.1426 13.0778 23.1426 10.9222 21.8107 9.47978C20.0833 7.60905 16.8112 5 12 5ZM3.65868 10.8366C5.18832 9.18002 7.9669 7 12 7C16.0331 7 18.8117 9.18002 20.3413 10.8366C20.9657 11.5128 20.9657 12.4872 20.3413 13.1634C18.8117 14.82 16.0331 17 12 17C7.9669 17 5.18832 14.82 3.65868 13.1634C3.03426 12.4872 3.03426 11.5128 3.65868 10.8366Z" fill="currentColor"></path>
+                                    </svg>
+                                </button>
                                 <form method="POST" action="{% url 'restore_volunteer' volunteer.id %}" class="js-ajax-action">
                                     {% csrf_token %}
-                                    <button class="btn" type="submit">Restore</button>
+                                    <button class="btn restore-btn" type="submit"><i data-lucide="rotate-ccw"></i><span>Restore</span></button>
                                 </form>
                                 <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this volunteer? This action cannot be undone.">
                                     {% csrf_token %}
-                                    <button class="btn-danger delete-icon-btn" type="submit" aria-label="Delete permanently"><i data-lucide="trash-2"></i></button>
+                                    <button class="btn btn-danger btn-danger-compact" type="submit">Permanently Delete</button>
                                 </form>
+                            </div>
+
+                            <div id="modal-trash-volunteer-{{ volunteer.id }}" class="modal" aria-hidden="true">
+                                <div class="modal-content modal-content--submission submission-modal" role="dialog" aria-modal="true" aria-labelledby="trashVolunteerDetailsTitle-{{ volunteer.id }}">
+                                    <span class="close" aria-label="Close">&times;</span>
+                                    <header class="submission-modal-head">
+                                        <h3 id="trashVolunteerDetailsTitle-{{ volunteer.id }}">Volunteer Report</h3>
+                                        <p class="submission-modal-disaster">{% if volunteer.disaster %}{{ volunteer.disaster.name }}{% else %}N/A{% endif %}</p>
+                                        <p class="submission-modal-date">Submitted: {{ volunteer.created_at|date:"n/j/Y, g:i:s A" }}</p>
+                                    </header>
+                                    <div class="submission-modal-divider"></div>
+
+                                    <div class="submission-status-wrap">
+                                        <span class="submission-status is-flagged">Deleted</span>
+                                    </div>
+
+                                    <div class="submission-id-card">
+                                        <p class="submission-k">Submission ID</p>
+                                        <p class="submission-v submission-v--mono">{{ volunteer.id }}</p>
+                                    </div>
+
+                                    <section class="submission-section">
+                                        <h4>Personal Information</h4>
+                                        <div class="submission-grid">
+                                            <div class="submission-field"><p class="submission-k">Full Name</p><p class="submission-v">{{ volunteer.name }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{% if volunteer.contact_method == 'email' %}{{ volunteer.email|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{% if volunteer.contact_method == 'phone' %}{{ volunteer.phone_number|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ volunteer.get_contact_method_display|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ volunteer.location_volunteered|default:'N/A' }}</p></div>
+                                        </div>
+                                    </section>
+
+                                    <section class="submission-section">
+                                        <h4>Contribution Details</h4>
+                                        <div class="submission-grid">
+                                            <div class="submission-field"><p class="submission-k">Hours Volunteered</p><p class="submission-v submission-v--accent">{{ volunteer.total_hours }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Service Date</p><p class="submission-v">{{ volunteer.date_of_work|date:"n/j/Y" }}</p></div>
+                                            <div class="submission-field submission-field--full"><p class="submission-k">Work Description</p><p class="submission-v">{{ volunteer.work_desc|default:'N/A' }}</p></div>
+                                            <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ volunteer.notes|default:'N/A' }}</p></div>
+                                        </div>
+                                    </section>
+
+                                    <section class="submission-section">
+                                        <h4>Equipment Information</h4>
+                                        <div class="submission-grid">
+                                            <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ volunteer.get_equipment_display|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Other Equipment</p><p class="submission-v">{{ volunteer.other_equipment|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Make / Model</p><p class="submission-v">{{ volunteer.equipment_make_model|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Equipment Hours</p><p class="submission-v">{{ volunteer.equipment_hours|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Skilled Worker Response</p><p class="submission-v">{{ volunteer.get_skilled_worker_display|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Confirmed Skilled Worker</p><p class="submission-v">{% if volunteer.confirmed_skilled_worker %}Yes{% else %}No{% endif %}</p></div>
+                                        </div>
+                                    </section>
+
+                                    {% if volunteer.flagged_reason %}
+                                        <section class="submission-section">
+                                            <h4>Flagged Reasons</h4>
+                                            <div class="reason-list">
+                                                {% for reason in volunteer.flagged_reason %}
+                                                    <span class="reason-tag">{{ reason }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </section>
+                                    {% endif %}
+
+                                    <section class="actions-section">
+                                        <h4>Actions</h4>
+                                        <div class="actions-row">
+                                            <form method="POST" action="{% url 'restore_volunteer' volunteer.id %}" class="js-ajax-action">
+                                                {% csrf_token %}
+                                                <button class="btn restore-btn" type="submit"><i data-lucide="rotate-ccw"></i><span>Restore</span></button>
+                                            </form>
+                                            <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this volunteer? This action cannot be undone.">
+                                                {% csrf_token %}
+                                                <button class="btn btn-danger btn-danger-compact" type="submit">Permanently Delete</button>
+                                            </form>
+                                        </div>
+                                    </section>
+                                </div>
                             </div>
                         </li>
                     {% empty %}
@@ -882,14 +993,94 @@
                                 <span> {{ donation.date_of_donation }} | {{ donation.total_hours }} hrs</span>
                             </div>
                             <div class="actions-row">
+                                <button class="details-icon-btn open-modal-btn" data-target="modal-trash-donation-{{ donation.id }}" type="button" aria-label="View details">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9944 15.5C13.9274 15.5 15.4944 13.933 15.4944 12C15.4944 10.067 13.9274 8.5 11.9944 8.5C10.0614 8.5 8.49439 10.067 8.49439 12C8.49439 13.933 10.0614 15.5 11.9944 15.5ZM11.9944 13.4944C11.1691 13.4944 10.5 12.8253 10.5 12C10.5 11.1747 11.1691 10.5056 11.9944 10.5056C12.8197 10.5056 13.4888 11.1747 13.4888 12C13.4888 12.8253 12.8197 13.4944 11.9944 13.4944Z" fill="currentColor"></path>
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 5C7.18879 5 3.9167 7.60905 2.1893 9.47978C0.857392 10.9222 0.857393 13.0778 2.1893 14.5202C3.9167 16.391 7.18879 19 12 19C16.8112 19 20.0833 16.391 21.8107 14.5202C23.1426 13.0778 23.1426 10.9222 21.8107 9.47978C20.0833 7.60905 16.8112 5 12 5ZM3.65868 10.8366C5.18832 9.18002 7.9669 7 12 7C16.0331 7 18.8117 9.18002 20.3413 10.8366C20.9657 11.5128 20.9657 12.4872 20.3413 13.1634C18.8117 14.82 16.0331 17 12 17C7.9669 17 5.18832 14.82 3.65868 13.1634C3.03426 12.4872 3.03426 11.5128 3.65868 10.8366Z" fill="currentColor"></path>
+                                    </svg>
+                                </button>
                                 <form method="POST" action="{% url 'restore_donation' donation.id %}" class="js-ajax-action">
                                     {% csrf_token %}
-                                    <button class="btn" type="submit">Restore</button>
+                                    <button class="btn restore-btn" type="submit"><i data-lucide="rotate-ccw"></i><span>Restore</span></button>
                                 </form>
                                 <form method="POST" action="{% url 'permanent_delete_donation' donation.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this donation? This action cannot be undone.">
                                     {% csrf_token %}
-                                    <button class="btn-danger delete-icon-btn" type="submit" aria-label="Delete permanently"><i data-lucide="trash-2"></i></button>
+                                    <button class="btn btn-danger btn-danger-compact" type="submit">Permanently Delete</button>
                                 </form>
+                            </div>
+
+                            <div id="modal-trash-donation-{{ donation.id }}" class="modal" aria-hidden="true">
+                                <div class="modal-content modal-content--submission submission-modal" role="dialog" aria-modal="true" aria-labelledby="trashDonationDetailsTitle-{{ donation.id }}">
+                                    <span class="close" aria-label="Close">&times;</span>
+                                    <div class="submission-modal-top">
+                                        <h2 id="trashDonationDetailsTitle-{{ donation.id }}">Donation Submission Details</h2>
+                                    </div>
+                                    <header class="submission-modal-head">
+                                        <h3>Donation Report</h3>
+                                        <p class="submission-modal-disaster">{% if donation.disaster %}{{ donation.disaster.name }}{% else %}N/A{% endif %}</p>
+                                        <p class="submission-modal-date">Submitted: {{ donation.created_at|date:"n/j/Y, g:i:s A" }}</p>
+                                    </header>
+                                    <div class="submission-modal-divider"></div>
+
+                                    <div class="submission-status-wrap">
+                                        <span class="submission-status is-flagged">Deleted</span>
+                                    </div>
+
+                                    <div class="submission-id-card">
+                                        <p class="submission-k">Submission ID</p>
+                                        <p class="submission-v submission-v--mono">{{ donation.id }}</p>
+                                    </div>
+
+                                    <section class="submission-section">
+                                        <h4>Personal Information</h4>
+                                        <div class="submission-grid">
+                                            <div class="submission-field"><p class="submission-k">Full Name</p><p class="submission-v">{{ donation.name }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Email Address</p><p class="submission-v">{% if donation.contact_method == 'email' %}{{ donation.email|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Phone Number</p><p class="submission-v">{% if donation.contact_method == 'phone' %}{{ donation.phone_number|default:'N/A' }}{% else %}N/A{% endif %}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Preferred Contact</p><p class="submission-v">{{ donation.get_contact_method_display|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Location</p><p class="submission-v">{{ donation.location_donated|default:'N/A' }}</p></div>
+                                        </div>
+                                    </section>
+
+                                    <section class="submission-section">
+                                        <h4>Donation Details</h4>
+                                        <div class="submission-grid">
+                                            <div class="submission-field"><p class="submission-k">Hours</p><p class="submission-v submission-v--accent">{{ donation.total_hours }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Donation Type</p><p class="submission-v">{{ donation.get_donation_type_display|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Material Type</p><p class="submission-v">{{ donation.material_type|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Equipment Type</p><p class="submission-v">{{ donation.equipment_type|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Other Donation Type</p><p class="submission-v">{{ donation.other_donation_type|default:'N/A' }}</p></div>
+                                            <div class="submission-field"><p class="submission-k">Donation Date</p><p class="submission-v">{{ donation.date_of_donation|date:"n/j/Y" }}</p></div>
+                                            <div class="submission-field submission-field--full"><p class="submission-k">Description</p><p class="submission-v">{{ donation.work_desc|default:'N/A' }}</p></div>
+                                            <div class="submission-field submission-field--full"><p class="submission-k">Notes</p><p class="submission-v">{{ donation.notes|default:'N/A' }}</p></div>
+                                        </div>
+                                    </section>
+
+                                    {% if donation.flagged_reason %}
+                                        <section class="submission-section">
+                                            <h4>Flagged Reasons</h4>
+                                            <div class="reason-list">
+                                                {% for reason in donation.flagged_reason %}
+                                                    <span class="reason-tag">{{ reason }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        </section>
+                                    {% endif %}
+
+                                    <section class="actions-section">
+                                        <h4>Actions</h4>
+                                        <div class="actions-row">
+                                            <form method="POST" action="{% url 'restore_donation' donation.id %}" class="js-ajax-action">
+                                                {% csrf_token %}
+                                                <button class="btn restore-btn" type="submit"><i data-lucide="rotate-ccw"></i><span>Restore</span></button>
+                                            </form>
+                                            <form method="POST" action="{% url 'permanent_delete_donation' donation.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this donation? This action cannot be undone.">
+                                                {% csrf_token %}
+                                                <button class="btn btn-danger btn-danger-compact" type="submit">Permanently Delete</button>
+                                            </form>
+                                        </div>
+                                    </section>
+                                </div>
                             </div>
                         </li>
                     {% empty %}
