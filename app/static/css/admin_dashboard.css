@@ -1731,6 +1731,8 @@
         flex-direction: column;
     }
 }
+
+
 @media (max-width: 760px) {
 .dash-wrap {
         padding: 0 0.25rem;
