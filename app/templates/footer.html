@@ -1,0 +1,13 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/footer.css' %}">
+
+<footer class="site-footer">
+    <div class="site-footer__inner">
+        <p>&copy; 2024 Volunteer Tracker. All rights reserved.</p>
+        <nav class="site-footer__links" aria-label="Footer">
+            <a href="{% url 'landing' %}" class="site-footer__link">Home</a>
+            <a href="{% url 'forms' %}" class="site-footer__link">Forms</a>
+            <a href="{% url 'faq' %}" class="site-footer__link">FAQ</a>
+        </nav>
+    </div>
