@@ -308,6 +308,26 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
+#settings-modal .settings-logout-btn svg,
+#settings-modal .settings-logout-btn i {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+#settings-modal .settings-logout-btn svg {
+  transform: rotate(180deg);
+  transform-origin: center;
+}
+
+#settings-modal .settings-logout-btn svg {
+  margin-right: 0.35rem;
+}
+
+#settings-modal .settings-logout-btn i {
+  margin-right: 0.35rem;
+}
+
 #settings-modal .settings-logout-btn:hover,
 #settings-modal .settings-logout-btn:focus {
   background: #b72a2a;
@@ -1204,8 +1224,9 @@ body {
 }
 
 .submission-status.is-flagged {
-  background: #eaf5f9;
-  color: #1f5f77;
+  background: var(--color-flag-bg);
+  color: var(--color-flag-text);
+  border: 1px solid var(--color-flag-border);
 }
 
 .submission-id-card {
@@ -1361,6 +1382,46 @@ body {
 .submission-modal .actions-section svg {
   width: 1.5rem;
   height: 1.5rem;
+}
+
+/* Donation detail modals use blue accents instead of green. */
+.modal[id^="modal-flagged-donation-"] .submission-modal .submission-status.is-active,
+.modal[id^="modal-trash-donation-general-"] .submission-modal .submission-status.is-active {
+  background: rgba(31, 111, 139, 0.16);
+  color: var(--primary-color);
+}
+
+.modal[id^="modal-flagged-donation-"] .submission-modal .submission-id-card,
+.modal[id^="modal-trash-donation-general-"] .submission-modal .submission-id-card {
+  background: linear-gradient(180deg, rgba(31, 111, 139, 0.12) 0%, rgba(31, 111, 139, 0.08) 100%);
+}
+
+.modal[id^="modal-flagged-donation-"] .submission-modal .submission-v--accent,
+.modal[id^="modal-trash-donation-general-"] .submission-modal .submission-v--accent {
+  color: var(--primary-color);
+}
+
+.modal[id^="modal-flagged-donation-"] .submission-modal .submission-modal-head h3,
+.modal[id^="modal-trash-donation-general-"] .submission-modal .submission-modal-head h3,
+.modal[id^="modal-flagged-donation-"] .submission-modal .submission-section h4,
+.modal[id^="modal-trash-donation-general-"] .submission-modal .submission-section h4 {
+  color: var(--primary-color);
+}
+
+.modal[id^="modal-flagged-donation-"] .submission-modal .submission-modal-divider,
+.modal[id^="modal-trash-donation-general-"] .submission-modal .submission-modal-divider {
+  border-top-color: rgba(31, 111, 139, 0.45);
+}
+
+.modal[id^="modal-flagged-donation-"] .submission-modal .actions-section > .actions-row,
+.modal[id^="modal-trash-donation-general-"] .submission-modal .actions-section > .actions-row {
+  gap: 0;
+  flex-wrap: nowrap;
+}
+
+.modal[id^="modal-flagged-donation-"] .submission-modal .actions-section > .actions-row form,
+.modal[id^="modal-trash-donation-general-"] .submission-modal .actions-section > .actions-row form {
+  width: auto;
 }
 
 .assign-disaster-form {
@@ -1526,6 +1587,60 @@ body {
   gap: 1rem;
   padding: 0.75rem 0;
   border-bottom: 1px solid rgba(31, 111, 139, 0.08);
+}
+
+.restore-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #111111;
+  font-size: 0.82rem;
+  padding: 0.3rem 0.55rem;
+  min-height: 1.8rem;
+}
+
+.restore-btn:hover,
+.restore-btn:focus {
+  color: #111111;
+}
+
+.restore-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+#trash-panel .actions-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#trash-panel .details-icon-btn {
+  color: #111111;
+}
+
+#trash-panel .details-icon-btn:hover {
+  color: #111111;
+  background: transparent;
+}
+
+#trash-panel .actions-row form {
+  margin: 0;
+}
+
+#trash-panel .btn-danger-compact {
+  background: #b72a2a;
+  border-color: #b72a2a;
+  color: #ffffff;
+  font-size: 0.78rem;
+  padding: 0.28rem 0.5rem;
+  min-height: 1.8rem;
+}
+
+#trash-panel .btn-danger-compact:hover {
+  background: #982222;
+  border-color: #982222;
 }
 
 .record-item:last-child {
