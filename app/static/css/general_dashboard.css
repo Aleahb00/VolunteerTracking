@@ -891,7 +891,7 @@ body {
     position: absolute;
     top: 50%;
     right: 12px;
-    transform: translateY(-0%);
+    transform: translateY(-50%);
     pointer-events: none;
     font-size: 0.75rem;
     color: #19333f;
@@ -903,14 +903,14 @@ body {
   font-weight: 600;
 }
 
-.filter-form select {
+/* .filter-form select {
   min-width: 220px;
   padding: 0.55rem 0.65rem;
   border: 1px solid #c6d3c0;
   border-radius: 8px;
   background: #fcfdfb;
   color: #19333f;
-}
+} */
 
 .filter-hidden {
   display: none;
