@@ -31,14 +31,21 @@
             <form method="get" class="pv-filter pv-filter--stack" action="{% if disaster %}{% url 'submissions_full_disaster' disaster.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
                 <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
                 <input type="hidden" name="active_tab" value="volunteer-panel">
-                <div class="pv-field">
-                    {{ volunteer_filter.form.skilled_worker.label_tag }}
-                    {{ volunteer_filter.form.skilled_worker }}
+
+                <div class="select-wrapper">
+                    <div class="pv-field">
+                        {{ volunteer_filter.form.skilled_worker.label_tag }}
+                        {{ volunteer_filter.form.skilled_worker }}
+                    </div>
                 </div>
-                <div class="pv-field">
-                    {{ volunteer_filter.form.order_by.label_tag }}
-                    {{ volunteer_filter.form.order_by }}
+                
+                <div class="select-wrapper">
+                    <div class="pv-field">
+                        {{ volunteer_filter.form.order_by.label_tag }}
+                        {{ volunteer_filter.form.order_by }}
+                    </div>
                 </div>
+
                 <div class="pv-filter-actions">
                     <button class="btn" type="submit">Apply</button>
                     <a class="btn btn-secondary" href="{% if disaster %}{% url 'submissions_full_disaster' disaster.id %}?active_tab=volunteer-panel{% else %}{% url 'submissions_full' %}?active_tab=volunteer-panel{% endif %}">Reset</a>
@@ -54,10 +61,14 @@
             <form method="get" class="pv-filter" action="{% if disaster %}{% url 'submissions_full_disaster' disaster.id %}{% else %}{% url 'submissions_full' %}{% endif %}">
                 <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
                 <input type="hidden" name="active_tab" value="donation-panel">
-                <div class="pv-field">
-                    {{ donation_filter.form.order_by.label_tag }}
-                    {{ donation_filter.form.order_by }}
+
+                <div class="select-wrapper">
+                    <div class="pv-field">
+                        {{ donation_filter.form.order_by.label_tag }}
+                        {{ donation_filter.form.order_by }}
+                    </div>
                 </div>
+
                 <div class="pv-filter-actions">
                     <button class="btn" type="submit">Apply</button>
                     <a class="btn btn-secondary" href="{% if disaster %}{% url 'submissions_full_disaster' disaster.id %}?active_tab=donation-panel{% else %}{% url 'submissions_full' %}?active_tab=donation-panel{% endif %}">Reset</a>
@@ -76,7 +87,7 @@
                 {% for volunteer in volunteers %}
                     <article class="pdf-page selectable">
 
-                        <div class="report-actions no-print" style="display: flex; gap: 8px; margin-bottom: 12px;">
+                        <div class="report-actions no-print">
 
                             <button class="btn btn-secondary" type="button">
                                 <input type="checkbox" class="select-report">
@@ -200,13 +211,15 @@
             <div class="submission-list">
                 {% for donation in donations %}
                     <article class="pdf-page selectable">
+                        
                         <div class="report-actions no-print">
-                            <label>
+                            <button class="btn btn-secondary" type="button">
                                 <input type="checkbox" class="select-report">
                                 Select
-                            </label>
+                            </button>
                             <button class="btn btn-secondary" type="button" onclick="printSingleReport(this)">Print This Form</button>
                         </div>
+
 
                         <div class="page-header">
                             <h2>Donation Report</h2>
