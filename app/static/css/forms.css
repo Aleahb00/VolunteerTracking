@@ -172,8 +172,8 @@
 }
 
 .form-field input,
-.form-field select,
 .form-field textarea,
+.dropdown select , 
 .form-input {
 	width: 100%;
 	max-width: 100%;
@@ -184,6 +184,24 @@
 	background: #fcfdfb;
 	color: #19333f;
 	box-sizing: border-box;
+	transition: border-color 0.3s ease, box-shadow 0.3s ease;	
+	appearance: none;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown::after {
+    content: '▾';
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-0%);
+    pointer-events: none;
+    font-size: 0.75rem;
+    color: #19333f;
 }
 
 .radio-group {

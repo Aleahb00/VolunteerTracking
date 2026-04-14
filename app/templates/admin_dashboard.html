@@ -25,16 +25,19 @@
 
         <section class="dash-block dash-controls">
             <label for="disaster-select" class="field-label">Select a disaster to view:</label>
-            <select id="disaster-select" class="select-field" onchange="if(this.value) window.location.href=this.value;">
-                <option value="">-- Select a Disaster --</option>
-                {% for disaster_item in disasters %}
-                    <option value="{% url 'edit_disaster' disaster_item.id %}" {% if disaster and disaster.id == disaster_item.id %}selected{% endif %}>
-                        {{ disaster_item.name }}
-                    </option>
-                {% empty %}
-                    <option disabled>No disasters yet.</option>
-                {% endfor %}
-            </select>
+
+            <div class="select-wrapper">
+                <select id="disaster-select" class="select-field" onchange="if(this.value) window.location.href=this.value;">
+                    <option value="">-- Select a Disaster --</option>
+                    {% for disaster_item in disasters %}
+                        <option value="{% url 'edit_disaster' disaster_item.id %}" {% if disaster and disaster.id == disaster_item.id %}selected{% endif %}>
+                            {{ disaster_item.name }}
+                        </option>
+                    {% empty %}
+                        <option disabled>No disasters yet.</option>
+                    {% endfor %}
+                </select>
+            </div>
             
             {% if disaster %}
                 <a href="{% url 'submissions_full_disaster' disaster.id %}" class="btn btn-secondary">View Disaster Submissions</a>
@@ -96,10 +99,13 @@
                     <form method="get" class="filter-form filter-select-form dash-panel-filter">
                         <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
                         <input type="hidden" name="active_tab" value="volunteers-panel">
+
+                        
                         <div class="filter-select-wrap">
                             {{ volunteer_filter.form.skilled_worker.label_tag }}
                             {{ volunteer_filter.form.skilled_worker }}
                         </div>
+
                         <div class="filter-select-wrap">
                             {{ volunteer_filter.form.order_by.label_tag }}
                             {{ volunteer_filter.form.order_by }}
