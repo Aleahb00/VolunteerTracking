@@ -354,7 +354,8 @@ def assign_submission_view(request, submission_type, submission_id):
     submission.disaster = disaster
     if should_clear_flag_on_assignment(submission.flagged_reason):
         submission.flagged = False
-    submission.save(update_fields=['disaster', 'flagged'])
+        submission.flagged_reason = []
+    submission.save(update_fields=['disaster', 'flagged', 'flagged_reason'])
 
     return JsonResponse({'status': 'success'})
 
