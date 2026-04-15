@@ -105,8 +105,7 @@ body {
     flex-wrap: nowrap;
 }
 
-.pv-search input,
-.pv-field select {
+.pv-search input {
     min-width: 150px;
     padding: 0.58rem 0.72rem;
     border: 1px solid #c6d3c0;
@@ -120,10 +119,39 @@ body {
     margin: 0;
 }
 
+.pv-field select{
+    padding: 0.60rem 2.2rem 0.60rem 0.90rem; 
+    border: 1px solid #c6d3c0;
+    border-radius: 10px;
+    background: #fcfdfb;
+    color: var(--text);
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.select-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.select-wrapper::after {
+    content: '▾';
+    position: absolute;
+    top: 70%;
+    right: 12px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 0.75rem;
+    color: #19333f;
+}
+
 .pv-field {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
+    
 }
 
 .pv-field label {
@@ -208,9 +236,14 @@ body {
 }
 
 .report-actions {
-    display: flex;
+    /* display: flex;
     justify-content: flex-end;
-    margin-bottom: 0.9rem;
+    margin-bottom: 0.9rem; */
+    display: flex;                /* Enables flexbox layout */
+    justify-content: space-between; /* Pushes items to opposite ends */
+    flex-wrap: wrap;             /* Allows buttons to stack if space runs out */
+    gap: 10px;
+    margin-bottom: 5%;
 }
 
 .report-block label,

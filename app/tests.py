@@ -169,6 +169,7 @@ class DashboardSmokeTests(TestCase):
 		self.volunteer.refresh_from_db()
 		self.assertEqual(self.volunteer.disaster_id, self.other_disaster.id)
 		self.assertFalse(self.volunteer.flagged)
+		self.assertEqual(self.volunteer.flagged_reason, [])
 
 	def test_assign_submission_keeps_non_location_flags(self):
 		self.donation.flagged = True
@@ -183,3 +184,57 @@ class DashboardSmokeTests(TestCase):
 		self.donation.refresh_from_db()
 		self.assertEqual(self.donation.disaster_id, self.other_disaster.id)
 		self.assertTrue(self.donation.flagged)
+
+	def test_assign_submission_clears_donation_invalid_location_flag(self):
+		self.donation.disaster = None
+		self.donation.flagged = True
+		self.donation.flagged_reason = [Donations.FLAG_INVALID_LOCATION]
+		self.donation.save(update_fields=["disaster", "flagged", "flagged_reason"])
+
+		response = self.client.post(
+			reverse("assign_submission_view", args=["donation", self.donation.id]),
+			{"disaster_id": self.other_disaster.id},
+		)
+		self.assertEqual(response.status_code, 200)
+		self.donation.refresh_from_db()
+		self.assertEqual(self.donation.disaster_id, self.other_disaster.id)
+		self.assertFalse(self.donation.flagged)
+		self.assertEqual(self.donation.flagged_reason, [])
+
+	def test_assign_submission_requires_post_method(self):
+		response = self.client.get(
+			reverse("assign_submission_view", args=["volunteer", self.volunteer.id]),
+		)
+		self.assertEqual(response.status_code, 405)
+
+	def test_assign_submission_requires_disaster_id(self):
+		original_disaster_id = self.volunteer.disaster_id
+		response = self.client.post(
+			reverse("assign_submission_view", args=["volunteer", self.volunteer.id]),
+			{},
+		)
+		self.assertEqual(response.status_code, 400)
+		self.volunteer.refresh_from_db()
+		self.assertEqual(self.volunteer.disaster_id, original_disaster_id)
+
+	def test_assign_submission_rejects_invalid_submission_type(self):
+		response = self.client.post(
+			reverse("assign_submission_view", args=["invalid", self.volunteer.id]),
+			{"disaster_id": self.other_disaster.id},
+		)
+		self.assertEqual(response.status_code, 400)
+
+	def test_assign_submission_returns_404_for_missing_disaster(self):
+		response = self.client.post(
+			reverse("assign_submission_view", args=["volunteer", self.volunteer.id]),
+			{"disaster_id": 999999},
+		)
+		self.assertEqual(response.status_code, 404)
+
+	def test_assign_submission_returns_404_for_missing_submission(self):
+		response = self.client.post(
+			reverse("assign_submission_view", args=["volunteer", 999999]),
+			{"disaster_id": self.other_disaster.id},
+		)
+		self.assertEqual(response.status_code, 404)
+
