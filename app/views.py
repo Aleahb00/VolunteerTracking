@@ -240,7 +240,6 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
     deleted_donations = Donations.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
     trash_count = deleted_volunteers.count() + deleted_donations.count()
 
-    # Keep tab badge counts stable and independent from current filter/search state.
     flagged_volunteers_count = base_flagged_volunteers.count()
     flagged_donations_count = base_flagged_donations.count()
 
@@ -354,7 +353,8 @@ def assign_submission_view(request, submission_type, submission_id):
     submission.disaster = disaster
     if should_clear_flag_on_assignment(submission.flagged_reason):
         submission.flagged = False
-    submission.save(update_fields=['disaster', 'flagged'])
+        submission.flagged_reason = []
+    submission.save(update_fields=['disaster', 'flagged', 'flagged_reason'])
 
     return JsonResponse({'status': 'success'})
 

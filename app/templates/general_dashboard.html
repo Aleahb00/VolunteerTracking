@@ -150,8 +150,8 @@
             </svg>
             </div>
             <div class="card-content">
-            <div class="stat-value">{{ total_disasters }}</div>
-            <p class="stat-label">Active disasters</p>
+            <div class="stat-value">{{ disasters|length }}</div>
+            <p class="stat-label">{{ total_disasters }} Active </p>
             </div>
         </article>
 
@@ -417,11 +417,7 @@
                                             <button type="submit" class="btn">Assign to Disaster</button>
                                         </form>
                                         <div class="actions-row">
-                                            {% if volunteer.flagged %}
-                                                <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button" aria-label="Unflag submission"><i data-lucide="flag-off"></i></button>
-                                            {% else %}
-                                                <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button" aria-label="Flag submission"><i data-lucide="flag"></i></button>
-                                            {% endif %}
+
 
                                             {% if volunteer.deleted %}
                                                 <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}" class="js-ajax-action">
@@ -600,11 +596,6 @@
                                             <button type="submit" class="btn">Assign to Disaster</button>
                                         </form>
                                         <div class="actions-row">
-                                            {% if donation.flagged %}
-                                                <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button" aria-label="Unflag submission"><i data-lucide="flag-off"></i></button>
-                                            {% else %}
-                                                <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button" aria-label="Flag submission"><i data-lucide="flag"></i></button>
-                                            {% endif %}
 
                                             {% if donation.deleted %}
                                                 <form method="POST" action="{% url 'restore_donation_general' donation.id %}" class="js-ajax-action">

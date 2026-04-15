@@ -364,7 +364,7 @@
 
 .select-field {
     min-width: 260px;
-    padding: 0.60rem 0.90rem;
+    padding: 0.60rem 2.2rem 0.60rem 0.90rem; 
     border: 1px solid rgba(31, 111, 139, 0.14);
     border-radius: 10px;
     background: linear-gradient(180deg, #ffffff 0%, #f8fbfb 100%);
@@ -385,6 +385,22 @@
 .filter-form input:focus {
     border-color: rgba(31, 111, 139, 0.45);
     box-shadow: 0 0 0 3px rgba(31, 111, 139, 0.12);
+}
+
+.select-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.select-wrapper::after {
+    content: '▾';
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 0.75rem;
+    color: #19333f;
 }
 
 .inline-form {
@@ -417,11 +433,33 @@
     padding: 0.25rem 0 0;
 }
 
-.filter-select-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+.filter-select-wrap select{
+    padding: 0.60rem 2.2rem 0.60rem 0.90rem; 
+    border: 1px solid #c6d3c0;
+    border-radius: 10px;
+    background: #fcfdfb;
+    color: var(--text);
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
     min-width: 220px;
+}
+
+.filter-select-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.filter-select-wrap::after {
+    content: '▾';
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-20%);
+    pointer-events: none;
+    font-size: 0.75rem;
+    color: #19333f;
 }
 
 .filter-form select,
@@ -1731,6 +1769,8 @@
         flex-direction: column;
     }
 }
+
+
 @media (max-width: 760px) {
 .dash-wrap {
         padding: 0 0.25rem;
