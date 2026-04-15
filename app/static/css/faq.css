@@ -7,6 +7,10 @@
 	--faq-accent: #1b5c67;
 }
 
+body {
+	background: linear-gradient(180deg, #f7f4e8 0%, #f0ede2 100%);
+}
+
 .faq-page {
 	width: min(1100px, 100%);
 	margin: 0 auto;

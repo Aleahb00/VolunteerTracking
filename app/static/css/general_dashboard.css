@@ -1155,6 +1155,53 @@ body {
   top: -10px;
 }
 
+.trash-panel-search {
+  align-items: stretch;
+  grid-column: 1 / -1;
+}
+
+.trash-search-form {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.trash-search-field {
+  position: relative;
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.trash-search-field .search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.trash-search-field .search-input {
+  max-width: none;
+  width: 100%;
+  padding-left: 2.15rem;
+}
+
+.trash-search-form .actions-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+#trash-panel > .tabs-list {
+  grid-column: 1 / -1;
+}
+
+#trash-panel > .tab-panel {
+  min-width: 0;
+}
+
 .panel-filter-form .filter-select-wrap {
   min-width: 150px;
 }
@@ -1608,7 +1655,8 @@ body {
   align-items: center;
   gap: 1rem;
   padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(31, 111, 139, 0.08);
+  border: #000000 dashed 1px;
+  padding: 0.75rem;
 }
 
 .restore-btn {
@@ -1636,6 +1684,40 @@ body {
   flex-wrap: nowrap;
   align-items: center;
   gap: 0.5rem;
+}
+
+#trash-panel > .tab-panel {
+  border: 1px solid rgba(31, 111, 139, 0.12);
+  border-radius: 0.75rem;
+  background: var(--card-bg);
+  box-shadow: var(--surface-shadow);
+  padding: 0.85rem;
+}
+
+#trash-panel > .tab-panel h2 {
+  margin: 0 0 0.65rem;
+  font-size: 1.02rem;
+}
+
+#trash-panel .record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+#trash-panel .record-item {
+  border: 1px solid #c6d3c0;
+  border-radius: 8px;
+  background: #fcfdfb;
+  padding: 0.7rem 0.75rem;
+}
+
+#trash-panel .record-item:hover {
+  background: #f9fbf9;
+}
+
+#trash-panel .record-item > div:first-child {
+  min-width: 0;
 }
 
 #trash-panel .details-icon-btn {
@@ -1757,6 +1839,21 @@ body {
     align-items: stretch;
   }
 
+  .trash-search-form {
+    width: 100%;
+  }
+
+  .trash-search-form .actions-row {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .trash-search-form .actions-row .btn,
+  .trash-search-form .actions-row .btn-secondary {
+    width: 100%;
+    max-width: 100%;
+  }
+
   .panel-filter-form,
   .panel-filter-form .actions-row {
     width: 100%;
@@ -1850,14 +1947,6 @@ body {
   /* hide the small tab list inside the trash area on larger screens */
   #trash-panel > .tabs-list {
     display: none;
-  }
-
-  /* ensure the trash-panel shows its children side-by-side */
-  #trash-panel {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-    align-items: start;
   }
 
   /* show panels even if they have the `hidden` attribute (JS toggles it for tabs) */

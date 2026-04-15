@@ -49,7 +49,6 @@ class Volunteer(SafeDeleteModel):
         ('hand_tools', 'Hand Tools'),
         ('tarps', 'Tarps'),
         ('safety_gear', 'Safety Gear'),
-        ('first_aid', 'First Aid Kit'),
         ('none', 'None'),
         ('other', 'Other'),
     ]
