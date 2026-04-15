@@ -698,7 +698,12 @@ def toggle_skilled_worker_status(request, volunteer_id):
     volunteer = get_object_or_404(Volunteer, id=volunteer_id)
     volunteer.confirmed_skilled_worker = not volunteer.confirmed_skilled_worker
     volunteer.save(update_fields=['confirmed_skilled_worker'])
-    return JsonResponse({'confirmed_skilled_worker': volunteer.confirmed_skilled_worker, 'status': 'success'})
+    return JsonResponse({
+        'confirmed_skilled_worker': volunteer.confirmed_skilled_worker,
+        'status': 'success',
+        'message': 'Submission marked as skilled worker.' if volunteer.confirmed_skilled_worker else 'Submission unmarked as skilled worker.',
+        'message_type': 'success',
+    })
 
 
 def submissions_full_view(request: HttpRequest, disaster_id=None) -> HttpResponse:
