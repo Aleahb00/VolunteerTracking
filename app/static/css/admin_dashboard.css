@@ -134,6 +134,12 @@
     }
 }
 
+.search-icon {
+    width: 1rem;
+    height: 1rem;
+    color: var(--text-muted);
+}
+
 .dash-header {
     display: flex;
     justify-content: space-between;
@@ -326,6 +332,7 @@
     color: var(--color-slate-2);
     font-size: 0.82rem;
 }
+
 .dash-toggle {
     display: flex;
     gap: 0.4rem;
