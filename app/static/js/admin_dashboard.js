@@ -494,6 +494,16 @@ document.addEventListener('DOMContentLoaded', function () {
 					.then(response => response.json())
 					.then(data => {
 						if (data.status === 'success') {
+							if (data.message) {
+								try {
+									sessionStorage.setItem('dashboardToast', JSON.stringify({
+										message: data.message,
+										type: data.message_type || 'success'
+									}));
+								} catch (error) {
+									// ignore storage errors and continue reload
+								}
+							}
 							location.reload();
 						} else {
 							alert('Error toggling skilled worker status.');
