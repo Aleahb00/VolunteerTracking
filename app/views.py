@@ -457,7 +457,10 @@ def admin_dashboard_view(request: HttpRequest, disaster_id=None) -> HttpResponse
     skilled_hourly_rate = disaster.skilled_hourly_rate if disaster else Decimal('45.00')
 
     total_hours = volunteers.aggregate(total=Sum('total_hours'))['total'] or 0
-    revenue_data = get_disaster_revenue(disaster)
+    if disaster:
+        revenue_data = get_disaster_revenue(disaster)
+    else:
+        revenue_data = get_aggregate_revenue(base_volunteers, base_donations)
     volunteer_value = revenue_data['volunteer_value']
     flagged_count = volunteers.filter(flagged=True).count()
     donation_flagged_count = donations.filter(flagged=True).count()
