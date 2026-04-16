@@ -87,13 +87,7 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
                 volunteer.save()
 
-                if volunteer.flagged:
-                    if has_invalid_location:
-                        messages.warning(request, 'Volunteer submission saved and flagged (invalid location). No disaster was assigned.')
-                    else:
-                        messages.warning(request, 'Volunteer submission saved and flagged for review.')
-                else:
-                    messages.success(request, 'Volunteer form submission saved successfully.')
+                messages.success(request, 'Volunteer form submission saved successfully.')
 
                 return redirect('forms')
             
@@ -118,10 +112,8 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
                 donation.save()
 
-                if donation.flagged:
-                    messages.warning(request, 'Donation submission saved and flagged (invalid location). No disaster was assigned.')
-                else:
-                    messages.success(request, 'Donation form submission saved successfully.')
+
+                messages.success(request, 'Donation form submission saved successfully.')
 
                 return redirect('forms')
 
@@ -240,7 +232,6 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
     deleted_donations = Donations.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
     trash_count = deleted_volunteers.count() + deleted_donations.count()
 
-    # Keep tab badge counts stable and independent from current filter/search state.
     flagged_volunteers_count = base_flagged_volunteers.count()
     flagged_donations_count = base_flagged_donations.count()
 
@@ -273,6 +264,27 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
                 | Q(equipment_type__icontains=search_query)
                 | Q(other_donation_type__icontains=search_query)
                 | Q(disaster__name__icontains=search_query)
+            )
+    elif active_tab == 'trash-panel':
+        if search_query:
+            deleted_volunteers = deleted_volunteers.filter(
+                Q(name__icontains=search_query)
+                | Q(email__icontains=search_query)
+                | Q(phone_number__icontains=search_query)
+                | Q(location_volunteered__icontains=search_query)
+                | Q(work_desc__icontains=search_query)
+                | Q(notes__icontains=search_query)
+            )
+            deleted_donations = deleted_donations.filter(
+                Q(name__icontains=search_query)
+                | Q(email__icontains=search_query)
+                | Q(phone_number__icontains=search_query)
+                | Q(location_donated__icontains=search_query)
+                | Q(work_desc__icontains=search_query)
+                | Q(notes__icontains=search_query)
+                | Q(material_type__icontains=search_query)
+                | Q(equipment_type__icontains=search_query)
+                | Q(other_donation_type__icontains=search_query)
             )
     
     # Ensure flagged_reason is always a list, never None

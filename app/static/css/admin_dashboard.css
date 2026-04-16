@@ -49,6 +49,7 @@
 .dash-wrap {
     max-width: 1120px;
     margin: 0 auto;
+    padding-bottom: 2rem;
 }
 
 .dashboard-messages {
@@ -456,7 +457,7 @@
     position: absolute;
     top: 50%;
     right: 12px;
-    transform: translateY(-20%);
+    transform: translateY(-50%);
     pointer-events: none;
     font-size: 0.75rem;
     color: #19333f;
