@@ -86,6 +86,10 @@
                                 {{ create_form.applicant.label_tag }}
                                 {{ create_form.applicant }}
                             </div>
+                            <div class="form-field-group">
+                                {{ create_form.goal.label_tag }}
+                                {{ create_form.goal }}
+                            </div>
                         </div>
 
                         <button type="submit" class="btn modal-form-submit">Create Disaster</button>
@@ -632,7 +636,22 @@
             </section>
 
             <section id="trash-panel" class="dash-grid tab-panel" role="tabpanel" {% if active_tab != 'trash-panel' %}hidden{% endif %}>
-
+                <div class="panel-search trash-panel-search">
+                    <form method="get" class="trash-search-form">
+                        <input type="hidden" name="active_tab" value="trash-panel">
+                        <div class="trash-search-field">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                            </svg>
+                            <input type="search" class="search-input" name="q" value="{{ search_query }}" placeholder="Search trash..." aria-label="Search deleted submissions">
+                        </div>
+                        <div class="actions-row">
+                            <button type="submit" class="btn">Search</button>
+                            <a href="{% url 'general_dashboard' %}?active_tab=trash-panel" class="btn btn-secondary">Reset</a>
+                        </div>
+                    </form>
+                </div>
             <div class="tabs-list" role="tablist">
                 <button type="button" class="tab-trigger" data-target="trash-volunteers">Volunteers</button>
                 <button type="button" class="tab-trigger" data-target="trash-donations">Donations</button>

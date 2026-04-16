@@ -87,13 +87,7 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
                 volunteer.save()
 
-                if volunteer.flagged:
-                    if has_invalid_location:
-                        messages.warning(request, 'Volunteer submission saved and flagged (invalid location). No disaster was assigned.')
-                    else:
-                        messages.warning(request, 'Volunteer submission saved and flagged for review.')
-                else:
-                    messages.success(request, 'Volunteer form submission saved successfully.')
+                messages.success(request, 'Volunteer form submission saved successfully.')
 
                 return redirect('forms')
             
@@ -118,10 +112,8 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
                 donation.save()
 
-                if donation.flagged:
-                    messages.warning(request, 'Donation submission saved and flagged (invalid location). No disaster was assigned.')
-                else:
-                    messages.success(request, 'Donation form submission saved successfully.')
+
+                messages.success(request, 'Donation form submission saved successfully.')
 
                 return redirect('forms')
 
@@ -272,6 +264,27 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
                 | Q(equipment_type__icontains=search_query)
                 | Q(other_donation_type__icontains=search_query)
                 | Q(disaster__name__icontains=search_query)
+            )
+    elif active_tab == 'trash-panel':
+        if search_query:
+            deleted_volunteers = deleted_volunteers.filter(
+                Q(name__icontains=search_query)
+                | Q(email__icontains=search_query)
+                | Q(phone_number__icontains=search_query)
+                | Q(location_volunteered__icontains=search_query)
+                | Q(work_desc__icontains=search_query)
+                | Q(notes__icontains=search_query)
+            )
+            deleted_donations = deleted_donations.filter(
+                Q(name__icontains=search_query)
+                | Q(email__icontains=search_query)
+                | Q(phone_number__icontains=search_query)
+                | Q(location_donated__icontains=search_query)
+                | Q(work_desc__icontains=search_query)
+                | Q(notes__icontains=search_query)
+                | Q(material_type__icontains=search_query)
+                | Q(equipment_type__icontains=search_query)
+                | Q(other_donation_type__icontains=search_query)
             )
     
     # Ensure flagged_reason is always a list, never None
@@ -444,7 +457,10 @@ def admin_dashboard_view(request: HttpRequest, disaster_id=None) -> HttpResponse
     skilled_hourly_rate = disaster.skilled_hourly_rate if disaster else Decimal('45.00')
 
     total_hours = volunteers.aggregate(total=Sum('total_hours'))['total'] or 0
-    revenue_data = get_disaster_revenue(disaster)
+    if disaster:
+        revenue_data = get_disaster_revenue(disaster)
+    else:
+        revenue_data = get_aggregate_revenue(base_volunteers, base_donations)
     volunteer_value = revenue_data['volunteer_value']
     flagged_count = volunteers.filter(flagged=True).count()
     donation_flagged_count = donations.filter(flagged=True).count()

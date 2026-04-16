@@ -73,15 +73,27 @@ def get_disaster_revenue(disaster):
     volunteers = Volunteer.objects.filter(disaster=disaster)
     donations = Donations.objects.filter(disaster=disaster)
 
-    confirmed_skilled_hours = volunteers.filter(confirmed_skilled_worker=True).aggregate(total=Sum('total_hours'))['total'] or 0
-    non_skilled_hours = volunteers.filter(confirmed_skilled_worker=False).aggregate(total=Sum('total_hours'))['total'] or 0
-    donation_hours = donations.aggregate(total=Sum('total_hours'))['total'] or 0
+    volunteer_hours = Decimal('0')
+    donation_hours = Decimal('0')
+    volunteer_value = Decimal('0.00')
+    donation_value = Decimal('0.00')
 
-    volunteer_value = (
-        Decimal(str(non_skilled_hours)) * hourly_rate
-        + Decimal(str(confirmed_skilled_hours)) * skilled_hourly_rate
-    )
-    donation_value = Decimal(str(donation_hours)) * hourly_rate
+    for volunteer in volunteers:
+        if has_invalid_location_flag(volunteer.flagged_reason):
+            continue
+
+        hours = Decimal(str(volunteer.total_hours or 0))
+        volunteer_hours += hours
+        rate = skilled_hourly_rate if volunteer.confirmed_skilled_worker else hourly_rate
+        volunteer_value += hours * rate
+
+    for donation in donations:
+        if has_invalid_location_flag(donation.flagged_reason):
+            continue
+
+        hours = Decimal(str(donation.total_hours or 0))
+        donation_hours += hours
+        donation_value += hours * hourly_rate
 
     return {
         'hourly_rate': hourly_rate,
@@ -89,8 +101,38 @@ def get_disaster_revenue(disaster):
         'volunteer_value': volunteer_value,
         'donation_value': donation_value,
         'total_value': volunteer_value + donation_value,
-        'volunteer_hours': volunteers.aggregate(total=Sum('total_hours'))['total'] or 0,
+        'volunteer_hours': float(volunteer_hours),
         'donation_hours': donation_hours,
+    }
+
+
+def get_aggregate_revenue(volunteers, donations):
+    volunteer_value = Decimal('0.00')
+    donation_value = Decimal('0.00')
+
+    for volunteer in volunteers.select_related('disaster'):
+        if not volunteer.disaster:
+            continue
+        if has_invalid_location_flag(volunteer.flagged_reason):
+            continue
+
+        hours = Decimal(str(volunteer.total_hours or 0))
+        rate = volunteer.disaster.skilled_hourly_rate if volunteer.confirmed_skilled_worker else volunteer.disaster.hourly_rate
+        volunteer_value += hours * rate
+
+    for donation in donations.select_related('disaster'):
+        if not donation.disaster:
+            continue
+        if has_invalid_location_flag(donation.flagged_reason):
+            continue
+
+        hours = Decimal(str(donation.total_hours or 0))
+        donation_value += hours * donation.disaster.hourly_rate
+
+    return {
+        'volunteer_value': volunteer_value,
+        'donation_value': donation_value,
+        'total_value': volunteer_value + donation_value,
     }
 
 
