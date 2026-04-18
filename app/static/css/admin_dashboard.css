@@ -49,7 +49,7 @@
 .dash-wrap {
     max-width: 1120px;
     margin: 0 auto;
-    padding-bottom: 2rem;
+    padding-bottom: 3rem;
 }
 
 .dashboard-messages {
@@ -246,9 +246,13 @@
 
 .dash-toolbar-body {
     display: flex;
-    flex-wrap: nowrap;
-    gap: 0.75rem;
-    align-items: flex-end;
+    flex-direction: row;
+}
+
+.dropdown {
+    display: inline-block;
+    display: flex;
+    flex-direction: row;
 }
 
 .dash-search-form {
@@ -261,9 +265,30 @@
     margin-top: 0;
 }
 
+.dash-search-form .search-icon {
+    flex: 0 0 auto;
+    align-self: flex-end;
+    padding-bottom: 0.6rem;
+    color: #19333f;
+}
+
 .dash-search-form input {
     flex: 1 1 auto;
     min-width: 0;
+    padding: 0.60rem 0.90rem;
+    min-height: 2.5rem;
+    border: 1px solid #c6d3c0;
+    border-radius: 10px;
+    background: #fcfdfb;
+    color: #19333f;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.dash-search-form input:focus {
+    border-color: rgba(31, 111, 139, 0.45);
+    box-shadow: 0 0 0 3px rgba(31, 111, 139, 0.12);
 }
 
 .dash-search-input-wrap {
@@ -388,7 +413,7 @@
 }
 
 .select-field:focus,
-.search-form input:focus,
+/* .search-form input:focus, */
 .filter-form select:focus,
 .filter-form input:focus {
     border-color: rgba(31, 111, 139, 0.45);
@@ -435,14 +460,15 @@
 
 .filter-select-form {
     display: flex;
-    flex-wrap: wrap;
+    /* flex-wrap: wrap; */
     gap: 0.75rem;
-    align-items: end;
+    align-items: flex-end;
     padding: 0.25rem 0 0;
 }
 
 .filter-select-wrap select{
     padding: 0.60rem 2.2rem 0.60rem 0.90rem; 
+    min-height: 2.5rem;
     border: 1px solid #c6d3c0;
     border-radius: 10px;
     background: #fcfdfb;
@@ -457,17 +483,20 @@
 .filter-select-wrap {
     position: relative;
     display: inline-block;
+    flex-direction: column;
 }
 
 .filter-select-wrap::after {
     content: '▾';
     position: absolute;
-    top: 50%;
-    right: 12px;
+    top: calc(100% - 1.25rem); /* centers inside select */
     transform: translateY(-50%);
+    right: 12px;
+    line-height: 1;
     pointer-events: none;
     font-size: 0.75rem;
     color: #19333f;
+    bottom: 0.65rem; 
 }
 
 .filter-form select,
@@ -483,6 +512,7 @@
 .filter-hidden {
     display: none !important;
 }
+
 .btn {
     border: 1px solid var(--color-teal);
     background: linear-gradient(180deg, #1f6f8b 0%, #185c74 100%);
@@ -516,6 +546,11 @@
 
 .btn-danger:hover {
     color: #f70010;
+}
+
+.btn-danger svg {
+    width: 1.1rem;
+    height: 1.1rem;
 }
 
 .dash-header .inline-form .btn.btn-danger {
@@ -1713,7 +1748,7 @@
         flex-wrap: nowrap;
     }
 
-    .dash-toolbar-head,
+    .dash-toolbar-head
     .dash-toolbar-body {
         flex-direction: column;
         align-items: stretch;
@@ -1781,8 +1816,18 @@
 
 @media (max-width: 760px) {
 .dash-wrap {
-        padding: 0 0.25rem;
+    padding: 0 0.25rem 3rem;
     }
+
+    .dash-wrap > .tab-panel:not([hidden]) {
+        padding-bottom: calc(2.25rem + env(safe-area-inset-bottom));
+    }
+
+    .dash-wrap > .tab-panel:not([hidden]) > *:last-child {
+        margin-bottom: calc(1.75rem + env(safe-area-inset-bottom));
+    }
+
+
 
     .dash-block {
         padding: 1rem;
@@ -1837,7 +1882,6 @@
     }
 
     .dash-search-form {
-        flex-direction: column;
         gap: 0.5rem;
     }
 
@@ -1901,68 +1945,78 @@
     .inline-form {
         width: 100%;
     }
-.table-shell {
-        overflow-x: visible;
-    }
-
-    .submission-table {
+    #volunteers-panel .dash-block,
+    #donations-panel .dash-block {
         min-width: 0;
+        overflow: hidden;
     }
 
-    .submission-table,
-    .submission-table thead,
-    .submission-table tbody,
-    .submission-table tr,
-    .submission-table th,
-    .submission-table td {
-        display: block;
+    #volunteers-panel .table-shell,
+    #donations-panel .table-shell {
         width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
     }
 
-    .submission-table thead {
-        display: none;
+    #volunteers-panel .submission-table,
+    #donations-panel .submission-table {
+        display: table;
+        width: 100%;
+        min-width: 760px;
+    }
+
+    #volunteers-panel .submission-table thead,
+    #donations-panel .submission-table thead {
+        display: table-header-group;
+    }
+
+    #volunteers-panel .submission-table tbody,
+    #donations-panel .submission-table tbody {
+        display: table-row-group;
+    }
+
+    #volunteers-panel .submission-table tr,
+    #donations-panel .submission-table tr {
+        display: table-row;
+    }
+
+    #volunteers-panel .submission-table th,
+    #volunteers-panel .submission-table td,
+    #donations-panel .submission-table th,
+    #donations-panel .submission-table td {
+        display: table-cell;
+        width: auto;
     }
 
     .submission-table tbody tr {
-        border: 1px solid var(--color-border);
-        border-radius: 8px;
-        margin-bottom: 0.75rem;
-        padding: 0.25rem 0;
+        border: 0;
+        margin: 0;
+        padding: 0;
     }
 
     .submission-table tbody tr:hover td {
-        background: var(--color-bg-white);
+        background: #f3faf8;
     }
 
     .submission-table tbody td {
+        padding: 1rem 0.95rem;
         border-bottom: 1px solid var(--color-border-row);
-        padding: 0.55rem 0.75rem;
-        display: flex;
-        align-items: baseline;
-        gap: 0.5rem;
+        white-space: nowrap;
     }
 
-    .submission-table tbody td:last-child {
-        border-bottom: 0;
+    .submission-table tbody td::before {
+        content: none;
     }
-.submission-table tbody td::before {
-        content: attr(data-label);
-        font-size: 0.78rem;
-        font-weight: 700;
-        color: var(--color-slate-3);
-        min-width: 72px;
-        flex-shrink: 0;
-    }
-.submission-table tbody td[data-label="Actions"] {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
+
+    .submission-table tbody td[data-label="Actions"] {
+        display: table-cell;
     }
 
     .table-actions {
-        flex-wrap: wrap;
-        gap: 0.4rem;
-        width: 100%;
+        flex-wrap: nowrap;
+        width: auto;
     }
 .modal-content,
     .modal-content--form,
