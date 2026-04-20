@@ -87,13 +87,7 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
                 volunteer.save()
 
-                if volunteer.flagged:
-                    if has_invalid_location:
-                        messages.warning(request, 'Volunteer submission saved and flagged (invalid location). No disaster was assigned.')
-                    else:
-                        messages.warning(request, 'Volunteer submission saved and flagged for review.')
-                else:
-                    messages.success(request, 'Volunteer form submission saved successfully.')
+                messages.success(request, 'Volunteer form submission saved successfully.')
 
                 return redirect('forms')
             
@@ -118,10 +112,8 @@ def form_template_view(request:HttpRequest)->HttpResponse:
 
                 donation.save()
 
-                if donation.flagged:
-                    messages.warning(request, 'Donation submission saved and flagged (invalid location). No disaster was assigned.')
-                else:
-                    messages.success(request, 'Donation form submission saved successfully.')
+
+                messages.success(request, 'Donation form submission saved successfully.')
 
                 return redirect('forms')
 
@@ -229,6 +221,7 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
 
     active_tab = request.GET.get('active_tab', 'volunteer-panel')
     search_query = (request.GET.get('q') or '').strip()
+    trash_sort = (request.GET.get('trash_sort') or 'newest').strip()
     create_form = DisasterForm()
     disasters = Disaster.objects.all().order_by('-active', 'name')
     active_disasters_count = Disaster.objects.filter(active=True).count()
@@ -236,11 +229,10 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
     base_flagged_donations = Donations.objects.filter(flagged=True).select_related('disaster').order_by('-created_at')
     flagged_volunteers = base_flagged_volunteers
     flagged_donations = base_flagged_donations
-    deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
-    deleted_donations = Donations.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
+    deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False, disaster__isnull=True)
+    deleted_donations = Donations.all_objects.filter(deleted__isnull=False, disaster__isnull=True)
     trash_count = deleted_volunteers.count() + deleted_donations.count()
 
-    # Keep tab badge counts stable and independent from current filter/search state.
     flagged_volunteers_count = base_flagged_volunteers.count()
     flagged_donations_count = base_flagged_donations.count()
 
@@ -274,6 +266,43 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
                 | Q(other_donation_type__icontains=search_query)
                 | Q(disaster__name__icontains=search_query)
             )
+    elif active_tab == 'trash-panel':
+        if search_query:
+            deleted_volunteers = deleted_volunteers.filter(
+                Q(name__icontains=search_query)
+                | Q(email__icontains=search_query)
+                | Q(phone_number__icontains=search_query)
+                | Q(location_volunteered__icontains=search_query)
+                | Q(work_desc__icontains=search_query)
+                | Q(notes__icontains=search_query)
+            )
+            deleted_donations = deleted_donations.filter(
+                Q(name__icontains=search_query)
+                | Q(email__icontains=search_query)
+                | Q(phone_number__icontains=search_query)
+                | Q(location_donated__icontains=search_query)
+                | Q(work_desc__icontains=search_query)
+                | Q(notes__icontains=search_query)
+                | Q(material_type__icontains=search_query)
+                | Q(equipment_type__icontains=search_query)
+                | Q(other_donation_type__icontains=search_query)
+            )
+
+        if trash_sort == 'oldest':
+            deleted_volunteers = deleted_volunteers.order_by('created_at')
+            deleted_donations = deleted_donations.order_by('created_at')
+        elif trash_sort == 'name_asc':
+            deleted_volunteers = deleted_volunteers.order_by('name', '-created_at')
+            deleted_donations = deleted_donations.order_by('name', '-created_at')
+        elif trash_sort == 'name_desc':
+            deleted_volunteers = deleted_volunteers.order_by('-name', '-created_at')
+            deleted_donations = deleted_donations.order_by('-name', '-created_at')
+        else:
+            deleted_volunteers = deleted_volunteers.order_by('-created_at')
+            deleted_donations = deleted_donations.order_by('-created_at')
+    else:
+        deleted_volunteers = deleted_volunteers.order_by('-created_at')
+        deleted_donations = deleted_donations.order_by('-created_at')
     
     # Ensure flagged_reason is always a list, never None
     for volunteer in flagged_volunteers:
@@ -295,6 +324,7 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
         'donation_filter': donation_filter,
         'active_tab': active_tab,
         'search_query': search_query,
+        'trash_sort': trash_sort,
         'deleted_volunteers': deleted_volunteers,
         'deleted_donations': deleted_donations,
         'trash_count': trash_count,
@@ -354,7 +384,8 @@ def assign_submission_view(request, submission_type, submission_id):
     submission.disaster = disaster
     if should_clear_flag_on_assignment(submission.flagged_reason):
         submission.flagged = False
-    submission.save(update_fields=['disaster', 'flagged'])
+        submission.flagged_reason = []
+    submission.save(update_fields=['disaster', 'flagged', 'flagged_reason'])
 
     return JsonResponse({'status': 'success'})
 
@@ -444,7 +475,10 @@ def admin_dashboard_view(request: HttpRequest, disaster_id=None) -> HttpResponse
     skilled_hourly_rate = disaster.skilled_hourly_rate if disaster else Decimal('45.00')
 
     total_hours = volunteers.aggregate(total=Sum('total_hours'))['total'] or 0
-    revenue_data = get_disaster_revenue(disaster)
+    if disaster:
+        revenue_data = get_disaster_revenue(disaster)
+    else:
+        revenue_data = get_aggregate_revenue(base_volunteers, base_donations)
     volunteer_value = revenue_data['volunteer_value']
     flagged_count = volunteers.filter(flagged=True).count()
     donation_flagged_count = donations.filter(flagged=True).count()
@@ -698,7 +732,12 @@ def toggle_skilled_worker_status(request, volunteer_id):
     volunteer = get_object_or_404(Volunteer, id=volunteer_id)
     volunteer.confirmed_skilled_worker = not volunteer.confirmed_skilled_worker
     volunteer.save(update_fields=['confirmed_skilled_worker'])
-    return JsonResponse({'confirmed_skilled_worker': volunteer.confirmed_skilled_worker, 'status': 'success'})
+    return JsonResponse({
+        'confirmed_skilled_worker': volunteer.confirmed_skilled_worker,
+        'status': 'success',
+        'message': 'Submission marked as skilled worker.' if volunteer.confirmed_skilled_worker else 'Submission unmarked as skilled worker.',
+        'message_type': 'success',
+    })
 
 
 def submissions_full_view(request: HttpRequest, disaster_id=None) -> HttpResponse:

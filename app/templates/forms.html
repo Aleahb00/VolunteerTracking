@@ -13,8 +13,14 @@
     <div class="forms-container">
         <header class="forms-header">
             <h1>Get Involved</h1>
-            <p>Better heading pargraph thing needs to go here and im thinking a little information too idk what</p>
-            <p>The more information you can fill out the better (but in a professional way)</p>
+            <p>Thank you for your hard work on the front lines.</p>
+            <p>By documenting your hours and donations, you help us demonstrate the collective strength of our response. </p>
+            <p>Please fill out the form below as accurately as possible so we can celebrate and scale our impact. </p>
+            <hr>
+
+            <p>Thank you for helping out the community in such difficult times.</p>
+            <p>Accurate documentation is critical for ensuring compliance with FEMA guidelines and securing community recovery funds. </p>
+            <p>Please use the forms below to provide a detailed account of your volunteer hours, donated resources, or equipment usage.</p>
         </header>
 
         {% if messages %}
@@ -43,7 +49,7 @@
                     {{ volunteerForm.name.label_tag }}
                     {{ volunteerForm.name }}
                 </div>
-                <div class="form-field">
+                <div class="dropdown">
                     {{ volunteerForm.contact_method.label_tag }}
                     {{ volunteerForm.contact_method }}
                     <span class="contact-select-volunteer" data-trigger="contact_method"></span>
@@ -80,7 +86,7 @@
                     {{ volunteerForm.work_desc.label_tag }}
                     {{ volunteerForm.work_desc }}
                 </div>
-                <div class="form-field">
+                <div class="dropdown">
                     {{ volunteerForm.equipment.label_tag }}
                     {{ volunteerForm.equipment }}
                     <span class="equipment-select-volunteer" data-trigger="equipment"></span>
@@ -134,7 +140,7 @@
                     {{ donationForm.name.label_tag }}
                     {{ donationForm.name }}
                 </div>
-                <div class="form-field">
+                <div class="dropdown">
                     {{ donationForm.contact_method.label_tag }}
                     {{ donationForm.contact_method }}
                     <span class="contact-select-donation" data-trigger="contact_method"></span>
@@ -171,7 +177,7 @@
                     {{ donationForm.work_desc.label_tag }}
                     {{ donationForm.work_desc }}
                 </div>
-                <div class="form-field">
+                <div class="dropdown">
                     {{ donationForm.donation_type.label_tag }}
                     {{ donationForm.donation_type }}
                     <span class="donation-select" data-trigger="donation_type"></span>

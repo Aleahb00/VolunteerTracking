@@ -165,15 +165,18 @@
 	grid-column: 1 / -1;
 }
 
-.form-field label {
+.form-field label,
+.dropdown label {
 	font-size: 0.92rem;
 	font-weight: 600;
 	color: #2e4651;
 }
 
-.form-field input,
-.form-field select,
+.form-field input:not([type="radio"]):not([type="checkbox"]),
 .form-field textarea,
+.form-field select,
+.dropdown select,
+
 .form-input {
 	width: 100%;
 	max-width: 100%;
@@ -184,11 +187,43 @@
 	background: #fcfdfb;
 	color: #19333f;
 	box-sizing: border-box;
+	transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-field select,
+.dropdown select {
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+}
+
+.dropdown {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	min-width: 0;
+}
+
+.dropdown::after {
+	content: '▾';
+	position: absolute;
+	top: calc(50% + 0.52rem);
+	right: 12px;
+	transform: translateY(-50%);
+	pointer-events: none;
+	font-size: 0.75rem;
+	color: #19333f;
+}
+
+.dropdown select {
+	padding-right: 2rem;
+	line-height: 1.2;
+	background-image: none;
 }
 
 .radio-group {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
 	gap: 0.45rem;
 	padding: 0.25rem 0 0.1rem;
 }
@@ -205,7 +240,7 @@
 	color: #19333f;
 	cursor: pointer;
 	transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
-	min-height: 2.25rem;
+	max-width: 6rem;
 }
 
 .radio-option:hover {
@@ -219,6 +254,7 @@
 	margin: 0;
 	accent-color: #1b5c67;
 	flex-shrink: 0;
+	pointer-events: auto;
 }
 
 .radio-option span {

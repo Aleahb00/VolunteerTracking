@@ -3,9 +3,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from safedelete.models import SafeDeleteModel, SOFT_DELETE
 from  django.core.validators import MaxValueValidator
 
-
 # Create your models here.
-
 class Disaster(models.Model):
     name = models.CharField(max_length=100)
     number = models.CharField(max_length=100)
@@ -49,7 +47,6 @@ class Volunteer(SafeDeleteModel):
         ('hand_tools', 'Hand Tools'),
         ('tarps', 'Tarps'),
         ('safety_gear', 'Safety Gear'),
-        ('first_aid', 'First Aid Kit'),
         ('none', 'None'),
         ('other', 'Other'),
     ]

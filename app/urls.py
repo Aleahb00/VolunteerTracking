@@ -85,7 +85,7 @@ urlpatterns = [
 
 
     # TBD
-    
+
     # path('disaster/<int:disaster_id>/', disaster_detail_view, name='disaster_detail'),
     # path('admin-dashboard/volunteer/<int:volunteer_id>/pdf/', volunteer_pdf_view, name='volunteer_pdf'),
     # path('admin-dashboard/donation/<int:donation_id>/pdf/', donation_pdf_view, name='donation_pdf'),

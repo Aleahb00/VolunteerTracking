@@ -86,6 +86,10 @@
                                 {{ create_form.applicant.label_tag }}
                                 {{ create_form.applicant }}
                             </div>
+                            <div class="form-field-group">
+                                {{ create_form.goal.label_tag }}
+                                {{ create_form.goal }}
+                            </div>
                         </div>
 
                         <button type="submit" class="btn modal-form-submit">Create Disaster</button>
@@ -150,8 +154,8 @@
             </svg>
             </div>
             <div class="card-content">
-            <div class="stat-value">{{ total_disasters }}</div>
-            <p class="stat-label">Active disasters</p>
+            <div class="stat-value">{{ disasters|length }}</div>
+            <p class="stat-label">{{ total_disasters }} Active </p>
             </div>
         </article>
 
@@ -193,6 +197,21 @@
             </div>
         </div>
         <div class="card-content">
+            <div class="disaster-search-row">
+                <label class="disaster-search-field" aria-label="Search disasters">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon" aria-hidden="true">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.3-4.3"></path>
+                    </svg>
+                    <input
+                        type="search"
+                        id="disaster-search-input"
+                        class="search-input"
+                        placeholder="Search disasters by name, category, or location"
+                        aria-label="Search disasters by name, category, or location"
+                    >
+                </label>
+            </div>
             <div class="project-toggle-row">
                 <label class="project-toggle" for="show-inactive-projects">
                     <span class="project-toggle-labels">
@@ -209,7 +228,7 @@
             </div>
             <div class="disasters-list">
             {% for disaster in disasters %}
-            <div class="disaster-item {% if not disaster.active %}is-inactive-project{% endif %}" data-active="{{ disaster.active|yesno:'true,false' }}" {% if not disaster.active %}hidden{% endif %}>
+            <div class="disaster-item {% if not disaster.active %}is-inactive-project{% endif %}" data-active="{{ disaster.active|yesno:'true,false' }}" data-search="{{ disaster.name }} {{ disaster.category }} {{ disaster.location|default:'' }}" {% if not disaster.active %}hidden{% endif %}>
                 <div class="disaster-info">
                 <h3 class="disaster-title">{{ disaster.name }}</h3>
                 <p class="disaster-description">{{ disaster.category }}</p>
@@ -268,7 +287,7 @@
                     <path d="m21 21-4.3-4.3"></path>
                 </svg>
                 <input type="search" class="search-input" name="q" form="volunteer-filter-form" value="{{ search_query }}" placeholder="Search volunteers..." aria-label="Search flagged volunteers">
-                <form id="volunteer-filter-form" method="get" class="filter-form panel-filter-form">
+                <form id="volunteer-filter-form" method="get" class="filter-form panel-filter-form" data-panel-target="volunteer-panel">
                     <input type="hidden" name="active_tab" value="volunteer-panel">
                     <div class="filter-select-wrap">
                         {{ volunteer_filter.form.skilled_worker.label_tag }}
@@ -355,10 +374,7 @@
                                         <span class="submission-status {% if volunteer.flagged %}is-flagged{% else %}is-active{% endif %}">{% if volunteer.flagged %}Flagged{% else %}Active{% endif %}</span>
                                     </div>
 
-                                    <div class="submission-id-card">
-                                        <p class="submission-k">Submission ID</p>
-                                        <p class="submission-v submission-v--mono">{{ volunteer.id }}</p>
-                                    </div>
+
 
                                     <section class="submission-section">
                                         <h4>Personal Information</h4>
@@ -417,11 +433,7 @@
                                             <button type="submit" class="btn">Assign to Disaster</button>
                                         </form>
                                         <div class="actions-row">
-                                            {% if volunteer.flagged %}
-                                                <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button" aria-label="Unflag submission"><i data-lucide="flag-off"></i></button>
-                                            {% else %}
-                                                <button data-volunteer-id="{{ volunteer.id }}" class="btn-flag js-toggle-flag" type="button" aria-label="Flag submission"><i data-lucide="flag"></i></button>
-                                            {% endif %}
+
 
                                             {% if volunteer.deleted %}
                                                 <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}" class="js-ajax-action">
@@ -465,7 +477,7 @@
                     <path d="m21 21-4.3-4.3"></path>
                 </svg>
                 <input type="search" class="search-input" name="q" form="donation-filter-form" value="{{ search_query }}" placeholder="Search donations..." aria-label="Search flagged donations">
-                <form id="donation-filter-form" method="get" class="filter-form panel-filter-form">
+                <form id="donation-filter-form" method="get" class="filter-form panel-filter-form" data-panel-target="donation-panel">
                     <input type="hidden" name="active_tab" value="donation-panel">
                     <div class="filter-select-wrap">
                         {{ donation_filter.form.order_by.label_tag }}
@@ -600,11 +612,6 @@
                                             <button type="submit" class="btn">Assign to Disaster</button>
                                         </form>
                                         <div class="actions-row">
-                                            {% if donation.flagged %}
-                                                <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button" aria-label="Unflag submission"><i data-lucide="flag-off"></i></button>
-                                            {% else %}
-                                                <button data-donation-id="{{ donation.id }}" class="btn-flag js-toggle-donation-flag" type="button" aria-label="Flag submission"><i data-lucide="flag"></i></button>
-                                            {% endif %}
 
                                             {% if donation.deleted %}
                                                 <form method="POST" action="{% url 'restore_donation_general' donation.id %}" class="js-ajax-action">
@@ -641,7 +648,28 @@
             </section>
 
             <section id="trash-panel" class="dash-grid tab-panel" role="tabpanel" {% if active_tab != 'trash-panel' %}hidden{% endif %}>
-
+                <div class="panel-search trash-panel-search">
+                    <form method="get" class="trash-search-form" data-panel-target="trash-panel">
+                        <input type="hidden" name="active_tab" value="trash-panel">
+                        <div class="trash-search-field">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                            </svg>
+                            <input type="search" class="search-input" name="q" value="{{ search_query }}" placeholder="Search trash..." aria-label="Search deleted submissions">
+                        </div>
+                        <div class="filter-select-wrap trash-sort-wrap">
+                            <label for="trash-sort-select">Sort by</label>
+                            <select id="trash-sort-select" name="trash_sort" onchange="this.form.submit()">
+                                <option value="newest" {% if trash_sort == 'newest' %}selected{% endif %}>Newest</option>
+                                <option value="oldest" {% if trash_sort == 'oldest' %}selected{% endif %}>Oldest</option>
+                                <option value="name_asc" {% if trash_sort == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
+                                <option value="name_desc" {% if trash_sort == 'name_desc' %}selected{% endif %}>Name (Z-A)</option>
+                            </select>
+                        </div>
+                        
+                    </form>
+                </div>
             <div class="tabs-list" role="tablist">
                 <button type="button" class="tab-trigger" data-target="trash-volunteers">Volunteers</button>
                 <button type="button" class="tab-trigger" data-target="trash-donations">Donations</button>
