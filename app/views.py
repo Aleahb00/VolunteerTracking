@@ -221,6 +221,7 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
 
     active_tab = request.GET.get('active_tab', 'volunteer-panel')
     search_query = (request.GET.get('q') or '').strip()
+    trash_sort = (request.GET.get('trash_sort') or 'newest').strip()
     create_form = DisasterForm()
     disasters = Disaster.objects.all().order_by('-active', 'name')
     active_disasters_count = Disaster.objects.filter(active=True).count()
@@ -228,8 +229,8 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
     base_flagged_donations = Donations.objects.filter(flagged=True).select_related('disaster').order_by('-created_at')
     flagged_volunteers = base_flagged_volunteers
     flagged_donations = base_flagged_donations
-    deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
-    deleted_donations = Donations.all_objects.filter(deleted__isnull=False, disaster__isnull=True).order_by('-created_at')
+    deleted_volunteers = Volunteer.all_objects.filter(deleted__isnull=False, disaster__isnull=True)
+    deleted_donations = Donations.all_objects.filter(deleted__isnull=False, disaster__isnull=True)
     trash_count = deleted_volunteers.count() + deleted_donations.count()
 
     flagged_volunteers_count = base_flagged_volunteers.count()
@@ -286,6 +287,22 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
                 | Q(equipment_type__icontains=search_query)
                 | Q(other_donation_type__icontains=search_query)
             )
+
+        if trash_sort == 'oldest':
+            deleted_volunteers = deleted_volunteers.order_by('created_at')
+            deleted_donations = deleted_donations.order_by('created_at')
+        elif trash_sort == 'name_asc':
+            deleted_volunteers = deleted_volunteers.order_by('name', '-created_at')
+            deleted_donations = deleted_donations.order_by('name', '-created_at')
+        elif trash_sort == 'name_desc':
+            deleted_volunteers = deleted_volunteers.order_by('-name', '-created_at')
+            deleted_donations = deleted_donations.order_by('-name', '-created_at')
+        else:
+            deleted_volunteers = deleted_volunteers.order_by('-created_at')
+            deleted_donations = deleted_donations.order_by('-created_at')
+    else:
+        deleted_volunteers = deleted_volunteers.order_by('-created_at')
+        deleted_donations = deleted_donations.order_by('-created_at')
     
     # Ensure flagged_reason is always a list, never None
     for volunteer in flagged_volunteers:
@@ -307,6 +324,7 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
         'donation_filter': donation_filter,
         'active_tab': active_tab,
         'search_query': search_query,
+        'trash_sort': trash_sort,
         'deleted_volunteers': deleted_volunteers,
         'deleted_donations': deleted_donations,
         'trash_count': trash_count,

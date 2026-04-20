@@ -208,6 +208,29 @@ body {
   font-size: 0.85rem;
 }
 
+.disaster-search-row {
+  margin: 0 0 0.85rem;
+}
+
+.disaster-search-field {
+  position: relative;
+  display: block;
+  max-width: 34rem;
+}
+
+.disaster-search-field .search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.disaster-search-field .search-input {
+  width: 100%;
+  max-width: none;
+  padding-left: 2.15rem;
+}
+
 .disaster-item[hidden] {
   display: none !important;
 }
@@ -1100,16 +1123,28 @@ body {
 .section-title-row {
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 0.5rem;
+}
+
+.section-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .section-title-row h4 {
   margin: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1;
 }
 
 .section-icon {
   width: 1.25rem;
   height: 1.25rem;
+  display: block;
   color: #dc2626;
   flex-shrink: 0;
 }
@@ -1172,6 +1207,21 @@ body {
 .trash-search-field {
   position: relative;
   flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.trash-sort-wrap {
+  flex: 0 0 12.5rem;
+  min-width: 11rem;
+}
+
+.trash-sort-wrap label {
+  display: block;
+  margin: 0 0 0.35rem;
+}
+
+.trash-sort-wrap select {
+  width: 100%;
   min-width: 0;
 }
 
@@ -1841,6 +1891,11 @@ body {
 
   .trash-search-form {
     width: 100%;
+  }
+
+  .trash-sort-wrap {
+    width: 100%;
+    flex: 1 1 100%;
   }
 
   .trash-search-form .actions-row {

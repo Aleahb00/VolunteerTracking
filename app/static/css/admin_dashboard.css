@@ -246,13 +246,9 @@
 
 .dash-toolbar-body {
     display: flex;
-    flex-direction: row;
-}
-
-.dropdown {
-    display: inline-block;
-    display: flex;
-    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+    align-items: flex-end;
 }
 
 .dash-search-form {
@@ -413,7 +409,7 @@
 }
 
 .select-field:focus,
-/* .search-form input:focus, */
+.search-form input:focus,
 .filter-form select:focus,
 .filter-form input:focus {
     border-color: rgba(31, 111, 139, 0.45);
@@ -460,9 +456,9 @@
 
 .filter-select-form {
     display: flex;
-    /* flex-wrap: wrap; */
+    flex-wrap: wrap;
     gap: 0.75rem;
-    align-items: flex-end;
+    align-items: end;
     padding: 0.25rem 0 0;
 }
 
@@ -483,20 +479,18 @@
 .filter-select-wrap {
     position: relative;
     display: inline-block;
-    flex-direction: column;
 }
 
 .filter-select-wrap::after {
     content: '▾';
     position: absolute;
-    top: calc(100% - 1.25rem); /* centers inside select */
-    transform: translateY(-50%);
+    top: 50%;
     right: 12px;
+    transform: translateY(-50%);
     line-height: 1;
     pointer-events: none;
     font-size: 0.75rem;
     color: #19333f;
-    bottom: 0.65rem; 
 }
 
 .filter-form select,
@@ -512,7 +506,6 @@
 .filter-hidden {
     display: none !important;
 }
-
 .btn {
     border: 1px solid var(--color-teal);
     background: linear-gradient(180deg, #1f6f8b 0%, #185c74 100%);
@@ -546,11 +539,6 @@
 
 .btn-danger:hover {
     color: #f70010;
-}
-
-.btn-danger svg {
-    width: 1.1rem;
-    height: 1.1rem;
 }
 
 .dash-header .inline-form .btn.btn-danger {
@@ -1372,12 +1360,7 @@
     justify-content: center;
 }
 
-#flagged-panel .submission-modal .actions-section > .actions-row .btn,
-#flagged-panel .submission-modal .actions-section > .actions-row .btn-flag,
-#flagged-panel .submission-modal .actions-section > .actions-row .skilled-icon-btn,
-#flagged-panel .submission-modal .actions-section > .actions-row .delete-icon-btn {
-    width: 100%;
-}
+
 
 .submission-modal .actions-section > .actions-row form {
     margin: 0;
@@ -1748,7 +1731,7 @@
         flex-wrap: nowrap;
     }
 
-    .dash-toolbar-head
+    .dash-toolbar-head,
     .dash-toolbar-body {
         flex-direction: column;
         align-items: stretch;
