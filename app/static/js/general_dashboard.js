@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	const messageContainer = document.querySelector('.dashboard-messages');
 	const projectToggle = document.getElementById('show-inactive-projects');
+	const projectSearchInput = document.getElementById('disaster-search-input');
 	const projectItems = Array.from(document.querySelectorAll('.disaster-item[data-active]'));
 	const projectsEmptyState = document.querySelector('.js-projects-empty');
 
@@ -131,11 +132,14 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 
 		const showInactiveProjects = projectToggle.checked;
+		const searchTerm = (projectSearchInput?.value || '').trim().toLowerCase();
 		let visibleProjectCount = 0;
 
 		projectItems.forEach(item => {
 			const isInactiveProject = item.dataset.active === 'false';
-			const shouldHide = !showInactiveProjects && isInactiveProject;
+			const searchSource = (item.dataset.search || item.textContent || '').toLowerCase();
+			const matchesSearch = !searchTerm || searchSource.includes(searchTerm);
+			const shouldHide = (!showInactiveProjects && isInactiveProject) || !matchesSearch;
 			item.hidden = shouldHide;
 
 			if (!shouldHide) {
@@ -145,6 +149,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		if (projectsEmptyState) {
 			projectsEmptyState.hidden = visibleProjectCount !== 0;
+			if (visibleProjectCount === 0) {
+				projectsEmptyState.textContent = searchTerm ? 'No matching projects.' : 'No active projects.';
+			}
 		}
 	}
 
@@ -152,6 +159,97 @@ document.addEventListener('DOMContentLoaded', function () {
 		updateProjectVisibility();
 		projectToggle.addEventListener('change', updateProjectVisibility);
 	}
+
+	if (projectSearchInput) {
+		projectSearchInput.addEventListener('input', updateProjectVisibility);
+	}
+
+
+	function updateTabCountsFromDocument(doc) {
+		document.querySelectorAll('.js-tab-count[data-count-target]').forEach(current => {
+			const target = current.getAttribute('data-count-target');
+			const incoming = doc.querySelector(`.js-tab-count[data-count-target="${target}"]`);
+			if (incoming) {
+				current.textContent = incoming.textContent;
+			}
+		});
+	}
+
+	async function submitPanelGetForm(form) {
+		const panelTarget = form?.dataset?.panelTarget;
+		if (!panelTarget) {
+			return;
+		}
+
+		const currentPanel = document.getElementById(panelTarget);
+		if (!currentPanel) {
+			form.submit();
+			return;
+		}
+
+		const requestUrl = new URL(form.getAttribute('action') || window.location.href, window.location.origin);
+		requestUrl.search = new URLSearchParams(new FormData(form)).toString();
+		requestUrl.searchParams.set('_ts', Date.now().toString());
+
+		try {
+			const response = await fetch(requestUrl.toString(), {
+				method: 'GET',
+				cache: 'no-store',
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest'
+				}
+			});
+			if (!response.ok) {
+				throw new Error('Request failed');
+			}
+
+			const html = await response.text();
+			const doc = new DOMParser().parseFromString(html, 'text/html');
+			const incomingPanel = doc.getElementById(panelTarget);
+			if (!incomingPanel) {
+				window.location.assign(requestUrl.toString());
+				return;
+			}
+
+			currentPanel.innerHTML = incomingPanel.innerHTML;
+			updateTabCountsFromDocument(doc);
+			bindLiveGetFormEnhancements(currentPanel);
+			window.history.replaceState({}, '', requestUrl.toString());
+			if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+				lucide.createIcons();
+			}
+		} catch (error) {
+			window.location.assign(requestUrl.toString());
+		}
+	}
+
+	function bindLiveGetFormEnhancements(scope = document) {
+		scope.querySelectorAll('form[data-panel-target][method="get"], form[data-panel-target][method="GET"]').forEach(form => {
+			if (form.dataset.boundLiveGetSubmit !== 'true') {
+				form.dataset.boundLiveGetSubmit = 'true';
+				form.addEventListener('submit', function (event) {
+					if (event.submitter) {
+						return;
+					}
+					event.preventDefault();
+					submitPanelGetForm(form);
+				});
+			}
+
+			// const inlineSearchInput = form.querySelector('input.search-input[name="q"], input[name="q"][type="search"], input[name="q"][type="text"]');
+			// if (inlineSearchInput) {
+			//     setupAutoSubmitSearch(inlineSearchInput, form);
+			// }
+
+			// if (form.id) {
+			//     scope.querySelectorAll(`input[form="${form.id}"][name="q"]`).forEach(externalSearchInput => {
+			//         setupAutoSubmitSearch(externalSearchInput, form);
+			//     });
+			// }
+		});
+	}
+
+	bindLiveGetFormEnhancements(document);
 
 	document.querySelectorAll('.submissions-tabs').forEach(container => {
 		const tabs = container.querySelectorAll('[role="tab"]');

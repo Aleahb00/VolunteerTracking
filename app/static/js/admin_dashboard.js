@@ -161,19 +161,25 @@ function renderAnalyticsChartIfNeeded() {
 
 				const centerX = (chartArea.left + chartArea.right) / 2;
 				const centerY = (chartArea.top + chartArea.bottom) / 2;
-				const percentText = `${percentValue.toFixed(2)}%`;
-				const goalText = `of ${goalLabel}`;
+				   const percentText = `${percentValue.toFixed(2)}%`;
+				   const goalText = `of ${goalLabel}`;
+				   const showGoalReached = percentValue >= 100 && goalValue > 0;
 
-				ctx.save();
-				ctx.textAlign = 'center';
-				ctx.textBaseline = 'middle';
-				ctx.fillStyle = '#143744';
-				ctx.font = '700 2.1rem Arial, sans-serif';
-				ctx.fillText(percentText, centerX, centerY - 8);
-				ctx.font = '600 0.9rem Arial, sans-serif';
-				ctx.fillStyle = '#5c7178';
-				ctx.fillText(goalText, centerX, centerY + 18);
-				ctx.restore();
+				   ctx.save();
+				   ctx.textAlign = 'center';
+				   ctx.textBaseline = 'middle';
+				   ctx.fillStyle = '#143744';
+				   ctx.font = '700 2.1rem Arial, sans-serif';
+				   ctx.fillText(percentText, centerX, centerY - 16);
+				   ctx.font = '600 0.9rem Arial, sans-serif';
+				   ctx.fillStyle = '#5c7178';
+				   ctx.fillText(goalText, centerX, centerY + 2);
+				   if (showGoalReached) {
+					   ctx.font = 'bold 1.1rem Arial, sans-serif';
+					   ctx.fillStyle = '#2d7552';
+					   ctx.fillText('Goal Reached', centerX, centerY + 22);
+				   }
+				   ctx.restore();
 			}
 		}],
 		data: {
@@ -357,6 +363,110 @@ document.addEventListener('DOMContentLoaded', function () {
 	) {
 		renderAnalyticsChartIfNeeded();
 	}
+
+
+	async function submitAdminPanelGetForm(form) {
+		const panelTarget = form?.dataset?.panelTarget;
+		if (!panelTarget) {
+			return;
+		}
+
+		const currentPanel = document.getElementById(panelTarget);
+		if (!currentPanel) {
+			form.submit();
+			return;
+		}
+
+		// Save the position of the focused element (if any)
+		let focusedSelector = null;
+		let focusedOffset = null;
+		const active = document.activeElement;
+		if (active && active !== document.body && active !== document.documentElement) {
+			if (active.id) {
+				focusedSelector = `#${active.id}`;
+			} else if (active.name) {
+				focusedSelector = `${active.tagName.toLowerCase()}[name="${active.name}"]`;
+			}
+			if (focusedSelector) {
+				const rect = active.getBoundingClientRect();
+				focusedOffset = rect.top;
+			}
+		}
+
+		const requestUrl = new URL(form.getAttribute('action') || window.location.href, window.location.origin);
+		requestUrl.search = new URLSearchParams(new FormData(form)).toString();
+		requestUrl.searchParams.set('_ts', Date.now().toString());
+
+		try {
+			const response = await fetch(requestUrl.toString(), {
+				method: 'GET',
+				cache: 'no-store',
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest'
+				}
+			});
+			if (!response.ok) {
+				throw new Error('Request failed');
+			}
+
+			const html = await response.text();
+			const doc = new DOMParser().parseFromString(html, 'text/html');
+			const incomingPanel = doc.getElementById(panelTarget);
+			if (!incomingPanel) {
+				window.location.assign(requestUrl.toString());
+				return;
+			}
+
+			currentPanel.innerHTML = incomingPanel.innerHTML;
+			document.querySelectorAll('.js-tab-count[data-count-target]').forEach(current => {
+				const target = current.getAttribute('data-count-target');
+				const incoming = doc.querySelector(`.js-tab-count[data-count-target="${target}"]`);
+				if (incoming) {
+					current.textContent = incoming.textContent;
+				}
+			});
+			bindAdminLiveGetFormEnhancements(currentPanel);
+			window.history.replaceState({}, '', requestUrl.toString());
+			if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+				lucide.createIcons();
+			}
+			// Restore scroll position to keep the previously focused element in view
+			if (focusedSelector && focusedOffset !== null) {
+				// Try to find the same element after update
+				const newElem = document.querySelector(focusedSelector);
+				if (newElem) {
+					const newRect = newElem.getBoundingClientRect();
+					const delta = newRect.top - focusedOffset;
+					window.scrollBy({ top: delta });
+					newElem.focus();
+				}
+			}
+		} catch (error) {
+			window.location.assign(requestUrl.toString());
+		}
+	}
+
+	function bindAdminLiveGetFormEnhancements(scope = document) {
+		scope.querySelectorAll('form[data-panel-target][method="get"], form[data-panel-target][method="GET"]').forEach(form => {
+			if (form.dataset.boundLiveGetSubmit !== 'true') {
+				form.dataset.boundLiveGetSubmit = 'true';
+				form.addEventListener('submit', function (event) {
+					if (event.submitter) {
+						return;
+					}
+					event.preventDefault();
+					submitAdminPanelGetForm(form);
+				});
+			}
+
+			// const searchInput = form.querySelector('input[name="q"]');
+			// if (searchInput) {
+			//     setupAutoSubmitSearch(searchInput, form);
+			// }
+		});
+	}
+
+	bindAdminLiveGetFormEnhancements(document);
 
 	tabs.forEach(tab => {
 		tab.addEventListener('click', function () {
