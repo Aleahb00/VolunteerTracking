@@ -25,16 +25,19 @@
 
         <section class="dash-block dash-controls">
             <label for="disaster-select" class="field-label">Select a disaster to view:</label>
-            <select id="disaster-select" class="select-field" onchange="if(this.value) window.location.href=this.value;">
-                <option value="">-- Select a Disaster --</option>
-                {% for disaster_item in disasters %}
-                    <option value="{% url 'edit_disaster' disaster_item.id %}" {% if disaster and disaster.id == disaster_item.id %}selected{% endif %}>
-                        {{ disaster_item.name }}
-                    </option>
-                {% empty %}
-                    <option disabled>No disasters yet.</option>
-                {% endfor %}
-            </select>
+
+            <div class="select-wrapper">
+                <select id="disaster-select" class="select-field" onchange="if(this.value) window.location.href=this.value;">
+                    <option value="">-- Select a Disaster --</option>
+                    {% for disaster_item in disasters %}
+                        <option value="{% url 'edit_disaster' disaster_item.id %}" {% if disaster and disaster.id == disaster_item.id %}selected{% endif %}>
+                            {{ disaster_item.name }}
+                        </option>
+                    {% empty %}
+                        <option disabled>No disasters yet.</option>
+                    {% endfor %}
+                </select>
+            </div>
             
             {% if disaster %}
                 <a href="{% url 'submissions_full_disaster' disaster.id %}" class="btn btn-secondary">View Disaster Submissions</a>
@@ -86,20 +89,26 @@
                 </div>
 
                 <div class="dash-toolbar-body">
-                    <form method="GET" class="search-form dash-search-form">
+                    <form method="GET" class="search-form dash-search-form" data-panel-target="volunteers-panel">
                         <input type="hidden" name="active_tab" value="volunteers-panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                        </svg>
                         <label class="dash-search-input-wrap" aria-label="Search submissions">
                             <input type="text" name="q" placeholder="Search submissions" value="{{ query|default_if_none:'' }}">
                         </label>
                     </form>
 
-                    <form method="get" class="filter-form filter-select-form dash-panel-filter">
+                    <form method="get" class="filter-form filter-select-form dash-panel-filter" data-panel-target="volunteers-panel">
                         <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
                         <input type="hidden" name="active_tab" value="volunteers-panel">
+                        
                         <div class="filter-select-wrap">
                             {{ volunteer_filter.form.skilled_worker.label_tag }}
                             {{ volunteer_filter.form.skilled_worker }}
                         </div>
+
                         <div class="filter-select-wrap">
                             {{ volunteer_filter.form.order_by.label_tag }}
                             {{ volunteer_filter.form.order_by }}
@@ -163,7 +172,12 @@
 
                                         <div id="modal-volunteer-{{ volunteer.id }}" class="modal" aria-hidden="true">
                                             <div class="modal-content modal-content--submission submission-modal" role="dialog" aria-modal="true" aria-labelledby="volunteerDetailsTitle-{{ volunteer.id }}">
-                                                <span class="close" aria-label="Close">&times;</span>
+                                                <button class="close close-disaster-btn" aria-label="Close" type="button" style="border:none;width:2.2rem;height:2.2rem;display:flex;align-items:center;justify-content:center;border-radius:0.3rem;position:absolute;top:1rem;right:1rem;cursor:pointer;">
+                                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                        <line x1="4.3934" y1="4.3934" x2="15.6066" y2="15.6066" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                                                        <line x1="15.6066" y1="4.3934" x2="4.3934" y2="15.6066" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                                                    </svg>
+                                                </button>
 
                                                 <header class="submission-modal-head">
                                                     <h3 id="volunteerDetailsTitle-{{ volunteer.id }}">Volunteer Report</h3>
@@ -179,10 +193,7 @@
                                                     </div>
                                                 {% endif %}
 
-                                                <div class="submission-id-card">
-                                                    <p class="submission-k">Submission ID</p>
-                                                    <p class="submission-v submission-v--mono">{{ volunteer.id }}</p>
-                                                </div>
+
 
                                                 <section class="submission-section">
                                                     <h4>Personal Information</h4>
@@ -298,14 +309,18 @@
                 </div>
 
                 <div class="dash-toolbar-body">
-                    <form method="GET" class="search-form dash-search-form">
+                    <form method="GET" class="search-form dash-search-form" data-panel-target="donations-panel">
                         <input type="hidden" name="active_tab" value="donations-panel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.3-4.3"></path>
+                        </svg>
                         <label class="dash-search-input-wrap" aria-label="Search submissions">
                             <input type="text" name="q" placeholder="Search submissions" value="{{ query|default_if_none:'' }}">
                         </label>
                     </form>
 
-                    <form method="get" class="filter-form filter-select-form dash-panel-filter">
+                    <form method="get" class="filter-form filter-select-form dash-panel-filter" data-panel-target="donations-panel">
                         <input type="hidden" name="q" value="{{ query|default_if_none:'' }}">
                         <input type="hidden" name="active_tab" value="donations-panel">
                         <div class="filter-select-wrap">
@@ -389,10 +404,7 @@
                                                     </div>
                                                 {% endif %}
 
-                                                <div class="submission-id-card">
-                                                    <p class="submission-k">Submission ID</p>
-                                                    <p class="submission-v submission-v--mono">{{ donation.id }}</p>
-                                                </div>
+
 
                                                 <section class="submission-section">
                                                     <h4>Personal Information</h4>
@@ -486,6 +498,7 @@
 
         <section id="flagged-panel" class="dash-grid tab-panel" {% if active_tab != 'flagged-panel' %}hidden{% endif %}>
             <article class="dash-block">
+
                 <h2>Flagged Volunteers</h2>
                 <ul class="record-list">
                     {% for volunteer in flagged_volunteers %}
@@ -538,10 +551,7 @@
                                             <span class="submission-status {% if volunteer.flagged %}is-flagged{% else %}is-active{% endif %}">{% if volunteer.flagged %}Flagged{% else %}Active{% endif %}</span>
                                         </div>
 
-                                        <div class="submission-id-card">
-                                            <p class="submission-k">Submission ID</p>
-                                            <p class="submission-v submission-v--mono">{{ volunteer.id }}</p>
-                                        </div>
+
 
                                         <section class="submission-section">
                                             <h4>Personal Information</h4>
@@ -611,7 +621,7 @@
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn restore-btn"><i data-lucide="rotate-ccw"></i><span>Restore Submission</span></button>
                                                     </form>
-                                                    <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}">
+                                                    <form method="POST" action="{% url 'permanent_delete_volunteer' volunteer.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this volunteer? This action cannot be undone.">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn btn-danger">Permanently Delete</button>
                                                     </form>
@@ -688,10 +698,7 @@
                                             <span class="submission-status {% if donation.flagged %}is-flagged{% else %}is-active{% endif %}">{% if donation.flagged %}Flagged{% else %}Active{% endif %}</span>
                                         </div>
 
-                                        <div class="submission-id-card">
-                                            <p class="submission-k">Submission ID</p>
-                                            <p class="submission-v submission-v--mono">{{ donation.id }}</p>
-                                        </div>
+
 
                                         <section class="submission-section">
                                             <h4>Personal Information</h4>
@@ -818,7 +825,7 @@
                             <div class="settings-rate-form">
                                 <label class="settings-label" for="hourly-rate">Update Hourly Rate</label>
                                 <div class="settings-rate-actions">
-                                    <input id="hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.hourly_rate }}" {% if not disaster.active %}readonly{% endif %}>
+                                    <input id="hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.hourly_rate }}" {% if not disaster.active %}readonly disabled{% endif %}>
                                     <button id="hourly-rate-btn" class="btn" type="button" {% if not disaster.active %}disabled aria-disabled="true"{% endif %}>{% if disaster.active %}Save Changes{% else %}Read Only{% endif %}</button>
                                 </div>
                                 <p class="settings-note">Changes will affect future revenue calculations</p>
@@ -837,7 +844,7 @@
                             <div class="settings-rate-form">
                                 <label class="settings-label" for="skilled-hourly-rate">Update Skilled Hourly Rate</label>
                                 <div class="settings-rate-actions">
-                                    <input id="skilled-hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.skilled_hourly_rate|floatformat:2 }}" {% if not disaster.active %}readonly{% endif %}>
+                                    <input id="skilled-hourly-rate" class="settings-input" type="number" step="0.01" value="{{ disaster.skilled_hourly_rate|floatformat:2 }}" {% if not disaster.active %}readonly disabled{% endif %}>
                                     <button id="skilled-hourly-rate-btn" class="btn" type="button" {% if not disaster.active %}disabled aria-disabled="true"{% endif %}>{% if disaster.active %}Save Changes{% else %}Read Only{% endif %}</button>
                                 </div>
                                 <p class="settings-note">Changes will affect future revenue calculations</p>
@@ -860,8 +867,14 @@
                         </dl>
                     </div>
 
-                    <div class="actions-row disaster-settings-actions">
+                    <div class="actions-row disaster-settings-actions" style="justify-content: space-between; align-items: flex-end;">
                         <button class="btn open-modal-btn" data-target="modal-{{ disaster.id }}" type="button">Edit Disaster</button>
+                        {% if not disaster.active %}
+                        <form method="POST" action="{% url 'delete_disaster' disaster.id %}" onsubmit="return confirm('Are you sure you want to permanently delete this disaster? This action cannot be undone.');" style="margin-left:auto;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn" style="background:#b72a2a;color:#fff;border:none;">DELETE DISASTER</button>
+                        </form>
+                        {% endif %}
                     </div>
                 </article>
             {% else %}
@@ -873,6 +886,7 @@
 
         <section id="trash-panel" class="dash-grid tab-panel" {% if active_tab != 'trash-panel' %}hidden{% endif %}>
             <article class="dash-block">
+
                 <h2>Deleted Volunteers</h2>
                 <ul class="record-list">
                     {% for volunteer in deleted_volunteers %}
@@ -912,10 +926,7 @@
                                         <span class="submission-status is-flagged">Deleted</span>
                                     </div>
 
-                                    <div class="submission-id-card">
-                                        <p class="submission-k">Submission ID</p>
-                                        <p class="submission-v submission-v--mono">{{ volunteer.id }}</p>
-                                    </div>
+
 
                                     <section class="submission-section">
                                         <h4>Personal Information</h4>
@@ -1026,10 +1037,7 @@
                                         <span class="submission-status is-flagged">Deleted</span>
                                     </div>
 
-                                    <div class="submission-id-card">
-                                        <p class="submission-k">Submission ID</p>
-                                        <p class="submission-v submission-v--mono">{{ donation.id }}</p>
-                                    </div>
+
 
                                     <section class="submission-section">
                                         <h4>Personal Information</h4>
