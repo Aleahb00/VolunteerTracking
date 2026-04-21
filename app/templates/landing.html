@@ -9,8 +9,9 @@
 {% block content %}
 {% include 'navbar.html' %}
 <main>
+
   <section class="hero">
-    <div class="container">
+    <div class="hero-left">
       <p class="eyebrow">OVER THE PAST SEVEN YEARS</p>
       <h1>$3+ Billion</h1>
       <p class="subtitle">IN DISASTERS FUNDING TO COMMUNITIES JUST LIKE YOURS</p>
@@ -18,24 +19,59 @@
         Supporting communities affected by ice storms, floods, and natural disasters
         with coordinated volunteer relief efforts.
       </p>
+      <div class="hero-btns">
+        <a href="#" class="btn-primary">Login your hours</a>
+        <a href="#" class="btn-outline">Login in your donations</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="hero-stat-num">$130M</span>
+          <span class="hero-stat-lbl">Federal Dollars Saved</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">12X</span>
+          <span class="hero-stat-lbl">More Efficient</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">28%</span>
+          <span class="hero-stat-lbl">Faster Funding</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="before-after" id="slider">
+        <img src="{% static 'images/before.png' %}">
+        <div class="before-wrapper" id="beforeWrapper">
+          <img src="{% static 'images/after.png' %}">
+        </div>
+        <div class="slider-line" id="sliderLine">
+          <div class="slider-handle">
+            <i data-lucide="chevrons-left-right"></i>
+          </div>
+        </div>
+        <span class="label before">Before</span>
+        <span class="label after">After</span>
+      </div>
+      <div class="emergency-badge">
+        <span class="badge-title">Emergency</span>
+        <span class="badge-sub">Response Ready</span>
+      </div>
     </div>
   </section>
 
   <section class="impact">
     <div class="container">
       <h2>Our Impact</h2>
-
       <div class="stats-grid">
         <div class="stat">
           <span class="stat-number">$130M</span>
           <span class="stat-label">Federal Dollars Saved</span>
         </div>
-
         <div class="stat">
           <span class="stat-number">12X</span>
           <span class="stat-label">More Efficient Data Collection</span>
         </div>
-
         <div class="stat">
           <span class="stat-number">28%</span>
           <span class="stat-label">Faster Funding</span>
@@ -44,84 +80,31 @@
     </div>
   </section>
 
-  <section class="focus">
+  <section class="responses">
     <div class="container">
-      <h2>Areas of Focus</h2>
-
-      <div class="focus-grid">
-
-        <div class="focus-card">
-          <div class="focus-image volunteer-img">
-            <span>Volunteer</span>
+      <h2>Recent Emergency Responses</h2>
+      <div class="resp-card">
+        <div class="resp-grid">
+          <div class="resp-item resp-item--first">
+            <p class="resp-region">Yalobusha County</p>
+            <p class="resp-date">March 2025</p>
+            <p class="resp-desc">Ice storm cleanup and debris removal for 2,400 affected households</p>
           </div>
-
-          <ul>
-            <li>On-site Cleanup and Debris Removal</li>
-            <li>Emergency Response Coordination</li>
-            <li>Community Outreach Programs</li>
-            <li>Volunteer Hour Tracking & Management</li>
-            <li>Safety Training and Certification</li>
-          </ul>
-        </div>
-
-        <div class="focus-card">
-          <div class="focus-image funding-img">
-            <span>Funding</span>
+          <div class="resp-item">
+            <p class="resp-region">Kentucky Tornadoes</p>
+            <p class="resp-date">JDecember 2021</p>
+            <p class="resp-desc"> Assisted Princeton Water and Wastewater with FEMA reimbursement.</p>
           </div>
-
-          <ul>
-            <li>Hourly Rate Revenue Generation</li>
-            <li>Direct Donation Processing</li>
-            <li>Grant Application Assistance</li>
-            <li>Financial Transparency Reporting</li>
-            <li>Budget Allocation & Planning</li>
-          </ul>
-        </div>
-
-        <div class="focus-card">
-          <div class="focus-image support-img">
-            <span>Support</span>
+          <div class="resp-item">
+            <p class="resp-region">Iowa Derecho Storm</p>
+            <p class="resp-date">Augest 2020</p>
+            <p class="resp-desc">Provided recovery services for the city of University Heights.</p>
           </div>
-
-          <ul>
-            <li>24/7 Emergency Hotline</li>
-            <li>Mental Health & Counseling Resources</li>
-            <li>Supply Distribution Centers</li>
-            <li>Temporary Shelter Coordination</li>
-            <li>Long-term Recovery Planning</li>
-          </ul>
         </div>
-
       </div>
     </div>
   </section>
 
-
-  <section class="hero">
-    <div class="container center">
-
-      <h1>SEE THE TRANSFORMATION</h1>
-
-      <div class="before-after" id="slider">
-
-        <img src="{% static 'images/before.png' %}">
-
-        <div class="before-wrapper" id="beforeWrapper">
-          <img src="{% static 'images/after.png' %}">
-        </div>
-
-        <div class="slider-line" id="sliderLine">
-          <div class="slider-handle">
-            <i data-lucide="chevrons-left-right"></i>
-          </div>
-        </div>
-
-        <span class="label before">Before</span>
-        <span class="label after">After</span>
-
-      </div>
-    </div>
-  </section>
   <section class="testimonial">
     <div class="container">
       <blockquote>
@@ -143,12 +126,10 @@
           Emergency response and cleanup progress will appear here when a disaster is active.
         {% endif %}
       </p>
-
       <div class="recovery-card">
         <div class="recovery-topline">
           <span class="recovery-value">${{ progress_total|default:0|floatformat:2 }} / ${{ progress_goal|default:0|floatformat:2 }}</span>
         </div>
-
         <div
           class="recovery-track"
           role="progressbar"
@@ -158,7 +139,6 @@
           aria-valuenow="{{ progress_total|default:0 }}">
           <div class="recovery-fill" style="width: {{ progress_percent|default:0 }}%;"></div>
         </div>
-
         <p class="recovery-percent">{{ progress_percent|default:0|floatformat:0 }}% to goal</p>
       </div>
     </div>
@@ -173,13 +153,11 @@
           <h3>Submit Your Contribution</h3>
           <p>After volunteering or making a donation, complete the form that matches your contribution.</p>
         </article>
-
         <article class="step">
           <div class="step-icon">2</div>
           <h3>Make an Impact</h3>
           <p>Every volunteer hour supports funding for essential cleanup and restoration efforts.</p>
         </article>
-
         <article class="step">
           <div class="step-icon">3</div>
           <h3>See the Impact Grow</h3>
@@ -201,7 +179,6 @@
   <section class="cta">
     <div class="container">
       <h2>Let's Get Started.</h2>
-
       <p>
         Every volunteer hour and donation brings us closer to full recovery.
         Join our community of helpers and be part of the solution.
@@ -210,6 +187,7 @@
       <a href="{% url 'forms' %}" class="cta-btn">Get Started →</a>
     </div>
   </section>
+
   {% include 'footer.html' %}
 </main>
 
