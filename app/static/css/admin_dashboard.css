@@ -244,14 +244,14 @@
     justify-content: flex-end;
 }
 
-.dash-toolbar-body {
+/* .dash-toolbar-body {
     display: flex;
     flex-wrap: nowrap;
     gap: 0.75rem;
     align-items: flex-end;
-}
+} */
 
-.dash-search-form {
+/* .dash-search-form {
     flex: 0 0 320px;
     max-width: 320px;
     min-width: 0;
@@ -266,7 +266,7 @@
     align-self: flex-end;
     padding-bottom: 0.6rem;
     color: #19333f;
-}
+} */
 
  /*
 .dash-search-form input {
@@ -2006,7 +2006,7 @@
     .modal-content--form,
     .modal-content--submission,
     .submission-modal {
-        width: calc(100vw - 1rem);
+        width: min(580px, calc(110vw - 8.0rem));
         max-width: calc(100vw - 1rem);
         margin: 2% auto;
         padding: 0.9rem 0.85rem 0.85rem;
@@ -2085,7 +2085,6 @@
 
     .settings-input {
         min-width: 0;
-        width: 100%;
     }
 .record-item {
         flex-direction: column;
