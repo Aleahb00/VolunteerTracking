@@ -41,9 +41,9 @@
 
     <div class="hero-right">
       <div class="before-after" id="slider">
-        <img src="{% static 'images/before.png' %}">
+        <img src="{% static 'images/before-icestorm.webp' %}">
         <div class="before-wrapper" id="beforeWrapper">
-          <img src="{% static 'images/after.png' %}">
+          <img src="{% static 'images/after-icestorm.webp' %}">
         </div>
         <div class="slider-line" id="sliderLine">
           <div class="slider-handle">
@@ -121,7 +121,10 @@
       <h2>{{ latest_disaster.name|default:'Recovery Progress' }}</h2>
       <p class="disaster-desc">
         {% if latest_disaster %}
-          Emergency response and cleanup for {{ latest_disaster.name }}.
+          The most recent disaster response effort is for {{ latest_disaster.name }}. 
+          Volunteer hours and donations are being tracked in real time to support ongoing recovery efforts.
+          This progress bar reflects the cumulative impact of all contributions and shows 
+          how close we are to reaching our funding goal for this disaster.
         {% else %}
           Emergency response and cleanup progress will appear here when a disaster is active.
         {% endif %}

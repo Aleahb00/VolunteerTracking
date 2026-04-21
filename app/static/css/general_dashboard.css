@@ -377,7 +377,7 @@ body {
 }
 
 #settings-modal h2 {
-  margin: 0 0 0.4rem;
+  /* margin: 0 0 0.4rem; */
   color: #184f66;
   font-size: 1.72rem;
   font-weight: 700;
@@ -1306,7 +1306,6 @@ body {
 }
 
 .submission-modal-head h3 {
-  margin: 0;
   color: #184f66;
   font-size: 2.1rem;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
@@ -1468,7 +1467,7 @@ body {
 }
 
 .submission-modal .assign-disaster-form .form-control {
-  flex: 0 1 12.5rem;
+  /* flex: 0 1 12.5rem; */
   min-width: 0;
   min-height: 2.25rem;
   padding: 0.35rem 0.55rem;
@@ -1797,6 +1796,18 @@ body {
   border-color: #982222;
 }
 
+.filter-select-wrap.trash-sort-wrap {
+  position: relative;
+}
+
+.filter-select-wrap.trash-sort-wrap::after {
+  top: auto !important;
+  bottom: 18px !important; 
+  transform: translateY(50%) !important; 
+  right: 12px !important;
+  pointer-events: none;
+}
+
 .record-item:last-child {
   border-bottom: 0;
 }
@@ -1951,7 +1962,7 @@ body {
     width: 100%;
     min-height: 2.6rem;
     padding: 0.45rem 0.55rem;
-    font-size: 0.8rem;
+    font-size: 0.6rem;
     white-space: nowrap;
     line-height: 1.15;
     overflow: hidden;
@@ -1993,6 +2004,41 @@ body {
   .submission-modal .actions-section > .actions-row form .delete-icon-btn {
     width: 100%;
   }
+
+  #settings-modal .modal-content {
+  background: linear-gradient(180deg, #f3faf8 0%, #eef5f7 100%);
+  border: 1px solid rgba(31, 111, 139, 0.12);
+  border-radius: 12px;
+  width: min(560px, calc(85vw - 1.25rem));
+  max-width: min(560px, calc(100vw - 1.25rem));
+  margin: 4.5% auto;
+  padding: 1.65rem 1.5rem 1.55rem;
+  box-shadow: 0 18px 50px rgba(16, 24, 40, 0.18);
+  }
+
+  .modal-content.create-disaster-modal {
+  background: linear-gradient(180deg, #f3faf8 0%, #eef5f7 100%);
+  border: 1px solid rgba(31, 111, 139, 0.12);
+  border-radius: 12px;
+  width: min(580px, calc(85vw - 1.25rem));
+  margin: 4.5% auto;
+  padding: 1.7rem 1.5rem 1.75rem;
+  position: relative;
+}
+
+.submission-modal {
+  width: min(520px, calc(85vw - 1.75rem));
+  max-width: 520px;
+  max-height: 94vh;
+  min-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 1.05rem 0.95rem 1rem;
+  border-radius: 7px;
+  display: flex;
+  flex-direction: column;
+}
+
 }
 
 /* Trash panel: show tabs on mobile, but on desktop hide the tab controls
