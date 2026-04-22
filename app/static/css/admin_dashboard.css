@@ -1851,6 +1851,7 @@
 
     .dash-block {
         padding: 1rem;
+        overflow: auto;
     }
     .dash-block.dash-controls {
         display: flex;
@@ -2021,7 +2022,7 @@
     }
 
     .submission-table tbody td {
-        padding: 1rem 0.95rem;
+        padding: 0.5rem 0.95rem;
         border-bottom: 1px solid var(--color-border-row);
         white-space: nowrap;
     }
