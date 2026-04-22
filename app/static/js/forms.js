@@ -1,3 +1,4 @@
+document.addEventListener('DOMContentLoaded', function () {
 (function () {
 	// Tab switching logic
 	const tabs = document.querySelectorAll('.forms-tab');
@@ -107,4 +108,40 @@
 			}
 		});
 	}
-})();
+
+	// Activate tab based on URL query param
+function activateTabFromURL() {
+	const params = new URLSearchParams(window.location.search);
+	const tab = params.get('tab');
+
+	if (!tab) return;
+
+	const targetId = `${tab}-panel`;
+	const targetTab = document.querySelector(`[data-tab-target="${targetId}"]`);
+	const targetPanel = document.getElementById(targetId);
+
+	if (targetTab && targetPanel) {
+		// Reset all tabs
+		tabs.forEach((item) => {
+			item.classList.remove('is-active');
+			item.setAttribute('aria-selected', 'false');
+		});
+
+		panels.forEach((panel) => {
+			panel.classList.remove('is-active');
+			panel.setAttribute('hidden', 'hidden');
+		});
+
+		// Activate correct one
+		targetTab.classList.add('is-active');
+		targetTab.setAttribute('aria-selected', 'true');
+
+		targetPanel.classList.add('is-active');
+		targetPanel.removeAttribute('hidden');
+	}
+}
+
+	activateTabFromURL();
+
+	})();
+});
