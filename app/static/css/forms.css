@@ -192,9 +192,10 @@
 
 .form-field select,
 .dropdown select {
-	appearance: none;
 	-webkit-appearance: none;
 	-moz-appearance: none;
+	appearance: none;
+
 }
 
 .dropdown {
