@@ -315,7 +315,6 @@
                         <th>Date</th>
                         <th>Location</th>
                         <th>Flagged Reasons</th>
-                        <th>Notes</th>
                         <th>Action</th>
                     </tr>
                     </thead>
@@ -344,7 +343,6 @@
                             <span class="muted-text">-</span>
                         {% endif %}
                         </td>
-                        <td>{{ volunteer.notes|default:"N/A" }}</td>
                         <td>
                             <div class="table-actions">
                                 <button class="details-icon-btn open-modal-btn" data-target="modal-flagged-volunteer-{{ volunteer.id }}" type="button" aria-label="View details">

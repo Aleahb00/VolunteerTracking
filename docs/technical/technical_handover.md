@@ -93,6 +93,3 @@ The project is organized into the following main components:
 2. Update models → run migrations
 3. Update forms and views accordingly
 
-## 8. Future Improvements
-Potential enhancements include:
-* not sure about these maybe for analytics or something like that 
