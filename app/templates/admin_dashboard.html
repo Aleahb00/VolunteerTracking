@@ -14,8 +14,9 @@
         <div class="dashboard-messages" aria-live="polite" aria-atomic="true"></div>
         <header class="dash-header">
             <div class="dash-heading">
-                <p class="dash-kicker">Disaster Dashboard</p>
-                <h1>Admin Dashboard</h1>
+                <p class="dash-kicker">Welcome back,
+                    {% if user.first_name %}! {% else %} {{ user.username }}! {% endif %}</p>
+                <h1>Disaster Dashboard</h1>
                 <p>Manage disasters and review submissions.</p>
             </div>
             <div class="actions-row dash-header-actions">

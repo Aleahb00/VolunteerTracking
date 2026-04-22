@@ -653,7 +653,7 @@ body {
   align-items: center;
   justify-content: center;
   width: 100%;
-  gap: 0.5rem;
+  gap: 0.1rem;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -1864,6 +1864,17 @@ body {
 
   .header-content > div:first-child {
     width: 100%;
+  }
+
+  .header-hello {
+    width: 100%;
+    margin-bottom: 0.35rem;
+    font-size: clamp(1.5rem, 6vw, 1.9rem);
+    line-height: 1.08;
+    text-align: center;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    color: pink;
   }
 
   .header-title {

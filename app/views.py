@@ -160,6 +160,7 @@ def _json_message_response(message, status='success', http_status=200):
 
 
 # NOTE GENERAL DASHBOARD VIEWS
+@login_required
 def general_dashboard_view(request:HttpRequest)->HttpResponse:
     if request.method == 'POST':
         is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -331,39 +332,45 @@ def general_dashboard_view(request:HttpRequest)->HttpResponse:
         'create_form': create_form,
     })
 
-
+@login_required
 def general_delete_volunteer_view(request, volunteer_id):
     volunteer = get_object_or_404(Volunteer, id=volunteer_id)
     volunteer.delete()
     return JsonResponse({'status': 'success', 'message': 'Volunteer moved to trash.', 'message_type': 'danger'})
 
+@login_required
 def general_permanent_delete_volunteer_view(request, id):
     volunteer = get_object_or_404(Volunteer.all_objects, id=id)
     volunteer.delete(force_policy=HARD_DELETE)
     return JsonResponse({'status': 'success', 'message': 'Volunteer permanently deleted.', 'message_type': 'danger'})
 
+@login_required
 def general_restore_volunteer_view(request, id):
     volunteer = get_object_or_404(Volunteer.all_objects, id=id)
     volunteer.undelete()
     return JsonResponse({'status': 'success', 'message': 'Volunteer restored successfully.'})
 
 
+@login_required
 def general_delete_donation_view(request, donation_id):
     donation = get_object_or_404(Donations, id=donation_id)
     donation.delete()
     return JsonResponse({'status': 'success', 'message': 'Donation moved to trash.', 'message_type': 'danger'})
 
+@login_required
 def general_permanent_delete_donation_view(request, id):
     donation = get_object_or_404(Donations.all_objects, id=id)
     donation.delete(force_policy=HARD_DELETE)
     return JsonResponse({'status': 'success', 'message': 'Donation permanently deleted.', 'message_type': 'danger'})
 
+@login_required
 def general_restore_donation_view(request, id):
     donation = get_object_or_404(Donations.all_objects, id=id)
     donation.undelete()
     return JsonResponse({'status': 'success', 'message': 'Donation restored successfully.'})
 
 
+@login_required
 def assign_submission_view(request, submission_type, submission_id):
     if request.method != 'POST':
         return JsonResponse({'status': 'error', 'error': 'Invalid request method'}, status=405)
@@ -393,6 +400,7 @@ def assign_submission_view(request, submission_type, submission_id):
 
 
 # NOTE ADMIN DASHBOARD VIEWS
+@login_required
 def admin_dashboard_view(request: HttpRequest, disaster_id=None) -> HttpResponse:
     disaster = get_object_or_404(Disaster, id=disaster_id) if disaster_id else None
     active_tab = request.GET.get('active_tab', 'volunteers-panel')
@@ -530,6 +538,7 @@ def admin_dashboard_view(request: HttpRequest, disaster_id=None) -> HttpResponse
     })
 
 
+@login_required
 def delete_volunteer_view(request, volunteer_id):
     volunteer = get_object_or_404(Volunteer, id=volunteer_id)
     volunteer_disaster_id = volunteer.disaster_id
@@ -540,6 +549,7 @@ def delete_volunteer_view(request, volunteer_id):
         return redirect('edit_disaster', disaster_id=volunteer_disaster_id)
     return redirect('admin_dashboard')
 
+@login_required
 def permanent_delete_volunteer_view(request, id):
     volunteer = get_object_or_404(Volunteer.all_objects, id=id)
     volunteer.delete(force_policy=HARD_DELETE)
@@ -547,6 +557,7 @@ def permanent_delete_volunteer_view(request, id):
         return JsonResponse({'status': 'success', 'message': 'Volunteer permanently deleted.', 'message_type': 'danger'})
     return redirect('admin_dashboard')
 
+@login_required
 def restore_volunteer_view(request, id):
     volunteer = get_object_or_404(Volunteer.all_objects, id=id)
     volunteer_disaster_id = volunteer.disaster_id
@@ -557,6 +568,7 @@ def restore_volunteer_view(request, id):
         return redirect('edit_disaster', disaster_id=volunteer_disaster_id)
     return redirect('admin_dashboard')
 
+@login_required
 def generate_volunteer_csv(request):
     response = HttpResponse(
         content_type="text/csv",
@@ -600,6 +612,7 @@ def generate_volunteer_csv(request):
     return response
 
 
+@login_required
 def delete_donation_view(request, donation_id):
     donation = get_object_or_404(Donations, id=donation_id)
     donation_disaster_id = donation.disaster_id
@@ -610,6 +623,7 @@ def delete_donation_view(request, donation_id):
         return redirect('edit_disaster', disaster_id=donation_disaster_id)
     return redirect('admin_dashboard')
 
+@login_required
 def permanent_delete_donation_view(request, id):
     donation = get_object_or_404(Donations.all_objects, id=id)
     donation.delete(force_policy=HARD_DELETE)
@@ -617,6 +631,7 @@ def permanent_delete_donation_view(request, id):
         return JsonResponse({'status': 'success', 'message': 'Donation permanently deleted.', 'message_type': 'danger'})
     return redirect('admin_dashboard')
 
+@login_required
 def restore_donation_view(request, id):
     donation = get_object_or_404(Donations.all_objects, id=id)
     donation_disaster_id = donation.disaster_id
@@ -627,6 +642,7 @@ def restore_donation_view(request, id):
         return redirect('edit_disaster', disaster_id=donation_disaster_id)
     return redirect('admin_dashboard')
 
+@login_required
 def generate_donation_csv(request):
     response = HttpResponse(
         content_type="text/csv",
@@ -669,6 +685,7 @@ def generate_donation_csv(request):
     return response
 
 
+@login_required
 def close_disaster_view(request, disaster_id):
     disaster = get_object_or_404(Disaster, id=disaster_id)
     disaster.active = False
@@ -676,6 +693,7 @@ def close_disaster_view(request, disaster_id):
     return redirect('admin_dashboard')
 
 
+@login_required
 def update_hourly_rate_view(request, disaster_id):
     disaster = get_object_or_404(Disaster, id=disaster_id)
     
@@ -697,6 +715,7 @@ def update_hourly_rate_view(request, disaster_id):
     })
 
 
+@login_required
 def toggle_flagged_status(request, volunteer_id):
     volunteer = get_object_or_404(Volunteer, id=volunteer_id)
     volunteer.flagged = not volunteer.flagged
@@ -712,6 +731,7 @@ def toggle_flagged_status(request, volunteer_id):
         'message_type': 'success',
     })
 
+@login_required
 def toggle_donation_flagged_status(request, donation_id):
     donation = get_object_or_404(Donations, id=donation_id)
     donation.flagged = not donation.flagged
@@ -728,6 +748,7 @@ def toggle_donation_flagged_status(request, donation_id):
     })
 
 
+@login_required
 def toggle_skilled_worker_status(request, volunteer_id):
     volunteer = get_object_or_404(Volunteer, id=volunteer_id)
     volunteer.confirmed_skilled_worker = not volunteer.confirmed_skilled_worker
@@ -740,6 +761,7 @@ def toggle_skilled_worker_status(request, volunteer_id):
     })
 
 
+@login_required
 def submissions_full_view(request: HttpRequest, disaster_id=None) -> HttpResponse:
     disaster = get_object_or_404(Disaster, id=disaster_id) if disaster_id else None
     active_tab = request.GET.get('active_tab', 'volunteer-panel')

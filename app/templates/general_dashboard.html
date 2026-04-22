@@ -17,7 +17,8 @@
         <header class="dashboard-header">
         <div class="header-content">
             <div>
-            <h1 class="header-title">General Admin Dashboard</h1>
+            <h1 class="header-hello"> hello admin should be pink </h1>
+            <h1 class="header-title">General Dashboard</h1>
             <p class="header-subtitle">Overview of all flagged submissions across disasters</p>
             </div>
 
@@ -28,7 +29,7 @@
                     <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
                     <circle cx="12" cy="12" r="3"></circle>
                 </svg>
-                Settings</button>
+                Account Settings</button>
             </div>
 
             <div id="create-form-modal" class="modal" aria-hidden="true">
@@ -105,7 +106,7 @@
                     
                     <button class="close-btn" id="close-settings">&times;</button>
 
-                    <h2>Admin Settings</h2>
+                    <h2>Account Settings</h2>
                     <p>Manage your admin account settings</p>
 
                     <form method="POST" class="settings-form js-ajax-action">
@@ -356,6 +357,7 @@
                                     <button class="btn-danger delete-icon-btn" type="submit" aria-label="Move to trash"><i data-lucide="trash-2"></i></button>
                                 </form>
                             </div>
+                            
                             <div id="modal-flagged-volunteer-{{ volunteer.id }}" class="modal" aria-hidden="true">
                                 <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">
                                     <span class="close" aria-label="Close">&times;</span>
