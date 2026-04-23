@@ -17,7 +17,9 @@
         <header class="dashboard-header">
         <div class="header-content">
             <div>
-            <h1 class="header-hello"> hello admin should be pink </h1>
+            <h1 class="header-hello"> Welcome back {% if user.first_name %}
+                {{ user.first_name }}!{% else %}{{user.username}}!
+                {% endif %}</h1>
             <h1 class="header-title">General Dashboard</h1>
             <p class="header-subtitle">Overview of all flagged submissions across disasters</p>
             </div>
@@ -97,6 +99,7 @@
                     </form>
                 </div>
             </div>
+
             <div id="settings-modal" class="modal hidden">
                 <div class="modal-content">
                     <a href="{% url 'logout' %}" class="settings-logout-btn">
@@ -139,8 +142,6 @@
 
                 </div>
             </div>
-            
-
         </div>
         </header>
 
@@ -274,9 +275,9 @@
         <div class="card-content">
             <div class="submissions-tabs">
             <div class="tabs-list" role="tablist" aria-label="Flagged submissions">
-                <button type="button" role="tab" data-target="volunteer-panel" data-state="{% if active_tab == 'volunteer-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'volunteer-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Volunteers (<span class="js-tab-count" data-count-target="volunteer-panel">{{ flagged_volunteers_count }}</span>)</button>
-                <button type="button" role="tab" data-target="donation-panel" data-state="{% if active_tab == 'donation-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'donation-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Donations (<span class="js-tab-count" data-count-target="donation-panel">{{ flagged_donations_count }}</span>)</button>
-                <button type="button" role="tab" data-target="trash-panel" data-state="{% if active_tab == 'trash-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'trash-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Trash (<span class="js-tab-count" data-count-target="trash-panel">{{ trash_count }}</span>)</button>
+                <button type="button" role="tab" data-target="volunteer-panel" data-state="{% if active_tab == 'volunteer-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'volunteer-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Volunteers<span class="js-tab-count" data-count-target="volunteer-panel">({{ flagged_volunteers_count }})</span></button>
+                <button type="button" role="tab" data-target="donation-panel" data-state="{% if active_tab == 'donation-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'donation-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Donations<span class="js-tab-count" data-count-target="donation-panel">({{ flagged_donations_count }})</span></button>
+                <button type="button" role="tab" data-target="trash-panel" data-state="{% if active_tab == 'trash-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'trash-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Trash <span class="js-tab-count" data-count-target="trash-panel">({{ trash_count }})</button>
             </div>
 
 
