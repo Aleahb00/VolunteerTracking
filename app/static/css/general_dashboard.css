@@ -1870,6 +1870,11 @@ body {
 /* Responsive */
 @media (max-width: 768px) {
 
+  #trash-panel .actions-row{
+    display: flex;
+    flex-direction: row;
+  }
+
   .delete-btn{
     display: block;
   }
@@ -1922,9 +1927,10 @@ body {
   }
 
   .record-item {
-    flex-direction: row;
-    align-items: flex-start;
-  }
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 0.65rem;
+    }
 
   .panel-search {
     flex-wrap: wrap;
