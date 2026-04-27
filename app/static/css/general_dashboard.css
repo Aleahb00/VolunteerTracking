@@ -1914,7 +1914,7 @@ body {
   }
 
   .record-item {
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
   }
 
@@ -2062,6 +2062,10 @@ body {
   flex-direction: column;
 }
 
+.btn-text{
+    display: none;
+  }
+
 }
 
 /* Trash panel: show tabs on mobile, but on desktop hide the tab controls
@@ -2082,6 +2086,7 @@ body {
   #trash-panel > .tab-panel[hidden] {
     display: block !important;
   }
+
 }
 
 @media (max-width: 768px) {
