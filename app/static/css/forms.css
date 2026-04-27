@@ -1,7 +1,8 @@
 .forms-page {
 	min-height: calc(100vh - 70px);
 	padding: 2.5rem 1rem;
-	background: linear-gradient(180deg, #f7f4e8 0%, #f0ede2 100%);
+	background-color: #03544f86;
+	/* background: linear-gradient(180deg, #f7f4e8 0%, #f0ede2 100%); */
 }
 
 
@@ -105,7 +106,7 @@
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 0.5rem;
-	background: #d8e0d4;
+	background: #d4e0dc;
 	border-radius: 12px;
 	padding: 0.35rem;
 	margin-bottom: 1.25rem;
@@ -192,9 +193,10 @@
 
 .form-field select,
 .dropdown select {
-	appearance: none;
 	-webkit-appearance: none;
 	-moz-appearance: none;
+	appearance: none;
+
 }
 
 .dropdown {

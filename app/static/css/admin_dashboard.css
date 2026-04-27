@@ -475,8 +475,12 @@
 }
 
 .search-form {
-    display: flex;
-    gap: 0.5rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 8px;
+    max-width: 55rem;
+    margin-top: 1rem;
 }
 
 .search-form input {
@@ -1388,12 +1392,12 @@
 }
 
 #flagged-panel .submission-modal .actions-section > .actions-row {
-    justify-content: space-evenly;
+    /* justify-content: space-evenly; */
     gap: 0.5rem;
 }
 
 #flagged-panel .submission-modal .actions-section > .actions-row > * {
-    flex: 1 1 0;
+    /* flex: 1 1 0; */
     display: inline-flex;
     justify-content: center;
 }
@@ -1677,9 +1681,9 @@
 }
 
 /* Trash panel: keep action forms aligned and make destructive button visually distinct. */
-#trash-panel .record-item {
+/* #trash-panel .record-item {
     align-items: center;
-}
+} */
 
 #trash-panel .record-item > div:first-child {
     min-width: 0;
@@ -1705,7 +1709,7 @@
 }
 
 #trash-panel .actions-row .btn {
-    min-width: 132px;
+    /* min-width: 132px; */
     text-align: center;
 }
 
@@ -1718,6 +1722,10 @@
 #trash-panel .actions-row .btn.btn-danger:hover {
     background: #982222;
     border-color: #982222;
+}
+
+.delete-btn{
+    display: none;
 }
 
 .analytics-chart-wrap {
@@ -1741,6 +1749,7 @@
         height: 320px;
     }
 }
+
 @media (max-width: 860px) {
     .dash-header {
         flex-direction: column;
@@ -1753,7 +1762,7 @@
     }
 
     .record-item {
-        flex-direction: column;
+        flex-direction: row;
         align-items: flex-start;
     }
 
@@ -1978,7 +1987,7 @@
         max-width: 100%;
         overflow-x: auto;
         overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
+        /* -webkit-overflow-scrolling: touch; */
     }
 
     #volunteers-panel .submission-table,
@@ -2124,7 +2133,7 @@
         min-width: 0;
     }
 .record-item {
-        flex-direction: column;
+        flex-direction: row;
         align-items: flex-start;
         gap: 0.65rem;
     }
@@ -2166,14 +2175,24 @@
     }
 
     .filter-select-wrap::after {
-    content: '▾';
-    position: absolute;
-    top: 50%;
-    right: 12px;
-    transform: translateY(0%);
-    line-height: 1;
-    pointer-events: none;
-    font-size: 0.75rem;
-    color: #19333f;
-}
+        content: '▾';
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(0%);
+        line-height: 1;
+        pointer-events: none;
+        font-size: 0.75rem;
+        color: #19333f;
+    }   
+
+    .btn-text{
+        display: none;
+    }
+
+    .delete-btn{
+        display: block
+    }
+
+
 }

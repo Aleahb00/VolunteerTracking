@@ -17,7 +17,10 @@
         <header class="dashboard-header">
         <div class="header-content">
             <div>
-            <h1 class="header-title">General Admin Dashboard</h1>
+            <h1 class="header-hello"> Welcome back {% if user.first_name %}
+                {{ user.first_name }}!{% else %}{{user.username}}!
+                {% endif %}</h1>
+            <h1 class="header-title">General Dashboard</h1>
             <p class="header-subtitle">Overview of all flagged submissions across disasters</p>
             </div>
 
@@ -28,7 +31,7 @@
                     <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
                     <circle cx="12" cy="12" r="3"></circle>
                 </svg>
-                Settings</button>
+                Account Settings</button>
             </div>
 
             <div id="create-form-modal" class="modal" aria-hidden="true">
@@ -96,6 +99,7 @@
                     </form>
                 </div>
             </div>
+
             <div id="settings-modal" class="modal hidden">
                 <div class="modal-content">
                     <a href="{% url 'logout' %}" class="settings-logout-btn">
@@ -105,7 +109,7 @@
                     
                     <button class="close-btn" id="close-settings">&times;</button>
 
-                    <h2>Admin Settings</h2>
+                    <h2>Account Settings</h2>
                     <p>Manage your admin account settings</p>
 
                     <form method="POST" class="settings-form js-ajax-action">
@@ -138,8 +142,6 @@
 
                 </div>
             </div>
-            
-
         </div>
         </header>
 
@@ -273,9 +275,9 @@
         <div class="card-content">
             <div class="submissions-tabs">
             <div class="tabs-list" role="tablist" aria-label="Flagged submissions">
-                <button type="button" role="tab" data-target="volunteer-panel" data-state="{% if active_tab == 'volunteer-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'volunteer-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Volunteers (<span class="js-tab-count" data-count-target="volunteer-panel">{{ flagged_volunteers_count }}</span>)</button>
-                <button type="button" role="tab" data-target="donation-panel" data-state="{% if active_tab == 'donation-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'donation-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Donations (<span class="js-tab-count" data-count-target="donation-panel">{{ flagged_donations_count }}</span>)</button>
-                <button type="button" role="tab" data-target="trash-panel" data-state="{% if active_tab == 'trash-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'trash-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Trash (<span class="js-tab-count" data-count-target="trash-panel">{{ trash_count }}</span>)</button>
+                <button type="button" role="tab" data-target="volunteer-panel" data-state="{% if active_tab == 'volunteer-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'volunteer-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Volunteers<span class="js-tab-count" data-count-target="volunteer-panel">({{ flagged_volunteers_count }})</span></button>
+                <button type="button" role="tab" data-target="donation-panel" data-state="{% if active_tab == 'donation-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'donation-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Donations<span class="js-tab-count" data-count-target="donation-panel">({{ flagged_donations_count }})</span></button>
+                <button type="button" role="tab" data-target="trash-panel" data-state="{% if active_tab == 'trash-panel' %}active{% else %}inactive{% endif %}" aria-selected="{% if active_tab == 'trash-panel' %}true{% else %}false{% endif %}" class="tab-trigger">Trash <span class="js-tab-count" data-count-target="trash-panel">({{ trash_count }})</button>
             </div>
 
 
@@ -315,7 +317,6 @@
                         <th>Date</th>
                         <th>Location</th>
                         <th>Flagged Reasons</th>
-                        <th>Notes</th>
                         <th>Action</th>
                     </tr>
                     </thead>
@@ -344,7 +345,6 @@
                             <span class="muted-text">-</span>
                         {% endif %}
                         </td>
-                        <td>{{ volunteer.notes|default:"N/A" }}</td>
                         <td>
                             <div class="table-actions">
                                 <button class="details-icon-btn open-modal-btn" data-target="modal-flagged-volunteer-{{ volunteer.id }}" type="button" aria-label="View details">
@@ -358,6 +358,7 @@
                                     <button class="btn-danger delete-icon-btn" type="submit" aria-label="Move to trash"><i data-lucide="trash-2"></i></button>
                                 </form>
                             </div>
+                            
                             <div id="modal-flagged-volunteer-{{ volunteer.id }}" class="modal" aria-hidden="true">
                                 <div class="modal-content submission-modal" role="dialog" aria-modal="true" aria-labelledby="flaggedVolunteerDetailsTitle-{{ volunteer.id }}">
                                     <span class="close" aria-label="Close">&times;</span>
@@ -647,6 +648,7 @@
 
             </section>
 
+<!-- TRASH PANEL -->
             <section id="trash-panel" class="dash-grid tab-panel" role="tabpanel" {% if active_tab != 'trash-panel' %}hidden{% endif %}>
                 <div class="panel-search trash-panel-search">
                     <form method="get" class="trash-search-form" data-panel-target="trash-panel">
@@ -675,6 +677,7 @@
                 <button type="button" class="tab-trigger" data-target="trash-donations">Donations</button>
             </div>
 
+            <!-- DELETED VOLUNTEERS -->
             <article id="trash-volunteers" class="tab-panel">
                 <h2>Deleted Volunteers</h2>
                 <ul class="record-list">
@@ -691,14 +694,25 @@
                                         <path fill-rule="evenodd" clip-rule="evenodd" d="M12 5C7.18879 5 3.9167 7.60905 2.1893 9.47978C0.857392 10.9222 0.857393 13.0778 2.1893 14.5202C3.9167 16.391 7.18879 19 12 19C16.8112 19 20.0833 16.391 21.8107 14.5202C23.1426 13.0778 23.1426 10.9222 21.8107 9.47978C20.0833 7.60905 16.8112 5 12 5ZM3.65868 10.8366C5.18832 9.18002 7.9669 7 12 7C16.0331 7 18.8117 9.18002 20.3413 10.8366C20.9657 11.5128 20.9657 12.4872 20.3413 13.1634C18.8117 14.82 16.0331 17 12 17C7.9669 17 5.18832 14.82 3.65868 13.1634C3.03426 12.4872 3.03426 11.5128 3.65868 10.8366Z" fill="currentColor"></path>
                                     </svg>
                                 </button>
+
                                 <form method="POST" action="{% url 'restore_volunteer_general' volunteer.id %}" class="js-ajax-action">
                                     {% csrf_token %}
-                                    <button class="btn restore-btn" type="submit"><i data-lucide="rotate-ccw"></i><span>Restore</span></button>
+                                    <button class="btn restore-btn" type="submit"><i data-lucide="rotate-ccw"></i><span class="btn-text">Restore</span></button>
                                 </form>
+
                                 <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this volunteer? This action cannot be undone.">
                                     {% csrf_token %}
-                                    <button class="btn btn-danger btn-danger-compact" type="submit">Permanently Delete</button>
+                                    <span class="btn-text" style="color:white;"> Permanently Delete </span>
+
+                                        <svg class="delete-btn" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash-2" aria-hidden="true" class="lucide lucide-trash-2">
+                                            <path d="M10 11v6"></path><path d="M14 11v6"></path>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                                            <path d="M3 6h18"></path>
+                                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        </svg>
+                                        
                                 </form>
+
                             </div>
 
                             <div id="modal-trash-volunteer-general-{{ volunteer.id }}" class="modal" aria-hidden="true">

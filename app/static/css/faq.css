@@ -3,12 +3,12 @@
 	--faq-surface: #ffffff;
 	--faq-border: #c9d5c2;
 	--faq-text: #17343f;
-	--faq-muted: #58707a;
+	--faq-muted: #36454b;
 	--faq-accent: #1b5c67;
 }
 
 body {
-	background: linear-gradient(180deg, #f7f4e8 0%, #f0ede2 100%);
+	background-color: #03544f86;
 }
 
 .faq-page {
