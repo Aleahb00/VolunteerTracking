@@ -1863,8 +1863,16 @@ body {
   display: flex !important;
 }
 
+.delete-btn{
+  display: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
+
+  .delete-btn{
+    display: block;
+  }
 
   .stats-grid {
     grid-template-columns: 1fr;
