@@ -702,7 +702,9 @@
 
                                 <form method="POST" action="{% url 'permanent_delete_volunteer_general' volunteer.id %}" class="js-ajax-action" data-confirm-message="Are you sure you want to permanently delete this volunteer? This action cannot be undone.">
                                     {% csrf_token %}
-                                    <span class="btn-text" style="color:white;"> Permanently Delete </span>
+                                    <button class="btn btn-danger btn-danger-compact" type="submit">
+
+                                        <span class="btn-text" style="color:white;"> Permanently Delete </span>
 
                                         <svg class="delete-btn" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash-2" aria-hidden="true" class="lucide lucide-trash-2">
                                             <path d="M10 11v6"></path><path d="M14 11v6"></path>
@@ -710,7 +712,7 @@
                                             <path d="M3 6h18"></path>
                                             <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                         </svg>
-                                        
+                                    </button>    
                                 </form>
 
                             </div>
