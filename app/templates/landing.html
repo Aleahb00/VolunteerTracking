@@ -12,7 +12,7 @@
 
   <section class="hero">
     <div class="hero-left">
-      <p class="eyebrow">OVER THE PAST SEVEN YEARS</p>
+      <p class="eyebrow">ER<img src="{% static 'images/erassist.png' %}" alt="ER Assist Logo">Assist's Volunteer Tracking</p>
       <h1>$3+ Billion</h1>
       <p class="subtitle">IN DISASTERS FUNDING TO COMMUNITIES JUST LIKE YOURS</p>
       <p class="desc">
@@ -41,9 +41,9 @@
 
     <div class="hero-right">
       <div class="before-after" id="slider">
-        <img src="{% static 'images/before.png' %}">
+        <img src="{% static 'images/before-icestorm.webp' %}">
         <div class="before-wrapper" id="beforeWrapper">
-          <img src="{% static 'images/after.png' %}">
+          <img src="{% static 'images/after-icestorm.webp' %}">
         </div>
         <div class="slider-line" id="sliderLine">
           <div class="slider-handle">
@@ -53,33 +53,10 @@
         <span class="label before">Before</span>
         <span class="label after">After</span>
       </div>
-      <div class="emergency-badge">
-        <span class="badge-title">Emergency</span>
-        <span class="badge-sub">Response Ready</span>
-      </div>
     </div>
   </section>
 
-  <section class="impact">
-    <div class="container">
-      <h2>Our Impact</h2>
-      <div class="stats-grid">
-        <div class="stat">
-          <span class="stat-number">$130M</span>
-          <span class="stat-label">Federal Dollars Saved</span>
-        </div>
-        <div class="stat">
-          <span class="stat-number">12X</span>
-          <span class="stat-label">More Efficient Data Collection</span>
-        </div>
-        <div class="stat">
-          <span class="stat-number">28%</span>
-          <span class="stat-label">Faster Funding</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
+  
   <section class="responses">
     <div class="container">
       <h2>Recent Emergency Responses</h2>
@@ -92,7 +69,7 @@
           </div>
           <div class="resp-item">
             <p class="resp-region">Kentucky Tornadoes</p>
-            <p class="resp-date">JDecember 2021</p>
+            <p class="resp-date">December 2021</p>
             <p class="resp-desc"> Assisted Princeton Water and Wastewater with FEMA reimbursement.</p>
           </div>
           <div class="resp-item">
@@ -108,7 +85,9 @@
   <section class="testimonial">
     <div class="container">
       <blockquote>
-        "QUOTE FROM MAYOR"
+        "The volunteer tracking site of Base Camp will help provided
+        proof on in-kind work that occurred in response to the January Ice Storm Disaster.
+        This is a great benefit to our City and all its people."
       </blockquote>
       <cite>
         Mayor of Water Valley, Community Leader, Yalobusha
@@ -121,7 +100,10 @@
       <h2>{{ latest_disaster.name|default:'Recovery Progress' }}</h2>
       <p class="disaster-desc">
         {% if latest_disaster %}
-          Emergency response and cleanup for {{ latest_disaster.name }}.
+          The most recent disaster response effort is for {{ latest_disaster.name }}. 
+          Volunteer hours and donations are being tracked in real time to support ongoing recovery efforts.
+          This progress bar reflects the cumulative impact of all contributions and shows 
+          how close we are to reaching our funding goal for this disaster.
         {% else %}
           Emergency response and cleanup progress will appear here when a disaster is active.
         {% endif %}

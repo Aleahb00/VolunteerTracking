@@ -3,12 +3,12 @@
 	--faq-surface: #ffffff;
 	--faq-border: #c9d5c2;
 	--faq-text: #17343f;
-	--faq-muted: #58707a;
+	--faq-muted: #36454b;
 	--faq-accent: #1b5c67;
 }
 
 body {
-	background: linear-gradient(180deg, #f7f4e8 0%, #f0ede2 100%);
+	background-color: #03544f86;
 }
 
 .faq-page {
@@ -121,7 +121,7 @@ body {
 }
 
 .faq-help {
-	margin-top: 1.4rem;
+	margin-top: 8rem;
 	text-align: center;
 	background: linear-gradient(135deg, #eef5f0, #f8faf7);
 	border: 1px solid var(--faq-border);
@@ -138,6 +138,16 @@ body {
 .faq-help-text {
 	margin: 0.45rem 0 0;
 	color: var(--faq-muted);
+}
+
+.faq-help-text a {
+	color: var(--faq-accent);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.faq-help-text a:hover {
+	text-decoration: underline;
 }
 
 @media (max-width: 640px) {
