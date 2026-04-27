@@ -52,6 +52,40 @@ footer.site-footer {
 	text-underline-offset: 3px;
 }
 
+.site-footer__credit-wrap {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	display: inline-flex;
+	flex-direction: column;
+}
+
+.site-footer__credit-wrap p{
+	font-size: 0.8rem;
+}
+
+.site-footer__credit-links {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 0.6rem;
+	font-size: .6rem;
+}
+
+.site-footer__credit-links a {
+	color: rgba(255, 255, 255, 0.86);
+	text-decoration: none;
+	transition: color 0.2s ease;
+}
+
+.site-footer__credit-links a:hover,
+.site-footer__credit-links a:focus {
+	color: #ffffff;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
 @media (max-width: 720px) {
 	.site-footer__inner {
 		padding: 0 20px;
