@@ -412,7 +412,7 @@ def admin_dashboard_view(request: HttpRequest, disaster_id=None) -> HttpResponse
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return _json_message_response('Disaster deleted successfully.')
         messages.success(request, 'Disaster deleted successfully.')
-        return redirect('admin_dashboard', )
+        return redirect('general_dashboard', )
     # think this needs to be deleted because you cant delete disasters just close them but maybe it should still be an option? //COW//
 
     # CREATE/UPDATE
