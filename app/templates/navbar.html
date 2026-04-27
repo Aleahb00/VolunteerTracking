@@ -20,7 +20,6 @@
             <a href="{% url 'landing' %}" class="site-nav__link {% if request.path == '/' %}is-active{% endif %}">Home</a>
             <a href="{% url 'forms' %}" class="site-nav__link {% if '/forms/' in request.path %}is-active{% endif %}">Forms</a>
             <a href="{% url 'faq' %}" class="site-nav__link {% if '/faq/' in request.path %}is-active{% endif %}">FAQ</a>
-            <a href="{% url 'general_dashboard' %}" class="site-nav__link {% if '/general-dashboard/' in request.path %}is-active{% endif %}">Dashboard</a>
         </nav>
     </div>
 </header>
