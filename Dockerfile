@@ -9,4 +9,6 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["gunicorn", "config.wsgi", "--bind", "0.0.0.0:8000"]
+RUN python manage.py collectstatic --noinput
+
+CMD ["bash", "-c", "python manage.py migrate && gunicorn config.wsgi --bind 0.0.0.0:8000"]
