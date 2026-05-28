@@ -690,7 +690,7 @@ def close_disaster_view(request, disaster_id):
     disaster = get_object_or_404(Disaster, id=disaster_id)
     disaster.active = False
     disaster.save()
-    return redirect('admin_dashboard')
+    return redirect('general_dashboard')
 
 
 @login_required
